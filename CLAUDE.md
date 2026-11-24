@@ -59,6 +59,10 @@ Map of this repo. Read this first, then open only the file you need.
   The Speaker and vice-presidents sit on the presidium bench instead: 9 places `p-0`..`p-8` (left to right as on the
   broadcast, `p-4` the middle); `benchSlots()` (same in `30-hall.js` and `admin/sala.html`) fills unsaved ones and puts the
   secretary general (not an MP) on `p-5` or the nearest free place.
+- Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
+  with simple info, lock and remove. `mps.seat_lock` = 1 locks an MP on his seat (column added by `ensureLockCol` in
+  admin.js; `POST /admin/api/lock {id,lock}`); `POST /admin/api/seats` refuses (409 `locked`) any change that moves a locked
+  MP or puts someone on a locked seat. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch.
 - The public Sala map uses hand-placed seats first and places everyone else automatically. The page's MP data is
   cached up to 5 minutes, so seat changes show on the site within 5 minutes.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.

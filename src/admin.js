@@ -55,6 +55,14 @@ export async function verifyGoogleToken(token, env) {
 
 const SEAT = /^([0-5]-[0-7]-\d{1,2}|p-[0-8])$/; // hall seat row-section-index, or presidium place p-0..p-8
 
+/** mps.seat_lock (1 = the seat editor can't move this MP); added once per isolate. */
+let lockCol = false;
+async function ensureLockCol(env) {
+  if (lockCol) return;
+  try { await env.DB.prepare("ALTER TABLE mps ADD COLUMN seat_lock INTEGER DEFAULT 0").run(); } catch (e) { } // already there
+  lockCol = true;
+}
+
 /** Handles /admin/sala and /admin/api/*; returns null for anything else. */
 export async function adminRoute(req, env, u, p) {
   if (p === "/admin/sala") {
@@ -80,22 +88,33 @@ export async function adminRoute(req, env, u, p) {
   const who = await adminEmail(req, env);
   if (!who) return json({ ok: false, err: "login" }, 401);
 
+  await ensureLockCol(env);
   if (p === "/admin/api/seats" && req.method === "GET") {
-    const { results } = await env.DB.prepare("SELECT m.id,m.name_lat n,m.electoral_list l,m.mp_group pg,m.assembly_role r,m.seat s,(SELECT 1 FROM photos p WHERE p.id=m.id) ph FROM mps m WHERE m.active=1 AND m.name_lat IS NOT NULL ORDER BY m.last_name,m.first_name").all();
+    const { results } = await env.DB.prepare("SELECT m.id,m.name_lat n,m.electoral_list l,m.mp_group pg,m.assembly_role r,m.seat s,m.seat_lock lk,(SELECT 1 FROM photos p WHERE p.id=m.id) ph FROM mps m WHERE m.active=1 AND m.name_lat IS NOT NULL ORDER BY m.last_name,m.first_name").all();
     return json({ ok: true, mps: results });
   }
   if (p === "/admin/api/seats" && req.method === "POST") {
     const { set } = await req.json().catch(() => ({}));
     if (!Array.isArray(set) || !set.length || set.length > 20) return json({ ok: false, err: "bad" }, 400);
     const at = new Date().toISOString(), st = [];
+    // locked MPs stay where they are: a change may not move one, nor put someone else on a locked seat
+    const { results: locked } = await env.DB.prepare("SELECT id,seat FROM mps WHERE seat_lock=1 AND active=1").all();
     for (const x of set) {
       const id = parseInt(x.id), seat = x.seat == null ? null : String(x.seat);
       if (!id || (seat !== null && !SEAT.test(seat))) return json({ ok: false, err: "bad" }, 400);
+      if (locked.some((l) => (l.id === id && l.seat !== seat) || (seat !== null && l.seat === seat && l.id !== id))) return json({ ok: false, err: "locked" }, 409);
       if (seat) st.push(env.DB.prepare("UPDATE mps SET seat=NULL,seat_at=? WHERE seat=? AND id<>?").bind(at, seat, id));
       st.push(env.DB.prepare("UPDATE mps SET seat=?,seat_at=? WHERE id=?").bind(seat, at, id));
     }
     await env.DB.batch(st);
     return json({ ok: true });
+  }
+  if (p === "/admin/api/lock" && req.method === "POST") {
+    const { id, lock } = await req.json().catch(() => ({}));
+    const n = parseInt(id);
+    if (!n) return json({ ok: false, err: "bad" }, 400);
+    const r = await env.DB.prepare("UPDATE mps SET seat_lock=? WHERE id=? AND (?=0 OR seat IS NOT NULL)").bind(lock ? 1 : 0, n, lock ? 1 : 0).run();
+    return r.meta.changes ? json({ ok: true }) : json({ ok: false, err: "no_seat" }, 409);
   }
   return json({ ok: false }, 404);
 }
