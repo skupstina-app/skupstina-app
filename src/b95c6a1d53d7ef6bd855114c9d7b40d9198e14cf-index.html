@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>skupština.app</title>
+<meta name="description" content="Nezavisan sajt o Narodnoj skupštini: prenos sednica uživo i svih 250 narodnih poslanika.">
+<style>@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-display-cyrillic-400-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-display-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-display-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-display-cyrillic-500-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-display-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-display-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-text-cyrillic-400-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-text-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-text-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-text-cyrillic-500-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-text-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-text-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 11'%3E%3Crect x='7' width='7' height='1'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"Departure Mono";src:url(/fonts/departure-mono.woff2) format("woff2");font-display:swap}
+/* VOICE calm and quiet: 65% clean product UI, 35% pixel (logo, menu morph, square seats, square dots)
+   IDEA the parliament as one app window: watch, see who talks, look back
+   PICTURE hero sky (illustration to come), live window overlapping it, pixel-square hall map
+   COLOUR paper / night, ink, hairline panels; teal only for live
+   TYPE Wix Madefor Display + Text (Dalton Maag for wix.com), Departure Mono (as on cofounder.co) for pixel numbers
+   LAYOUT hero, live window, Sala, Statistika, Arhiva, footer; menu is a full sheet; phones get a bottom tab bar */
+:root{--bg:#f5f5f2;--card:#fff;--ink:#171717;--btn:#202020;--btn-ink:#fff;--mute:rgba(23,23,23,.56);--mute2:rgba(23,23,23,.38);--line:rgba(0,0,0,.08);--chip:#f5f5f2;--seat:#dcdbd5;--live:#1f7a72;--dots:rgba(0,0,0,.12);--board:#fafaf8;
+--sky:#5d97de;
+--ring:0 0 0 1px rgba(255,255,255,.9) inset,0 0 0 1px rgba(0,0,0,.08),0 0 20px rgba(0,0,0,.03),0 36px 28px rgba(0,0,0,.02),0 25px 25px rgba(0,0,0,.02),0 4px 5px rgba(0,0,0,.06);
+--raise:0 1px 2px rgba(0,0,0,.12),0 2px 0 #fff inset,0 0 3px rgba(0,0,0,.16);color-scheme:light}
+:root[data-mode=dark]{--bg:#111211;--card:#1a1c1b;--ink:#ecebe6;--btn:#ecebe6;--btn-ink:#111211;--mute:rgba(236,235,230,.6);--mute2:rgba(236,235,230,.4);--line:rgba(255,255,255,.09);--chip:#222423;--seat:#323534;--live:#5fc2b6;--dots:rgba(255,255,255,.1);--board:#151716;
+--sky:#16233d;
+--ring:0 0 0 1px rgba(255,255,255,.06) inset,0 0 0 1px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.35);--raise:0 0 0 1px rgba(255,255,255,.1) inset,0 1px 2px rgba(0,0,0,.4);color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:80px;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 "Wix Madefor Text","Helvetica Neue",Arial,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+body.locked{overflow:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:max(16px,4vw)}
+.px{font-family:"Departure Mono",ui-monospace,monospace;letter-spacing:0;font-weight:400;-webkit-font-smoothing:none;font-smooth:never}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,.word,.links a,.card .k{font-family:"Wix Madefor Display","Wix Madefor Text",sans-serif}
+.now .n,.tl .row>span:nth-child(2),.mplist li>div{font-weight:500}
+.m{color:var(--mute)}
+h1,h2{font-weight:400;letter-spacing:-.02em;margin:0;text-wrap:balance}
+p{margin:0}
+.sq{display:inline-block;width:6px;height:6px;background:var(--live);flex:none;animation:blink 2.8s ease-in-out infinite}
+@keyframes blink{50%{opacity:.5}}
+.chip{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:4px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;font-size:14px;white-space:nowrap}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:6px;border:0;font-size:16px;white-space:nowrap}
+.b.light{background:var(--card);color:var(--ink);box-shadow:var(--raise)}
+.b.dark{background:var(--btn);color:var(--btn-ink)}
+.b.glass{background:transparent;color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.55) inset}
+
+/* nav */
+.nav{position:fixed;inset:0 0 auto;z-index:40;transition:background .3s,box-shadow .3s}
+.nav .wrap{display:flex;align-items:center;gap:10px;height:72px}
+.word{display:inline-flex;align-items:center;gap:10px;font-weight:500;font-size:22px;line-height:1;letter-spacing:-.02em;color:#fff;margin-right:auto;transition:color .3s}
+.mark{width:42px;height:22px;flex:none;margin-top:-3px}
+.livechip{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:6px;font-size:15px;color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.55) inset}
+.livechip .sq{background:#9fe6dc}
+.menubtn{width:52px;height:44px;border-radius:6px;border:0;display:grid;place-items:center;color:#fff;background:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.55) inset}
+.burger{width:32px;height:17px;overflow:visible}
+.burger rect{fill:currentColor;transform:translate(var(--dx),var(--dy));transition:transform .2s steps(3,end),opacity .2s}
+.open .burger rect{transform:none}
+.open .burger rect.f{opacity:.4}
+.nav.solid{background:var(--bg);box-shadow:0 1px 0 var(--line)}
+.nav.solid .word{color:var(--ink)}
+.nav.solid .livechip,.nav.solid .menubtn{color:var(--ink);background:var(--card);box-shadow:var(--raise)}
+.nav.solid .livechip .sq{background:var(--live)}
+.nav.open .menubtn{color:var(--ink);background:var(--card);box-shadow:var(--raise)}
+.nav.open .word{color:var(--ink)}
+.nav.open .livechip{opacity:0;pointer-events:none}
+
+/* menu sheet */
+.sheet{position:fixed;inset:0;z-index:35;background-color:var(--bg);background-image:radial-gradient(var(--dots) 1px,transparent 1.2px);background-size:18px 18px;display:flex;flex-direction:column;padding-top:96px;clip-path:inset(0 0 100% 0);transition:clip-path .2s steps(4,end);visibility:hidden}
+.sheet.show{clip-path:inset(0 0 0 0);visibility:visible}
+.sheet .wrap{width:100%;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:start}
+.links{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.links a{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 18px;border-radius:6px;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em;line-height:1.1}
+.links a:hover,.links a:focus-visible{background:var(--card);box-shadow:var(--ring)}
+.links .tag{font-size:14px;letter-spacing:0;color:var(--mute);display:inline-flex;align-items:center;gap:8px}
+.prefs{display:grid;gap:12px}
+.pref{background:var(--card);border-radius:8px;box-shadow:var(--ring);padding:16px 18px;display:grid;gap:12px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;padding:3px;border-radius:6px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+.seg button{border:0;background:none;border-radius:4px;min-height:40px;padding:0 10px;font-size:15px;color:var(--mute);white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:var(--raise)}
+.sheet .fine{font-size:14px;color:var(--mute);padding:4px 2px}
+
+/* hero */
+.hero{position:relative;min-height:min(92svh,720px);background:var(--sky);color:#fff}
+.hero .wrap{padding-top:150px}
+.hero h1{font-size:clamp(40px,5.6vw,68px);line-height:1.04;max-width:12em}
+.hero .lead{font-size:clamp(17px,1.5vw,20px);max-width:32em;margin-top:16px;color:rgba(255,255,255,.88)}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+
+/* live window */
+.win{background:var(--card);border-radius:8px;box-shadow:var(--ring);overflow:hidden}
+.livewin{position:relative;z-index:2;margin-top:-220px;display:grid;grid-template-columns:minmax(0,1fr) 360px}
+.stage{padding:14px;border-right:1px solid var(--line)}
+.video{position:relative;aspect-ratio:16/9;border-radius:6px;background:#0f1110;display:grid;place-items:center;overflow:hidden}
+.play{width:64px;height:64px;border-radius:4px;border:0;background:#fff;display:grid;place-items:center}
+.tri{width:0;height:0;margin-left:4px;border-left:16px solid #171717;border-top:10px solid transparent;border-bottom:10px solid transparent}
+.now{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:14px;align-items:center;margin-top:12px;padding:10px 12px;border-radius:6px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+.now .n{font-size:18px;line-height:1.25}
+.now .g{font-size:14px;color:var(--mute)}
+.ph{width:44px;height:44px;border-radius:8px;background:var(--seat)}
+.timer{font:22px/1 "Departure Mono",monospace;-webkit-font-smoothing:none}
+.mute-btn{min-height:40px;padding:0 14px;border-radius:5px;border:0;font-size:15px;background:var(--card);box-shadow:var(--raise)}
+.mute-btn[aria-pressed=true]{background:var(--btn);color:var(--btn-ink);box-shadow:none}
+.side{display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;align-items:center;gap:2px;padding:8px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:6px 10px;border-radius:4px;font-size:14px;color:var(--mute);min-height:34px}
+.tabs button[aria-selected=true]{background:var(--chip);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}
+.pane{flex:1 1 0;overflow-y:auto;padding:12px 14px;min-height:280px}
+.pane[hidden],.compose[hidden]{display:none}
+.msg{margin-bottom:12px;font-size:15px;line-height:1.45}
+.msg .u{font-variant-numeric:tabular-nums;display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--mute)}
+.msg .u b{color:var(--ink);font-weight:500}
+.flag{border:0;background:none;color:var(--mute2);font-size:13px;opacity:0}
+.msg:hover .flag,.flag:focus-visible,.flag[aria-pressed=true]{opacity:1}
+.flag[aria-pressed=true]{color:var(--ink)}
+.compose{margin:0 12px 12px}
+.compose .b{width:100%}
+.side{position:relative}
+.msg .x{overflow-wrap:anywhere}
+#msgs .msg{position:relative;margin-bottom:6px;font-size:15px;line-height:1.45;overflow-wrap:anywhere}
+#msgs .msg .tm{font-size:12px;color:var(--mute2);font-variant-numeric:tabular-nums;margin-right:2px}
+#msgs .msg b{font-weight:600}
+#msgs .msg .flag{position:absolute;right:0;top:0;background:var(--card);padding:0 0 0 8px}
+#msgs .u0{color:#1c7ed6}#msgs .u1{color:#2b8a3e}#msgs .u2{color:#d9480f}#msgs .u3{color:#ae3ec9}#msgs .u4{color:#0c8599}#msgs .u5{color:#c2255c}#msgs .u6{color:#5f3dc4}#msgs .u7{color:#b7791f}
+:root[data-mode=dark] #msgs .u0{color:#74c0fc}:root[data-mode=dark] #msgs .u1{color:#69db7c}:root[data-mode=dark] #msgs .u2{color:#ffa94d}:root[data-mode=dark] #msgs .u3{color:#e599f7}:root[data-mode=dark] #msgs .u4{color:#66d9e8}:root[data-mode=dark] #msgs .u5{color:#faa2c1}:root[data-mode=dark] #msgs .u6{color:#b197fc}:root[data-mode=dark] #msgs .u7{color:#ffd43b}
+.flag:disabled{cursor:default}
+.side.locked #p-chat{filter:blur(5px);opacity:.75;pointer-events:none;user-select:none}
+.side.locked .compose,.side:not(.locked) .gate,.side:has(#p-chat[hidden]) .gate{display:none}
+.gate{position:absolute;left:12px;right:12px;bottom:12px;z-index:3;max-height:calc(100% - 64px);overflow-y:auto;background:var(--card);border-radius:8px;box-shadow:0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.16);padding:16px;display:grid;gap:10px}
+.gate h3{margin:0;font:500 19px/1.25 "Wix Madefor Display","Wix Madefor Text",sans-serif;letter-spacing:-.01em}
+.gate p{font-size:14px;line-height:1.4}
+.gate input,.cbox input,.pn input{width:100%;min-height:44px;padding:0 12px;border-radius:6px;border:0;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;color:var(--ink);font:inherit;font-size:16px}
+.rules{margin:0;padding-left:18px;font-size:14px;line-height:1.4;color:var(--mute);display:grid;gap:4px}
+.gerr:empty{display:none}
+.gerr,#cst{font-size:13px;color:#c0392b}
+:root[data-mode=dark] .gerr,:root[data-mode=dark] #cst{color:#ff8a80}
+.gbtns{display:flex;gap:8px}.gbtns .b{flex:1}.gbtns .b[hidden]{display:none}
+.cbox{display:flex;gap:8px}
+.compose .cbox .b{width:auto}
+.cme{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 8px;font-size:13px;color:var(--mute);margin-top:6px}
+.lnk{border:0;background:none;padding:0;color:inherit;text-decoration:underline;font-size:inherit;min-height:0}
+.pn{display:flex;gap:8px}.pn input{flex:1}.pn .b{flex:none}
+@media(max-width:1020px){.side.locked #p-chat{min-height:560px;max-height:none}}
+#rulesDlg{border:0;border-radius:8px;background:var(--card);color:var(--ink);box-shadow:var(--ring);width:min(440px,calc(100% - 32px));padding:20px}
+#rulesDlg::backdrop{background:rgba(0,0,0,.4)}
+#rulesDlg h3{margin:0 0 10px;font:500 19px/1.25 "Wix Madefor Display",sans-serif}
+#rulesDlg .b{margin-top:14px;width:100%}
+body.v1 #t-tok{display:none}
+.row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:0 10px;padding:8px;border-radius:8px;font-size:15px;align-items:baseline}
+.row .t,.row .d{font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums;color:var(--mute);white-space:nowrap}
+.row .l{grid-column:2/4;font-size:13px;color:var(--mute);line-height:1.35}
+.row.live{background:var(--chip)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{padding:12px 14px;border-radius:6px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+.kpi .v{font:22px/1.3 "Departure Mono",monospace;-webkit-font-smoothing:none;margin-top:4px;line-height:1.15;white-space:nowrap}
+.kpi .s{font-size:13px;color:var(--mute)}
+.sample{font-size:13px;color:var(--mute2);margin-top:10px}
+
+/* chapters */
+section{padding-top:clamp(64px,8vw,104px)}
+.head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px}
+.head h2{font-size:clamp(30px,3.4vw,42px);line-height:1.05;display:flex;align-items:baseline;gap:14px}
+.board{border-radius:8px;background-color:var(--board);background-image:radial-gradient(var(--dots) 1px,transparent 1.2px);background-size:18px 18px;box-shadow:var(--ring);overflow:hidden}
+.fig{overflow:hidden}
+.fig svg{position:absolute;inset:0;width:100%;height:100%;transform-origin:0 0;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.plink{position:absolute;z-index:4;height:0;border-top:1.5px dashed var(--ink);pointer-events:none;opacity:.55}
+.plink::after{content:"";position:absolute;right:-4px;top:-5px;width:8px;height:8px;background:var(--ink)}
+.plink.rev::after{right:auto;left:-4px}
+.plink[hidden]{display:none}
+.tip{position:absolute;padding:8px 12px;border-radius:6px;background:var(--card);box-shadow:var(--ring);font-size:14px;line-height:1.35;pointer-events:none;white-space:nowrap;transition:left .2s steps(4),top .2s steps(4)}
+.tip b{display:block;font-weight:500}
+.tip span{font-size:13px;font-variant-numeric:tabular-nums;color:var(--mute)}
+
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:12px;background:var(--card);border-radius:8px;box-shadow:var(--ring)}
+.grid4 .card{box-shadow:none;border-radius:0;background:none;border-left:1px solid var(--line)}
+.grid4 .card:first-child{border-left:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{background:var(--card);border-radius:8px;box-shadow:var(--ring);padding:16px 18px}
+.card h3{font:500 15px/1.3 Onest,sans-serif;margin:0 0 14px;display:flex;justify-content:space-between;gap:8px}
+.card .k{font-size:15px;color:var(--mute)}
+.card .v{font:33px/1.1 "Departure Mono",monospace;-webkit-font-smoothing:none;line-height:1.1;margin-top:6px;white-space:nowrap}
+.sr{display:grid;grid-template-columns:6.5em minmax(0,1fr) 5.5em;align-items:center;gap:10px;font-size:14px;margin-bottom:8px}
+.sr .tr{position:relative;height:16px}
+.sr .tr i{position:absolute;left:0;height:6px}
+.sr .tr .a{top:0;background:var(--seat)}.sr .tr .b2{top:9px;background:var(--ink)}
+.sr .v2{font-size:13px;font-variant-numeric:tabular-nums;color:var(--mute);text-align:right;white-space:nowrap}
+.keys{display:flex;gap:14px;font-size:13px;color:var(--mute);font-weight:400}
+.keys i{display:inline-block;width:8px;height:8px;margin-right:6px;background:var(--seat)}
+.keys .k2 i{background:var(--ink)}
+.hours{display:flex;align-items:flex-end;gap:6px;height:150px}
+.hours div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--mute)}
+.hours i{display:block;width:100%;background:var(--ink);min-height:2px}
+.hours .p i{background:var(--seat)}
+.ls{display:grid;gap:10px;font-size:15px}
+.ls div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}
+.ls .d{font-size:14px;font-variant-numeric:tabular-nums;color:var(--mute)}
+.ls s{grid-column:1/3;display:block;height:4px;background:var(--seat);text-decoration:none}
+.ls s i{display:block;height:100%;background:var(--ink)}
+
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;padding:18px 20px}
+.col .h{display:flex;justify-content:space-between;font-size:15px;margin-bottom:10px;padding-inline:2px}
+.col .h span{font-size:13px;color:var(--mute)}
+.it{display:block;padding:10px 2px;border-top:1px solid var(--line);font-size:15px;line-height:1.35}
+.it:hover{color:var(--mute)}
+.it span{display:flex;align-items:center;gap:6px;font-size:14px;font-variant-numeric:tabular-nums;color:var(--mute);margin-top:4px}
+
+footer{margin-top:clamp(72px,9vw,120px);border-top:1px solid var(--line);padding-block:32px 48px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
+footer .word{color:var(--ink);font-size:22px}
+footer .mark{width:34px;height:18px}
+footer .fine{font-size:14px;color:var(--mute)}
+footer nav{display:flex;flex-wrap:wrap;gap:4px 20px;font-size:15px;color:var(--mute)}
+
+@media(max-width:1020px){.livewin{grid-template-columns:minmax(0,1fr)}.stage{border-right:0;border-bottom:1px solid var(--line)}.pane{max-height:380px}}
+@media(max-width:900px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid4 .card:nth-child(3){border-left:0}.grid4 .card:nth-child(n+3){border-top:1px solid var(--line)}.grid2,.cols{grid-template-columns:minmax(0,1fr)}.sheet .wrap{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.livechip{display:none}.now{grid-template-columns:auto minmax(0,1fr) auto auto;gap:10px;padding:8px 10px}.now .ph{width:40px;height:40px}.now .n{font-size:16px}.timer{font-size:22px}.now .mute-btn{width:44px;min-height:44px}.livewin{margin-top:-120px}.hero .wrap{padding-top:120px}.sr{grid-template-columns:5.5em minmax(0,1fr)}.sr .v2{grid-column:2;text-align:left}.links a{padding:12px}}
+
+
+/* sala */
+:root{--p0:#c4564b;--p1:#6e9a6a;--p2:#d98b4e;--p3:#5b84b0;--p4:#3f8a7d;--p5:#b49a4a;--p6:#3b414c;--H:clamp(320px,38vw,480px)}
+:root[data-mode=dark]{--p0:#e07a6e;--p1:#8fbd8a;--p2:#eba46c;--p3:#7fa6d1;--p4:#63ae9f;--p5:#cfb567;--p6:#aab3c2}
+.salaboard{display:grid;grid-template-columns:minmax(0,1fr) 360px}
+.fig{position:relative;height:100%;min-height:var(--H)}
+.fig{overflow:hidden}
+.fig svg{position:absolute;inset:0;width:100%;height:100%;transform-origin:0 0;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.plink{position:absolute;z-index:4;height:0;border-top:1.5px dashed var(--ink);pointer-events:none;opacity:.55}
+.plink::after{content:"";position:absolute;right:-4px;top:-5px;width:8px;height:8px;background:var(--ink)}
+.plink.rev::after{right:auto;left:-4px}
+.plink[hidden]{display:none}
+.fig rect{transition:width .18s steps(3),height .18s steps(3),x .18s steps(3),y .18s steps(3),opacity .18s}
+.side2{background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:var(--H)}
+.vw{display:none;flex:none;flex-direction:column}
+.v-mps,.v-day{height:var(--H)}
+[data-view=groups] .v-groups,[data-view=mps] .v-mps,[data-view=day] .v-day{display:flex}
+.v-groups{padding:18px;gap:10px}
+.blk{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:4px 12px;align-items:center}
+.blk i{width:12px;height:12px}
+.blk b{font-weight:500}
+.blk .px{font-size:22px;line-height:1}
+.blk small{grid-column:2/4;font-size:14px;color:var(--mute)}
+.bar100{display:flex;height:10px;margin:4px 0 6px}
+.bar100 i{height:100%}
+
+.smode{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.smode .seg{min-width:0}
+.smode .seg button{min-height:32px;font-size:14px}
+.barwrap{position:relative;padding:4px 0 6px}
+.bar100{display:flex;height:12px;margin:0}
+.maj{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed var(--ink)}
+.maj span{position:absolute;top:0;left:6px;font-size:13px;white-space:nowrap;color:var(--ink)}
+.blks{display:grid;gap:2px}
+.blk{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:8px 8px;border-radius:6px;display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:2px 12px;align-items:center}
+.blk:hover{background:var(--chip)}
+.blk[aria-expanded=true]{background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+.blk .num{font-variant-numeric:tabular-nums;font-size:18px}
+.blk .pc{grid-column:2/4;font-size:14px;color:var(--mute)}
+.det{display:none;margin:2px 0 8px;padding:10px 8px 4px 32px;font-size:15px;gap:6px}
+.blk[aria-expanded=true]+.det{display:grid}
+.det .r{display:flex;justify-content:space-between;gap:10px}
+.det .r span:first-child{color:var(--mute)}
+.det .b{min-height:40px;margin-top:6px}
+.fchip{display:flex;align-items:center;gap:8px;margin:12px 12px 0;font-size:14px}
+.fchip button{border:0;border-radius:4px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;padding:6px 10px;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.fchip i{width:10px;height:10px;display:inline-block}
+.fig svg rect[data-g]{cursor:pointer}
+
+.plist2{display:grid;gap:2px}
+.prow{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:10px 8px;border-radius:6px;display:grid;grid-template-columns:12px minmax(0,1fr) auto 14px;gap:12px;align-items:center;font-size:16px}
+.prow:hover,.prow[aria-expanded=true]{background:var(--chip)}
+.prow .num{font-variant-numeric:tabular-nums;color:var(--mute)}
+.prow .chev{color:var(--mute2)}
+.salaboard{position:relative}
+.pop{position:absolute;z-index:5;top:12px;left:12px;width:min(360px,calc(100% - 24px));max-height:calc(100% - 24px);overflow-y:auto;background:var(--card);border-radius:8px;box-shadow:0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.14);padding:16px 18px 18px}
+.pop[hidden]{display:none}
+.pop .phd{display:grid;grid-template-columns:12px minmax(0,1fr) 40px;gap:10px;align-items:center;margin-bottom:12px}
+.pop .phd h3{margin:0;font:500 18px/1.25 "Wix Madefor Display",sans-serif}
+.pop .x{width:40px;height:40px;border:0;border-radius:6px;background:var(--chip);font-size:20px;line-height:1;color:var(--mute)}
+.pop .sec{border-top:1px solid var(--line);padding:12px 0;display:grid;gap:6px;font-size:15px}
+.pop .sec:first-of-type{border-top:0;padding-top:0}
+.pop .lab{font-size:13px;color:var(--mute)}
+.pop .r{display:flex;justify-content:space-between;gap:10px}
+.pop .r span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.pop .big{display:flex;gap:18px}
+.pop .big div{display:grid}
+.pop .big .px{font-size:22px;line-height:1.2}
+.pop details summary{cursor:pointer;color:var(--mute);font-size:14px;padding:4px 0;list-style:none}
+.pop details summary::before{content:"+ "}
+.pop details[open] summary::before{content:"− "}
+.pop .b{width:100%;margin-top:4px}
+@media(max-width:760px){.pop{position:fixed;left:8px;right:8px;top:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:auto;max-height:62svh}}
+.spk{margin-top:auto;padding:12px;border-radius:6px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center}
+.spk .g{font-size:14px;color:var(--mute)}
+.spk b{font-weight:500}
+.search{flex:none;margin:12px 12px 0;width:auto;height:44px;border-radius:6px;border:0;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;padding:0 14px;font:16px "Wix Madefor Text",sans-serif;color:var(--ink)}
+.search::placeholder{color:var(--mute2)}
+.lens{list-style:none;margin:0;padding:0 10px;overflow-y:auto;flex:1 1 0;min-height:0;position:relative;-webkit-mask:linear-gradient(transparent,#000 18%,#000 82%,transparent);mask:linear-gradient(transparent,#000 18%,#000 82%,transparent)}
+.lens li{--f:0;transform:scale(calc(.92 + .08*var(--f)));transform-origin:left center;opacity:calc(.35 + .65*var(--f));will-change:transform}
+.lens li>button{width:100%;border:0;background:none;text-align:left;color:inherit;font:inherit;cursor:pointer;display:grid;align-items:center;border-radius:6px}
+.lens li.on>button{background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+.mplist li>button{grid-template-columns:40px minmax(0,1fr) auto;gap:12px;padding:8px 10px}
+.mplist .ph{width:40px;height:40px;border-radius:4px;background:var(--seat)}
+.mplist .nm{font-size:16px;font-weight:500;line-height:1.25}
+.mplist .g{font-size:14px;color:var(--mute)}
+.mplist .d{font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.mplist .w{display:inline-block;margin-left:6px;min-width:20px;height:20px;line-height:20px;text-align:center;border-radius:4px;background:var(--ink);color:var(--bg);font-size:12px;font-weight:500}
+.tl li>button{grid-template-columns:44px minmax(0,1fr) auto;gap:0 10px;padding:8px 10px;align-items:baseline;font-size:15px}
+.tl .nm{font-weight:500}
+.tl .t,.tl .d{font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl .l{grid-column:2/4;font-size:13px;color:var(--mute);line-height:1.35}
+.tl .pause>button{cursor:default}
+.empty{padding:16px 10px;color:var(--mute)}
+@media(max-width:1020px){.salaboard{grid-template-columns:minmax(0,1fr)}.fig{height:var(--H)}.side2{border-left:0;border-top:1px solid var(--line);min-height:0}.v-mps,.v-day{height:420px}}
+@media(max-width:760px){:root{--H:min(56vw,240px)}#sala .salaboard{position:relative}.v-mps,.v-day{height:calc(100svh - 72px - 84px - var(--H) - 150px);min-height:280px}}
+
+
+/* rang */
+.awards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.aw{background:var(--card);border-radius:8px;box-shadow:var(--ring);padding:16px 18px;display:grid;gap:12px;align-content:start}
+.aw .t{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--mute)}
+.aw .t .ic{width:26px;height:26px;color:var(--ink);flex:none}
+.aw .top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:end;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.aw .top b{font:500 20px/1.2 "Wix Madefor Display",sans-serif}
+.aw .top .g{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.aw .top .g i{width:10px;height:10px}
+.aw .top .px{font-size:33px;line-height:1;grid-row:1/3;grid-column:2;align-self:center}
+.aw ol{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:15px}
+.aw li{display:grid;grid-template-columns:20px 10px minmax(0,1fr) auto;gap:8px;align-items:center}
+.aw li .n{color:var(--mute2);font-variant-numeric:tabular-nums}
+.aw li i{width:8px;height:8px}
+.aw li .val{color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:1020px){.awards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.awards{grid-template-columns:minmax(0,1fr)}}
+
+
+/* govornici (live) */
+.mi{width:20px;height:20px}
+.mute-btn{display:grid;place-items:center;width:48px;padding:0}
+.spk-pane{padding:0}
+.spk-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;font-size:14px;border-bottom:1px solid var(--line)}
+.spk-head .b{min-height:34px;padding:0 10px;font-size:14px}
+.spk-list{list-style:none;margin:0;padding:0}
+.spk-list li{display:grid;grid-template-columns:3px minmax(0,1fr) auto 44px;gap:10px;align-items:center;padding:6px 10px 6px 0;border-bottom:1px solid var(--line);font-size:15px}
+.spk-list .bar{align-self:stretch;width:3px}
+.spk-list .nm{line-height:1.25}
+.spk-list .nm small{display:block;font-size:13px;color:var(--mute)}
+.spk-list .tm{font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.spk-list .tm b{color:var(--ink);font-weight:500}
+.spk-list li.is-muted .nm span{text-decoration:line-through;color:var(--mute)}
+.spk-list li.now .nm span::after{content:"";display:inline-block;width:7px;height:7px;margin-left:8px;background:var(--live);vertical-align:2px;animation:blink 2.8s ease-in-out infinite}
+.mbtn{width:40px;height:40px;border:0;border-radius:6px;background:none;color:var(--mute2);display:grid;place-items:center}
+.mbtn:hover{background:var(--chip);color:var(--ink)}
+.mbtn[aria-pressed=true]{background:var(--btn);color:var(--btn-ink)}
+
+/* arhiva */
+.arch{display:grid;grid-template-columns:340px minmax(0,1fr);gap:12px;align-items:start}
+.days{list-style:none;margin:0;padding:6px;background:var(--card);border-radius:8px;box-shadow:var(--ring);display:grid;gap:2px}
+.days button{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:10px;border-radius:6px}
+.days button:hover{background:var(--chip)}
+.days button[aria-current=true]{background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+.days .n{font:22px/1 "Departure Mono",monospace;-webkit-font-smoothing:none;grid-row:1/3;text-align:center}
+.days .d{font-weight:500}
+.days .s{font-size:14px;color:var(--mute);grid-column:2}
+.days .st{grid-row:1/3;grid-column:3;font-size:13px;color:var(--mute);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dayview{background:var(--card);border-radius:8px;box-shadow:var(--ring);padding:20px 22px;display:grid;gap:18px}
+.dv-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.dv-h h3{margin:0;font:500 24px/1.2 "Wix Madefor Display",sans-serif}
+.dv-h p{font-size:15px;color:var(--mute);margin-top:2px}
+.dv-back{display:none}
+.dv-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dv-k div{padding:12px 0 12px 14px;border-left:1px solid var(--line)}
+.dv-k div:first-child{border-left:0;padding-left:0}
+.dv-k span{display:block;font-size:13px;color:var(--mute)}
+.dv-k b{font:22px/1.3 "Departure Mono",monospace;font-weight:400;-webkit-font-smoothing:none;white-space:nowrap}
+.dv-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px 28px}
+.dv-s h4{margin:0 0 8px;font:500 15px/1.3 "Wix Madefor Text",sans-serif;color:var(--mute)}
+.ag{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:a}
+.ag li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:baseline;font-size:15px;counter-increment:a}
+.ag li::before{content:counter(a)".";color:var(--mute2);font-variant-numeric:tabular-nums}
+.tagx{font-size:12px;padding:3px 6px;border-radius:4px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;white-space:nowrap}
+.tagx.ok{background:var(--ink);color:var(--bg);box-shadow:none}
+.vote{display:grid;gap:6px;margin-bottom:12px;font-size:15px}
+.vbar{display:flex;height:8px;background:var(--seat)}
+.vbar i{height:100%}
+.vleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.tops{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:15px}
+.tops li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:10px;align-items:center}
+.tops i{width:8px;height:8px}
+.tops .v{color:var(--mute);font-variant-numeric:tabular-nums}
+.dv-links{display:flex;flex-wrap:wrap;gap:8px}
+@media(max-width:900px){.arch{grid-template-columns:minmax(0,1fr)}.dv-g{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.dayview{position:fixed;inset:72px 0 calc(76px + env(safe-area-inset-bottom,0px));z-index:30;border-radius:0;overflow-y:auto;box-shadow:none}.dayview[hidden]{display:none}.dv-back{display:inline-flex}.dv-k{grid-template-columns:repeat(2,minmax(0,1fr))}.dv-k div:nth-child(3){border-left:0;padding-left:0}.dv-k div:nth-child(n+3){border-top:1px solid var(--line)}}
+
+
+/* uživo layout */
+.livewin .side{max-height:none}
+.spk-list li{position:relative;grid-template-columns:3px minmax(0,1fr) auto 44px}
+.spk-list .tm{display:grid;justify-items:end;line-height:1.25}
+.spk-list .tm b{font-size:15px}
+.spk-list .tm small{font-size:12px;color:var(--mute)}
+.spk-list .prog{position:absolute;left:3px;bottom:0;height:2px;opacity:.55}
+.livestats{padding-top:clamp(40px,5vw,72px)}
+.lcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.lc{background:var(--card);border-radius:8px;box-shadow:var(--ring);padding:16px 18px;display:grid;gap:10px;align-content:start}
+.lc h3{margin:0;font:400 15px/1.3 "Wix Madefor Text",sans-serif;color:var(--mute);display:flex;justify-content:space-between;gap:8px}
+.lc.wide{grid-column:span 2}
+.lc .hero2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:end}
+.lc .hero2 b{font:500 20px/1.2 "Wix Madefor Display",sans-serif}
+.lc .hero2 .px{font-size:33px;line-height:1;grid-column:2;grid-row:1/3;align-self:center}
+.lc .hero2 .px:only-child{grid-column:1;grid-row:auto}
+.lc .g{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.lc .g i{width:10px;height:10px}
+.lc ol{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:15px}
+.lc li{display:grid;grid-template-columns:auto 10px minmax(0,1fr) auto;gap:8px;align-items:center}
+.lc li .n{color:var(--mute2);font-variant-numeric:tabular-nums;font-size:14px}
+.lc li i{width:8px;height:8px}
+.lc li .val{color:var(--mute);font-variant-numeric:tabular-nums}
+.lc p.m{font-size:15px;margin:0}
+.pgrid{display:grid;grid-template-columns:repeat(25,1fr);gap:2px}
+.pgrid i{aspect-ratio:1}
+@media(max-width:1020px){.lcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.lcards{grid-template-columns:minmax(0,1fr)}.lc.wide{grid-column:auto}}
+@media(max-width:760px){
+ .livewin,.stage{display:contents}
+ .vfloat .video{border-radius:0}
+ .now{margin-top:10px}
+ .side{background:var(--card);border-radius:8px;box-shadow:var(--ring);margin-top:10px;overflow:hidden}
+ .pane{max-height:52svh}
+}
+/* phone held sideways while on Uživo: video + chat side by side, nothing else */
+@media(max-width:950px) and (orientation:landscape) and (max-height:520px){
+ body[data-tab=live]{padding:0;overflow:hidden}
+ body[data-tab=live] .nav,body[data-tab=live] .tabbar,body[data-tab=live] .livestats,body[data-tab=live] #uzivo>.sample{display:none!important}
+ body[data-tab=live] main{padding:0}
+ body[data-tab=live] #uzivo{position:fixed;inset:0;z-index:60;padding:0;max-width:none;background:#000}
+ body[data-tab=live] .now .mute-btn{color:var(--ink)}
+ body[data-tab=live] .livewin{margin:0;height:100%;display:grid!important;grid-template-columns:minmax(0,1fr) min(320px,38vw);border-radius:0;overflow:hidden}
+ body[data-tab=live] .stage{position:relative;padding:0;display:flex!important;flex-direction:column;justify-content:center;background:#000}
+ body[data-tab=live] .vbox{position:relative;margin:0;width:100%;max-height:calc(100svh - 120px);aspect-ratio:16/9}
+ body[data-tab=live] .now{margin:0;border-radius:0}
+ body[data-tab=live] .vsticky{position:static;margin:0;width:100%}
+ body[data-tab=live] .vbar{margin:0;border-radius:0}
+ body[data-tab=live] .side{height:100svh;margin:0;border-radius:0;box-shadow:none}
+ body[data-tab=live] .pane{max-height:none}
+}
+
+
+.lc.kpi4{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:0}
+.kpi4 div{padding:14px 18px;border-left:1px solid var(--line)}
+.kpi4 div:first-child{border-left:0}
+.kpi4 span{display:block;font-size:14px;color:var(--mute)}
+.kpi4 b{font:22px/1.3 "Departure Mono",monospace;font-weight:400;-webkit-font-smoothing:none;white-space:nowrap}
+.pgrid i.h{background:none;box-shadow:inset 0 0 0 1.5px var(--c);opacity:.7}
+@media(max-width:600px){.lc.kpi4{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi4 div:nth-child(3){border-left:0}.kpi4 div:nth-child(n+3){border-top:1px solid var(--line)}}
+
+
+.lfig{position:relative;height:clamp(240px,26vw,360px)}
+.lfig svg{position:absolute;inset:0;width:100%;height:100%}
+.keys .ho{background:none!important;box-shadow:inset 0 0 0 1.5px var(--mute)}
+.keys i:not(.ho){background:var(--mute)}
+
+
+/* theater: video + chat, nothing else (button, any screen) */
+body.theater{overflow:hidden}
+body.theater .nav,body.theater .tabbar,body.theater .livestats,body.theater #uzivo>.sample,body.theater .sheet{display:none!important}
+body.theater #uzivo{display:block!important;position:fixed;inset:0;z-index:60;padding:0;max-width:none;background:#000}
+body.theater .livewin{display:grid!important;margin:0;height:100%;grid-template-columns:minmax(0,1fr) min(340px,34vw);border-radius:0;box-shadow:none;overflow:hidden}
+body.theater .stage{display:flex!important;flex-direction:column;justify-content:center;position:relative;padding:0;border:0;background:#000;min-height:0}
+body.theater .vbox{position:relative;margin:0;width:100%;max-height:calc(100svh - 120px);aspect-ratio:16/9}
+body.theater .vfloat .video{border-radius:0}
+body.theater .now{margin:0;border-radius:0}
+body.theater .vsticky{position:static;margin:0;width:100%}
+body.theater .vbar{margin:0;border-radius:0}
+body.theater .now .mute-btn{color:var(--ink)}
+body.theater .side{display:flex!important;height:100svh;margin:0;border-radius:0;box-shadow:none;background:var(--card)}
+body.theater .pane{max-height:none}
+@media(orientation:portrait) and (max-width:760px){
+ body.theater .livewin{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+ body.theater .stage{justify-content:flex-start}
+ body.theater .now{position:static;margin:0;border-radius:0}
+ body.theater .side{height:auto;min-height:0}
+}
+
+
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#unmuteAll[hidden]{display:none}
+
+
+/* player: YouTube's player stays untouched; our controls live beside it, never on top */
+.vbox{position:relative;aspect-ratio:16/9}
+.vfloat{position:absolute;inset:0;display:flex;flex-direction:column}
+.vfloat .video{position:relative;flex:1;aspect-ratio:auto;border-radius:10px}
+.minibar{display:none;align-items:center;justify-content:space-between;gap:8px;height:34px;padding:0 4px 0 10px;background:#0f1110;color:#fff;font-size:13px;border-radius:8px 8px 0 0}
+.vx{width:30px;height:30px;border:0;border-radius:4px;background:none;color:#fff;font-size:18px;line-height:1}
+.vbox.mini .vfloat{position:fixed;inset:auto 16px calc(16px + env(safe-area-inset-bottom,0px)) auto;width:min(360px,44vw);z-index:45;box-shadow:0 10px 30px rgba(0,0,0,.35);border-radius:8px}
+.vbox.mini .minibar{display:flex}
+.vbox.mini .vfloat .video{flex:none;aspect-ratio:16/9;border-radius:0 0 8px 8px}
+.vbox.mini .play{width:44px;height:44px}
+.vbar{display:flex;align-items:center;gap:6px;margin-top:8px;padding:4px;border-radius:8px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;min-height:48px}
+.vlive{display:inline-flex;align-items:center;gap:8px;padding:0 8px;font-size:14px;white-space:nowrap}
+.vstat{flex:1;min-width:0;font-size:14px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vstat b{color:var(--ink);font-weight:500}
+.vstat button{border:0;background:none;padding:0 0 0 8px;font-size:14px;color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+.vb{height:40px;min-width:40px;padding:0 10px;border:0;border-radius:6px;background:none;color:var(--ink);display:inline-grid;place-items:center;font-size:14px;text-decoration:none}
+.vb:hover{background:var(--card)}
+.vb[aria-pressed=true]{background:var(--btn);color:var(--btn-ink)}
+.vvol{width:90px;accent-color:var(--ink)}
+.vstat .ds{display:none}
+@media(max-width:600px){.vstat .dl{display:none}.vstat .ds{display:inline}.vstat{display:flex;align-items:center;gap:4px}.vstat b{overflow:hidden;text-overflow:ellipsis;min-width:0}.vstat button{flex:none}.vlive{padding:0 4px}}
+.vbar.auto{box-shadow:0 0 0 1.5px var(--ink) inset}
+@media(max-width:760px){.vvol,.vyt{display:none}.vsticky{position:sticky;top:72px;z-index:25;margin-inline:calc(-1*max(16px,4vw));background:var(--bg)}.vsticky .vbar{margin:0;border-radius:0}}
+
+/* profil */
+.plist{display:grid;gap:12px}
+.plist .pref .b{width:100%}
+.plist a.rowlink{display:flex;justify-content:space-between;padding:12px 2px;border-top:1px solid var(--line)}
+.plist a.rowlink:first-of-type{border-top:0}
+.muted{display:flex;flex-wrap:wrap;gap:6px}
+.muted span{font-size:14px;padding:4px 8px;border-radius:4px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+
+/* bottom tab bar (phones) */
+.infobtn{width:44px;height:44px;border-radius:6px;border:0;display:grid;place-items:center;color:#fff;background:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.55) inset;padding:0}
+.infobtn .mi{width:20px;height:20px}
+.nav.solid .infobtn,.nav.open .infobtn{color:var(--ink);background:var(--card);box-shadow:var(--raise)}
+.infopop{position:fixed;z-index:45;top:76px;right:calc(max(0px,(100vw - 1240px)/2) + max(16px,4vw));width:min(340px,calc(100% - 32px));background:var(--card);color:var(--ink);border-radius:8px;box-shadow:0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.16);padding:16px 18px}
+.infopop[hidden]{display:none}
+.infopop h3{margin:0 0 4px;font:500 18px/1.25 "Wix Madefor Display",sans-serif}
+.infopop p{font-size:14px}
+.infopop ul{margin:10px 0 0;padding-left:18px;display:grid;gap:8px;font-size:15px;line-height:1.4}
+.infopop b{font-weight:500}
+@media(max-width:760px){.nav .infobtn{color:var(--ink);background:var(--card);box-shadow:var(--raise);width:40px;height:40px}}
+.tabbar{display:none}
+.ic{width:26px;height:26px}
+@media(max-width:760px){
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.nav{background:var(--bg);box-shadow:0 1px 0 var(--line)}
+.nav .word{color:var(--ink)}
+.nav .livechip,.nav .menubtn{display:none}
+.mark{width:36px;height:19px}
+main{padding-top:72px;display:flex;flex-direction:column}
+main>*{width:100%}
+#arhiva{order:1}#statistika{order:2}
+.grid4 .card .v{font-size:22px}
+.hero,footer,.sheet{display:none}
+[data-screen]{display:none}
+body[data-tab=live] [data-screen~=live],body[data-tab=sala] [data-screen~=sala],body[data-tab=arhiva] [data-screen~=arhiva],body[data-tab=rang] [data-screen~=rang],body[data-tab=me] [data-screen~=me]{display:block}
+section{padding-top:20px}
+.livewin{margin-top:12px}
+.head{margin-bottom:14px}
+.head h2{font-size:30px}
+.tabbar{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--bg);box-shadow:0 -1px 0 var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+.tabbar button{border:0;background:none;display:grid;justify-items:center;gap:4px;padding:6px 0;min-height:56px;font-size:12px;color:var(--mute2)}
+.tabbar button[aria-current=page]{color:var(--ink)}
+.tabbar .mid{position:relative}
+.tabbar .mid .well{display:grid;place-items:center;width:56px;height:40px;border-radius:6px;background:var(--btn);color:var(--btn-ink)}
+.tabbar .mid[aria-current=page] .well{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--btn)}
+.tabbar .mid .sq{position:absolute;top:2px;right:calc(50% - 32px);width:8px;height:8px}
+}
+@media(min-width:761px){#profil{display:none!important}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* one flat bar under the video: who speaks, time, mute this MP | stream sound, full screen */
+.vbar[role=group]{gap:4px;padding:4px;min-height:48px;height:auto}
+.who{flex:1;display:flex;align-items:center;gap:10px;min-width:0;padding-left:2px}
+.who .ph{width:32px;height:32px;border-radius:4px;flex:none;box-shadow:0 0 0 1px var(--line) inset}
+.wt{flex:0 1 auto;min-width:0;display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.who .n{flex:0 1 auto;min-width:0;font-weight:500;font-size:16px;overflow:hidden;text-overflow:ellipsis}
+.who .g{flex:0 1000 auto;min-width:0;font-size:14px;color:var(--mute);overflow:hidden;text-overflow:ellipsis}
+.tmr{flex:none;font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
+.mmp{flex:none;width:40px;height:40px;margin-right:auto;border:0;border-radius:6px;display:grid;place-items:center;background:var(--card);color:var(--ink);box-shadow:var(--raise)}
+.mmp:hover{background:var(--bg)}
+.mmp[aria-pressed=true]{background:var(--btn);color:var(--btn-ink);box-shadow:none}
+.vol{display:flex;align-items:center;flex:none}
+.vbar.auto{box-shadow:0 0 0 1.5px var(--ink) inset}
+@media(max-width:600px){.who .g{display:none}.who .ph{width:28px;height:28px}.who{gap:8px;padding-left:4px}.who .n{font-size:15px}}
+
+/* v1 launch: hide what needs live session data */
+body.v1 .nv1,body.v1 #danas,body.v1 #uzivo>.sample,body.v1 #rang,body.v1 #arhiva,body.v1 .who{display:none!important}
+body.v1 .vol{margin-left:auto}
+@media(max-width:760px){body.v1 .tabbar{grid-template-columns:repeat(3,1fr)}}
+/* kontakt */
+.kgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;align-items:start}
+.kform{display:grid;gap:14px}
+.kform label{display:grid;gap:6px;font-size:15px}
+.kform input,.kform textarea,.kform select{font:16px "Wix Madefor Text",sans-serif;color:var(--ink);background:var(--chip);border:0;border-radius:6px;box-shadow:0 0 0 1px var(--line) inset;padding:10px 12px;min-height:44px}
+.kform textarea{resize:vertical}
+.pop .sec[hidden]{display:none}
+.kform .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.krow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kabout{display:grid;gap:10px;font-size:15px}
+.kabout h3{margin:0;font:500 18px/1.3 "Wix Madefor Display",sans-serif}
+.kabout a{text-decoration:underline;text-underline-offset:2px}
+@media(max-width:900px){.kgrid{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header class="nav" id="nav">
+<div class="wrap">
+<a class="word nt" href="#top" aria-label="skupstina.app"><svg class="mark" aria-hidden="true" viewBox="0 0 21 11" shape-rendering="crispEdges"><g fill="currentColor"><rect x="7" y="0" width="7" height="1"/><rect x="5" y="1" width="2" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="8" y="3" width="5" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="6" y="4" width="2" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="9" y="6" width="3" height="1"/><rect x="0" y="7" width="1" height="1"/><rect x="4" y="7" width="1" height="1"/><rect x="7" y="7" width="2" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="3" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/></g><g fill="currentColor" opacity=".4"><rect x="14" y="1" width="2" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="17" y="3" width="1" height="1"/><rect x="13" y="4" width="2" height="1"/><rect x="18" y="4" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="19" y="5" width="1" height="1"/><rect x="16" y="6" width="1" height="1"/><rect x="19" y="6" width="1" height="1"/><rect x="12" y="7" width="2" height="1"/><rect x="16" y="7" width="1" height="1"/><rect x="20" y="7" width="1" height="1"/><rect x="13" y="8" width="1" height="1"/><rect x="17" y="8" width="1" height="1"/><rect x="20" y="8" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="20" y="10" width="1" height="1"/></g></svg>skupština.app</a>
+<a class="livechip" href="#uzivo"><i class="sq"></i>Uživo</a>
+<button class="infobtn" id="infoBtn" type="button" aria-expanded="false" aria-controls="infoPop" aria-label="Šta stiže uskoro"><svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="5" y="2" width="3" height="2"/><rect x="4" y="5" width="4" height="1"/><rect x="5" y="6" width="3" height="4"/><rect x="4" y="10" width="5" height="1"/></svg></button>
+<button class="menubtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sheet" aria-label="Meni"><svg class="burger" viewBox="0 0 21 11" aria-hidden="true" shape-rendering="crispEdges"><rect x="0" y="10" width="1" height="1" class="" style="--dx:3px;--dy:-9.5px;--i:0"/><rect x="0" y="10" width="1" height="1" class="" style="--dx:3px;--dy:-8.5px;--i:1"/><rect x="0" y="9" width="1" height="1" class="" style="--dx:4px;--dy:-8.5px;--i:2"/><rect x="0" y="8" width="1" height="1" class="" style="--dx:4px;--dy:-6.5px;--i:3"/><rect x="0" y="7" width="1" height="1" class="" style="--dx:5px;--dy:-6.5px;--i:4"/><rect x="1" y="6" width="1" height="1" class="" style="--dx:4px;--dy:-4.5px;--i:5"/><rect x="1" y="5" width="1" height="1" class="" style="--dx:5px;--dy:-4.5px;--i:6"/><rect x="2" y="4" width="1" height="1" class="" style="--dx:4px;--dy:-2.5px;--i:7"/><rect x="3" y="3" width="1" height="1" class="" style="--dx:4px;--dy:-2.5px;--i:8"/><rect x="4" y="2" width="1" height="1" class="" style="--dx:3px;--dy:-0.5px;--i:9"/><rect x="5" y="1" width="1" height="1" class="" style="--dx:3px;--dy:-0.5px;--i:10"/><rect x="6" y="1" width="1" height="1" class="" style="--dx:2px;--dy:0.5px;--i:11"/><rect x="7" y="0" width="1" height="1" class="" style="--dx:2px;--dy:0.5px;--i:12"/><rect x="8" y="0" width="1" height="1" class="" style="--dx:1px;--dy:1.5px;--i:13"/><rect x="9" y="0" width="1" height="1" class="" style="--dx:1px;--dy:0.5px;--i:14"/><rect x="10" y="0" width="1" height="1" class="" style="--dx:0px;--dy:1.5px;--i:15"/><rect x="11" y="0" width="1" height="1" class="" style="--dx:0px;--dy:0.5px;--i:16"/><rect x="12" y="0" width="1" height="1" class="" style="--dx:-1px;--dy:1.5px;--i:17"/><rect x="13" y="0" width="1" height="1" class="" style="--dx:-1px;--dy:0.5px;--i:18"/><rect x="14" y="1" width="1" height="1" class="f" style="--dx:-2px;--dy:0.5px;--i:19"/><rect x="15" y="1" width="1" height="1" class="f" style="--dx:-2px;--dy:-0.5px;--i:20"/><rect x="16" y="2" width="1" height="1" class="f" style="--dx:-3px;--dy:-0.5px;--i:21"/><rect x="17" y="3" width="1" height="1" class="f" style="--dx:-3px;--dy:-2.5px;--i:22"/><rect x="18" y="4" width="1" height="1" class="f" style="--dx:-4px;--dy:-2.5px;--i:23"/><rect x="19" y="5" width="1" height="1" class="f" style="--dx:-4px;--dy:-4.5px;--i:24"/><rect x="19" y="6" width="1" height="1" class="f" style="--dx:-4px;--dy:-4.5px;--i:25"/><rect x="20" y="7" width="1" height="1" class="f" style="--dx:-4px;--dy:-6.5px;--i:26"/><rect x="20" y="8" width="1" height="1" class="f" style="--dx:-4px;--dy:-6.5px;--i:27"/><rect x="20" y="9" width="1" height="1" class="f" style="--dx:-3px;--dy:-8.5px;--i:28"/><rect x="20" y="10" width="1" height="1" class="f" style="--dx:-3px;--dy:-8.5px;--i:29"/><rect x="3" y="10" width="1" height="1" class="" style="--dx:2px;--dy:-5.5px;--i:30"/><rect x="3" y="10" width="1" height="1" class="" style="--dx:2px;--dy:-4.5px;--i:31"/><rect x="3" y="9" width="1" height="1" class="" style="--dx:3px;--dy:-4.5px;--i:32"/><rect x="3" y="8" width="1" height="1" class="" style="--dx:3px;--dy:-2.5px;--i:33"/><rect x="4" y="7" width="1" height="1" class="" style="--dx:3px;--dy:-2.5px;--i:34"/><rect x="4" y="6" width="1" height="1" class="" style="--dx:3px;--dy:-0.5px;--i:35"/><rect x="5" y="5" width="1" height="1" class="" style="--dx:3px;--dy:-0.5px;--i:36"/><rect x="6" y="4" width="1" height="1" class="" style="--dx:2px;--dy:1.5px;--i:37"/><rect x="7" y="4" width="1" height="1" class="" style="--dx:2px;--dy:0.5px;--i:38"/><rect x="8" y="3" width="1" height="1" class="" style="--dx:1px;--dy:2.5px;--i:39"/><rect x="9" y="3" width="1" height="1" class="" style="--dx:1px;--dy:1.5px;--i:40"/><rect x="10" y="3" width="1" height="1" class="" style="--dx:0px;--dy:2.5px;--i:41"/><rect x="11" y="3" width="1" height="1" class="" style="--dx:0px;--dy:1.5px;--i:42"/><rect x="12" y="3" width="1" height="1" class="" style="--dx:-1px;--dy:2.5px;--i:43"/><rect x="13" y="4" width="1" height="1" class="f" style="--dx:-1px;--dy:0.5px;--i:44"/><rect x="14" y="4" width="1" height="1" class="f" style="--dx:-2px;--dy:1.5px;--i:45"/><rect x="15" y="5" width="1" height="1" class="f" style="--dx:-2px;--dy:-0.5px;--i:46"/><rect x="16" y="6" width="1" height="1" class="f" style="--dx:-3px;--dy:-0.5px;--i:47"/><rect x="16" y="7" width="1" height="1" class="f" style="--dx:-2px;--dy:-2.5px;--i:48"/><rect x="17" y="8" width="1" height="1" class="f" style="--dx:-3px;--dy:-2.5px;--i:49"/><rect x="17" y="9" width="1" height="1" class="f" style="--dx:-2px;--dy:-4.5px;--i:50"/><rect x="17" y="10" width="1" height="1" class="f" style="--dx:-2px;--dy:-4.5px;--i:51"/><rect x="6" y="10" width="1" height="1" class="" style="--dx:1px;--dy:-1.5px;--i:52"/><rect x="6" y="10" width="1" height="1" class="" style="--dx:1px;--dy:-0.5px;--i:53"/><rect x="6" y="9" width="1" height="1" class="" style="--dx:2px;--dy:-0.5px;--i:54"/><rect x="7" y="8" width="1" height="1" class="" style="--dx:1px;--dy:1.5px;--i:55"/><rect x="7" y="7" width="1" height="1" class="" style="--dx:2px;--dy:1.5px;--i:56"/><rect x="8" y="7" width="1" height="1" class="" style="--dx:1px;--dy:2.5px;--i:57"/><rect x="9" y="6" width="1" height="1" class="" style="--dx:1px;--dy:2.5px;--i:58"/><rect x="10" y="6" width="1" height="1" class="" style="--dx:0px;--dy:3.5px;--i:59"/><rect x="11" y="6" width="1" height="1" class="" style="--dx:0px;--dy:2.5px;--i:60"/><rect x="12" y="7" width="1" height="1" class="f" style="--dx:-1px;--dy:2.5px;--i:61"/><rect x="13" y="7" width="1" height="1" class="f" style="--dx:-1px;--dy:1.5px;--i:62"/><rect x="13" y="8" width="1" height="1" class="f" style="--dx:-1px;--dy:1.5px;--i:63"/><rect x="14" y="9" width="1" height="1" class="f" style="--dx:-1px;--dy:-0.5px;--i:64"/><rect x="14" y="10" width="1" height="1" class="f" style="--dx:-1px;--dy:-0.5px;--i:65"/></svg></button>
+</div>
+</header>
+<div class="infopop" id="infoPop" role="dialog" aria-label="Uskoro" hidden><h3>Uskoro</h3><p class="m">Sajt je u ranoj fazi. Sledeće stiže:</p><ul><li><b>Arhiva</b>: svi prošli dani sednica, sa statistikom po danu, mesecu ili periodu.</li><li><b>Profili poslanika</b>: govori, glasanja i prisustvo na jednom mestu.</li><li><b>Utišavanje poslanika</b>: isključi zvuk prenosa dok govori neko koga ne želiš da slušaš.</li></ul></div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Meni">
+<div class="wrap">
+<ul class="links">
+<li><a href="#uzivo">Uživo<span class="tag"><i class="sq"></i>u toku</span></a></li>
+<li><a href="#sala" data-v="groups">Sala<span class="tag"></span></a></li>
+<li class="nv1"><a href="#rang">Rang liste<span class="tag"></span></a></li>
+<li class="nv1"><a href="#arhiva">Arhiva<span class="tag"></span></a></li>
+<li><a href="#sala" data-v="mps">Poslanici<span class="tag">250</span></a></li>
+<li><a href="#kontakt">Kontakt<span class="tag"></span></a></li>
+</ul>
+<div class="prefs">
+<div class="pref"><span class="m">Pismo</span><div class="seg nt" role="group" aria-label="Pismo"><button type="button" data-script="lat" aria-pressed="true">Latinica</button><button type="button" data-script="cyr" aria-pressed="false">Ћирилица</button></div></div>
+<div class="pref"><span class="m">Tema</span><div class="seg" role="group" aria-label="Tema"><button type="button" data-mode="light" aria-pressed="true">Svetla</button><button type="button" data-mode="dark" aria-pressed="false">Tamna</button></div></div>
+<p class="fine">Nezavisan sajt, nije zvanični sajt Narodne skupštine.</p>
+</div>
+</div>
+</div>
+
+<main id="top">
+<div class="hero" id="hero">
+<div class="wrap">
+<h1>Narodna skupština na dlanu</h1>
+<p class="lead" id="heroLead">Pratite sednice, vidite ko govori i koliko dugo, i vratite se na bilo koji govor kad vam odgovara.</p>
+<div class="cta" id="heroCta"><a class="b light" href="#uzivo">Gledaj sednicu</a><a class="b glass" id="heroAlt" href="#arhiva">Arhiva</a></div>
+</div>
+</div>
+
+<div class="wrap" id="uzivo" data-screen="live">
+<div class="win livewin">
+<div class="stage">
+<div class="vsticky" id="vsticky">
+<div class="vbox" id="vbox"><div class="vfloat">
+<div class="minibar"><span class="vlive"><i class="sq"></i>Uživo</span><button class="vx" id="vx" type="button" aria-label="Zatvori mali prozor">×</button></div>
+<div class="video" id="video"><button class="play" type="button" id="play" aria-label="Pokreni prenos"><i class="tri"></i></button></div>
+</div></div>
+<div class="vbar" role="group" aria-label="Prenos">
+<div class="who"><div class="ph" aria-hidden="true"></div><div class="wt"><span class="n" id="nowName"></span><span class="g" id="nowMeta" aria-live="polite"></span></div><span class="tmr nt" id="timer">0:00</span><button class="mmp" type="button" id="mute" aria-pressed="false"></button></div>
+<div class="vol"><button class="vb" id="vmute" type="button" aria-pressed="false" aria-label="Isključi zvuk prenosa" title="Zvuk prenosa"><svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="6" y="1" width="1" height="1"/><rect x="5" y="2" width="2" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="3" y="3" width="3" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="1" y="4" width="3" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="3" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="3" y="9" width="3" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="5" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/></svg></button></div>
+<button class="vb" id="vfs" type="button" aria-pressed="false" aria-label="Ceo ekran sa razgovorom" title="Ceo ekran sa razgovorom"><svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="0" width="4" height="1"/><rect x="9" y="0" width="4" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="12" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="12" y="10" width="1" height="1"/><rect x="0" y="11" width="1" height="1"/><rect x="12" y="11" width="1" height="1"/><rect x="0" y="12" width="4" height="1"/><rect x="9" y="12" width="4" height="1"/></svg></button>
+</div>
+</div>
+</div>
+<div class="side">
+<div class="tabs" role="tablist">
+<button role="tab" aria-selected="true" aria-controls="p-chat" id="t-chat">Razgovor</button>
+<button role="tab" aria-selected="false" aria-controls="p-tok" id="t-tok">Govornici</button>
+<span class="chip num" id="viewers" style="margin-left:auto;visibility:hidden"><i class="sq"></i><span><span id="vn"></span> gleda</span></span>
+</div>
+<div class="pane" role="tabpanel" id="p-chat" aria-labelledby="t-chat"><div id="msgs" aria-live="polite"></div></div>
+<div class="compose" id="compose"><form class="cbox" id="cbox" autocomplete="off"><input id="cin" maxlength="300" placeholder="Napiši poruku" aria-label="Poruka" enterkeyhint="send"><button class="b dark" type="submit">Pošalji</button></form><div class="cme"><span id="cst" aria-live="polite"></span><span>Pišeš kao <b class="nt" id="cname"></b> · <button type="button" class="lnk" id="crename">promeni ime</button></span></div></div>
+<form class="gate" id="gate" autocomplete="off"><h3>Uključi se u razgovor</h3><p class="m">Bez naloga. Izaberi ime i ono ostaje tvoje na ovom uređaju.</p><input id="gname" maxlength="20" placeholder="Tvoje ime" aria-label="Ime u razgovoru" autocapitalize="words"><ul class="rules"><li>Kritikuj odluke i ideje, ne ljude. Bez uvreda, pretnji i govora mržnje.</li><li>Bez linkova, brojeva telefona i tuđih ličnih podataka.</li><li>Prijavi ukoliko vidiš gore navedeno ponašanje.</li></ul><span class="gerr" id="gerr" aria-live="polite"></span><div class="gbtns"><button class="b light" type="button" id="gcancel" hidden>Otkaži</button><button class="b dark" type="submit">Prihvatam, uđi</button></div></form>
+<div class="pane spk-pane" role="tabpanel" id="p-tok" aria-labelledby="t-tok" hidden><div class="spk-head"><span class="m" id="spkCount"></span><button type="button" class="b light" id="unmuteAll" hidden></button></div><ol class="spk-list" id="spkList"></ol></div>
+</div>
+</div>
+<section class="livestats" id="danas" aria-labelledby="h-danas">
+<div class="head"><h2 id="h-danas">Danas uživo</h2><span class="chip num" id="dayLen"></span></div>
+<div class="lcards" id="liveCards"></div>
+</section>
+<p class="sample">Primer podataka</p>
+</div>
+
+<section class="wrap" id="sala" data-screen="sala">
+<div class="head"><h2>Sala</h2><div class="seg" id="salaSeg" role="tablist" aria-label="Sala" style="min-width:min(100%,360px)"><button type="button" data-v="groups" aria-pressed="true">Sastav</button><button type="button" data-v="mps" aria-pressed="false">Poslanici</button><button type="button" data-v="day" aria-pressed="false" hidden>Danas</button></div></div>
+<div class="board salaboard" id="salaBoard" data-view="groups">
+<div class="pop" id="pop" hidden role="dialog" aria-label="Detalji"></div><div class="plink" id="plink" hidden></div>
+<div class="fig" id="hall"><svg id="hallSvg" role="img" aria-label="Raspored poslanika u sali"></svg><div class="tip" id="tip"></div></div>
+<div class="side2">
+<div class="vw v-groups" id="vGroups"></div>
+<div class="vw v-mps"><div class="fchip" id="fchip" hidden></div><input class="search" id="q" type="search" placeholder="Pretraži poslanike" aria-label="Pretraži poslanike" autocomplete="off"><ol class="lens mplist" id="mplist"></ol></div>
+<div class="vw v-day"><ol class="lens tl" id="tl"></ol></div>
+</div>
+</div>
+<p class="sample" id="salaNote">Primer imena. Broj mesta: RIK, konačni rezultati 5. 11. 2026. Raspored u sali nije zvaničan.</p>
+</section>
+
+
+
+<section class="wrap" id="rang" data-screen="rang">
+<div class="head"><h2>Rang liste</h2><div class="seg" id="rangSeg" role="group" aria-label="Period" style="min-width:min(100%,360px)"><button type="button" aria-pressed="true">Danas</button><button type="button" aria-pressed="false">Mesec</button><button type="button" aria-pressed="false">Saziv</button></div></div>
+<div class="awards" id="awards"></div>
+<p class="sample">Primer podataka. Računa se automatski iz zvaničnih beleški, isto za svakog poslanika.</p>
+</section>
+
+<section class="wrap" id="arhiva" data-screen="arhiva">
+<div class="head"><h2>Arhiva</h2><span class="chip">15. saziv</span></div>
+<div class="arch"><ol class="days" id="days"></ol><article class="dayview" id="dayview" aria-live="polite"></article></div>
+<p class="sample">Primer podataka. Dnevni red konstitutivne sednice: najava iz Skupštine.</p>
+</section>
+
+
+
+<section class="wrap" id="profil" data-screen="me">
+<div class="head"><h2>Profil</h2></div>
+<div class="plist">
+<form class="pref" id="pname" autocomplete="off"><span class="m">Ime u razgovoru</span><div class="pn"><input id="pnin" maxlength="20" placeholder="Nije izabrano" aria-label="Ime u razgovoru"><button class="b dark" type="submit">Sačuvaj</button></div><span class="m" id="pnst" style="font-size:14px"></span></form>
+<div class="pref nv1"><span class="m">Utišani poslanici</span><div class="muted" id="mutedList"><span class="m" style="background:none;box-shadow:none;padding:0">Nema</span></div></div>
+<div class="pref"><span class="m">Pismo</span><div class="seg nt" role="group" aria-label="Pismo"><button type="button" data-script="lat" aria-pressed="true">Latinica</button><button type="button" data-script="cyr" aria-pressed="false">Ћирилица</button></div></div>
+<div class="pref"><span class="m">Tema</span><div class="seg" role="group" aria-label="Tema"><button type="button" data-mode="light" aria-pressed="true">Svetla</button><button type="button" data-mode="dark" aria-pressed="false">Tamna</button></div></div>
+<div class="pref" style="gap:0"><a class="rowlink" href="#pravila">Pravila razgovora<span class="m">›</span></a><a class="rowlink" href="#kontakt">Prijavi grešku<span class="m">›</span></a><a class="rowlink" href="#o-sajtu">Izvori podataka<span class="m">›</span></a></div>
+<p class="fine m" style="font-size:14px">Nezavisan sajt, nije zvanični sajt Narodne skupštine.</p>
+</div>
+</section>
+<dialog id="rulesDlg"><h3>Pravila razgovora</h3><ul class="rules"><li>Kritikuj odluke i ideje, ne ljude. Bez uvreda, pretnji i govora mržnje.</li><li>Bez linkova, brojeva telefona i tuđih ličnih podataka.</li><li>Prijavi ukoliko vidiš gore navedeno ponašanje.</li></ul><button class="b dark" type="button" id="rulesClose">Razumem</button></dialog>
+<section class="wrap" id="kontakt" data-screen="me">
+<div class="head"><h2>Kontakt</h2></div>
+<div class="kgrid">
+<form class="card kform" id="cform">
+<label>Tema<select name="kind"><option value="poruka">Poruka</option><option value="ispravka">Ispravka podataka</option><option value="greska">Greška na sajtu</option></select></label>
+<label>Poruka<textarea name="msg" rows="5" required minlength="3" maxlength="4000"></textarea></label>
+<label><span>Imejl <span class="m">(nije obavezno)</span></span><input name="mail" type="email" maxlength="200" autocomplete="email"></label>
+<label class="hp" aria-hidden="true">Sajt<input name="website" tabindex="-1" autocomplete="off"></label>
+<div class="krow"><button class="b dark" type="submit">Pošalji</button><span class="m" id="cstat" aria-live="polite"></span></div>
+</form>
+<div class="card kabout" id="o-sajtu">
+<h3>O sajtu</h3>
+<p>Nezavisan, nekomercijalni sajt. Nije zvanični sajt Narodne skupštine.</p>
+<p>Izvori: <a href="https://www.parlament.gov.rs" rel="noopener" target="_blank">parlament.gov.rs</a> i zvanični <a href="https://www.youtube.com/@ParlamentSrbija" rel="noopener" target="_blank">YouTube kanal</a> Narodne skupštine.</p>
+<p>Bez reklama i kolačića za praćenje. Poruke čuvamo samo da bismo odgovorili.</p>
+</div>
+</div>
+</section>
+</main>
+
+<nav class="tabbar" aria-label="Glavni meni">
+<button type="button" data-tab="sala"><svg class="ic" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="4" y="3" width="5" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="5" y="6" width="3" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="0" y="7" width="1" height="1"/><rect x="4" y="7" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="3" y="8" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="12" y="8" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/></svg>Sala</button>
+<button type="button" data-tab="arhiva" class="nv1"><svg class="ic" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="1" width="11" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="1" y="3" width="11" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="5" y="5" width="3" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="2" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="2" y="9" width="9" height="1"/></svg>Arhiva</button>
+<button type="button" data-tab="live" class="mid"><span class="well"><svg class="ic" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="1" width="11" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="2" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="5" y="5" width="3" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="5" y="6" width="2" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="1" y="9" width="11" height="1"/><rect x="3" y="11" width="7" height="1"/></svg></span><i class="sq"></i>Uživo</button>
+<button type="button" data-tab="rang" class="nv1"><svg class="ic" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="1" width="9" height="1"/><rect x="1" y="2" width="2" height="1"/><rect x="10" y="2" width="2" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="1" y="5" width="2" height="1"/><rect x="10" y="5" width="2" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="3" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="4" y="8" width="5" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="4" y="11" width="5" height="1"/><rect x="3" y="12" width="7" height="1"/></svg>Rang</button>
+<button type="button" data-tab="me"><svg class="ic" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="4" y="1" width="5" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1"/><rect x="4" y="5" width="5" height="1"/><rect x="2" y="7" width="9" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="11" y="10" width="1" height="1"/></svg>Profil</button>
+</nav>
+<footer>
+<div class="wrap">
+<span class="word nt"><svg class="mark" aria-hidden="true" viewBox="0 0 21 11" shape-rendering="crispEdges"><g fill="currentColor"><rect x="7" y="0" width="7" height="1"/><rect x="5" y="1" width="2" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="8" y="3" width="5" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="6" y="4" width="2" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="9" y="6" width="3" height="1"/><rect x="0" y="7" width="1" height="1"/><rect x="4" y="7" width="1" height="1"/><rect x="7" y="7" width="2" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="3" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/></g><g fill="currentColor" opacity=".4"><rect x="14" y="1" width="2" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="17" y="3" width="1" height="1"/><rect x="13" y="4" width="2" height="1"/><rect x="18" y="4" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="19" y="5" width="1" height="1"/><rect x="16" y="6" width="1" height="1"/><rect x="19" y="6" width="1" height="1"/><rect x="12" y="7" width="2" height="1"/><rect x="16" y="7" width="1" height="1"/><rect x="20" y="7" width="1" height="1"/><rect x="13" y="8" width="1" height="1"/><rect x="17" y="8" width="1" height="1"/><rect x="20" y="8" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="20" y="10" width="1" height="1"/></g></svg>skupština.app</span>
+<nav aria-label="Podnožje"><a href="#kontakt">Prijavi grešku</a><a href="#pravila">Pravila razgovora</a><a href="#o-sajtu">Izvori</a></nav>
+<p class="fine" style="flex-basis:100%">Nezavisan sajt, nije zvanični sajt Narodne skupštine. Izvori: <span class="nt">parlament.gov.rs</span>, zvanični <span class="nt">YouTube</span> kanal.</p>
+</div>
+</footer>
+
+<script>
+{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const root=document.documentElement,reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let sd=11;const rnd=()=>(sd=sd*16807%2147483647)/2147483647;const pick=a=>a[Math.floor(rnd()*a.length)];
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+
+const I_SON=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="6" y="1" width="1" height="1"/><rect x="5" y="2" width="2" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="3" y="3" width="3" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="1" y="4" width="3" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="3" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="3" y="9" width="3" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="5" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/></svg>`,I_SOFF=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="6" y="1" width="1" height="1"/><rect x="5" y="2" width="2" height="1"/><rect x="3" y="3" width="3" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="1" y="4" width="3" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="1" y="8" width="3" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="3" y="9" width="3" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="5" y="10" width="2" height="1"/><rect x="6" y="11" width="1" height="1"/></svg>`;
+const I_FS=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="0" width="4" height="1"/><rect x="9" y="0" width="4" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="12" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="12" y="10" width="1" height="1"/><rect x="0" y="11" width="1" height="1"/><rect x="12" y="11" width="1" height="1"/><rect x="0" y="12" width="4" height="1"/><rect x="9" y="12" width="4" height="1"/></svg>`,I_FSX=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="3" y="0" width="1" height="1"/><rect x="9" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="0" y="3" width="4" height="1"/><rect x="9" y="3" width="4" height="1"/><rect x="0" y="9" width="4" height="1"/><rect x="9" y="9" width="4" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="3" y="11" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/></svg>`;
+const I_PON=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="1" width="4" height="1"/><rect x="1" y="2" width="1" height="3"/><rect x="6" y="2" width="1" height="3"/><rect x="2" y="5" width="4" height="1"/><rect x="1" y="7" width="6" height="1"/><rect x="0" y="8" width="1" height="3"/><rect x="7" y="8" width="1" height="3"/><rect x="9" y="3" width="1" height="3"/><rect x="11" y="1" width="1" height="1"/><rect x="12" y="2" width="1" height="5"/><rect x="11" y="7" width="1" height="1"/></svg>`,I_POFF=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="1" width="4" height="1"/><rect x="1" y="2" width="1" height="3"/><rect x="6" y="2" width="1" height="3"/><rect x="2" y="5" width="4" height="1"/><rect x="1" y="7" width="6" height="1"/><rect x="0" y="8" width="1" height="3"/><rect x="7" y="8" width="1" height="3"/><rect x="9" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="10" y="3" width="2" height="2"/><rect x="9" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/></svg>`;
+const I_TROPHY=`<svg class="ic" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="1" width="9" height="1"/><rect x="1" y="2" width="2" height="1"/><rect x="10" y="2" width="2" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="1" y="5" width="2" height="1"/><rect x="10" y="5" width="2" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="3" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="4" y="8" width="5" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="4" y="11" width="5" height="1"/><rect x="3" y="12" width="7" height="1"/></svg>`;
+/* data: the server injects the real MP list here; empty = design preview with sample data */
+const REAL=/*MPS*/[];
+const V1=REAL.length>0;if(V1)document.body.classList.add("v1");
+const VOTES=[2354417,35461,27673,20638,12596,12440,1731323],VOTERS=4441636,MAJ=126;
+const LEAD={0:["Jovo Bakić","Aleksandra Štimac",""],6:["Aleksandar Vučić","Milenko Jovanov","Srbija pobeđuje"]};
+const groups=[["Studentska lista","Studentska lista",140],["Savez vojvođanskih Mađara","SVM",2],["Albanska koalicija","Albanska koalicija",2],["Rasim Ljajić – Ljudski","Ljudski",1],["SDA – Čuvari Sandžaka","SDA Sandžaka",1],["Pokret za ujedinjenje","Pokret za ujedinjenje",1],["Ujedinjena Srbija","Ujedinjena Srbija",103]];
+const FN=["Milena","Dragan","Jelena","Nebojša","Ivana","Zoran","Tamara","Bojan","Snežana","Vladimir","Maja","Goran","Ljiljana","Dejan","Marija","Nikola","Dušica","Aleksandar","Jovana","Miloš","Radmila","Stefan","Vesna","Đorđe","Teodora","Branislav"];
+const LN=["Kostić","Radovanović","Pantelić","Milovanović","Đurić","Stanković","Lazić","Bogdanović","Živković","Tomić","Ristić","Vasiljević","Janković","Nedeljković","Ćirić","Mladenović","Šarac","Pejović","Lukić","Gavrilović","Jakšić","Rakić"];
+const used=new Set(),mps=[];
+const listGroup=r=>{const x=(r.list||r.pg||"").toUpperCase();return /СТУДЕНТ/.test(x)?0:/МАЂАР|MAGYAR/.test(x)?1:/АЛБАН|SHQIP/.test(x)?2:/ЉАЈИЋ|ЉУДСКИ/.test(x)?3:/SDA|СДА|САНЏАК|SANDŽAK/.test(x)?4:/ПОКРЕТ ЗА УЈЕДИЊЕЊЕ|POKRET ZA UJEDINJENJE/.test(x)?5:/УЈЕДИЊЕНА СРБИЈА|ВУЧИЋ/.test(x)?6:-1};
+if(V1){groups.forEach(g=>g[2]=0);REAL.forEach(r=>{const g=listGroup(r);if(g<0)return;groups[g][2]++;mps.push({i:mps.length,g,name:r.l,c:r.c,id:r.id,ph:r.ph,pg:r.pg,party:r.party,role:r.role,t:0,w:0})})}
+else groups.forEach((g,gi)=>{for(let k=0;k<g[2];k++){let n;do n=pick(FN)+" "+pick(LN);while(used.has(n));used.add(n);mps.push({i:mps.length,g:gi,name:n,t:0,w:0})}});
+const LINES=["Amandman na član 4","Povreda Poslovnika, član 107","Replika","Rokovi za javnu raspravu","Amandman na član 12","Budžet lokalnih samouprava","Vraćanje tačke odboru","Zaključci odbora","Pitanje ministru","Amandman na član 21","Primedbe iz javne rasprave","Greška u tekstu predloga"];
+const pool=[];while(pool.length<46){const i=Math.floor(rnd()*250);if(!pool.includes(i))pool.push(i)}
+const sp=[];let t=36000,paused=false;
+for(let k=0;k<(V1?0:64);k++){if(t>=46800&&!paused){sp.push({pause:true,t:46800,d:3600});t=50400;paused=true}
+ const m=mps[pick(pool)],d=50+Math.floor(rnd()**2*780)+Math.floor(rnd()*60);sp.push({t,d,m,l:pick(LINES)});m.t+=d;t+=d+Math.floor(rnd()*45)}
+const talks=sp.filter(s=>!s.pause);
+for(let k=0;k<(V1?0:12);k++){const s=talks[3+Math.floor(rnd()*(talks.length-6))];if(!s.warn){s.warn=true;s.m.w++}}
+const live=V1?{m:mps[0],t:36000,d:0,l:"",live:true}:talks[talks.length-1];if(!V1){live.live=true;live.m.t-=live.d-134;live.d=134}const liveStart=Date.now()-134000;
+const hm=s=>Math.floor(s/3600)+":"+String(Math.floor(s%3600/60)).padStart(2,"0");
+const dur=d=>d<60?d+" s":d<3600?Math.round(d/60)+" min":Math.floor(d/3600)+" h "+Math.round(d%3600/60)+" min";
+
+/* script */
+const MAP={"Dž":"Џ","DŽ":"Џ","dž":"џ","Lj":"Љ","LJ":"Љ","lj":"љ","Nj":"Њ","NJ":"Њ","nj":"њ"};
+"abcčćdđefghijklmnoprsštuvzž".split("").forEach((c,i)=>{const y="абцчћдђефгхијклмнопрсштувзж"[i];MAP[c]=y;MAP[c.toUpperCase()]=y.toUpperCase()});
+const tr=s=>s.replace(/D[žŽ]|dž|L[jJ]|lj|N[jJ]|nj|./g,c=>MAP[c]??c);
+let cyr=false;const orig=new WeakMap();
+const apply=el=>{const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const p=n.parentElement;if(!p||p.closest(".nt,script,style"))continue;if(!orig.has(n))orig.set(n,n.nodeValue);n.nodeValue=cyr?tr(orig.get(n)):orig.get(n)}};
+const press=(sel,v,attr)=>$$(sel).forEach(b=>b.setAttribute("aria-pressed",b.dataset[attr]===v));
+const setScript=v=>{cyr=v==="cyr";press("[data-script]",v,"script");root.lang=cyr?"sr-Cyrl":"sr-Latn";apply(document.body);store.set("pismo",v)};
+const setMode=v=>{root.dataset.mode=v;press("[data-mode]",v,"mode");store.set("tema",v)};
+$$("[data-script]").forEach(b=>b.onclick=()=>setScript(b.dataset.script));
+$$("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+
+/* nav + menu */
+const nav=$("#nav"),sheet=$("#sheet"),mb=$("#menuBtn");
+const heroObs=new IntersectionObserver(e=>nav.classList.toggle("solid",!e[0].isIntersecting),{rootMargin:"-72px 0px 0px 0px"});heroObs.observe($("#heroCta"));
+const menu=o=>{nav.classList.toggle("open",o);sheet.classList.toggle("show",o);mb.setAttribute("aria-expanded",o);mb.setAttribute("aria-label",o?"Zatvori meni":"Meni");document.body.classList.toggle("locked",o);if(o)setTimeout(()=>sheet.querySelector("a").focus({preventScroll:true}),200)};
+mb.onclick=()=>menu(mb.getAttribute("aria-expanded")!=="true");
+$$(".links a").forEach(a=>a.addEventListener("click",()=>menu(false)));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sheet.classList.contains("show")){menu(false);mb.focus()}});
+
+/* live */
+$("#nowName").textContent=live.m.name;$("#nowMeta").textContent=groups[live.m.g][1];
+
+const tick=()=>{const s=Math.floor((Date.now()-liveStart)/1000);$("#timer").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};tick();setInterval(tick,1000);
+/* chat: open names for now, login + full moderation later */
+{
+const box=$("#msgs"),pane=$("#p-chat"),side=$(".side"),gate=$("#gate"),gname=$("#gname"),gerr=$("#gerr"),cin=$("#cin"),cst=$("#cst"),pnin=$("#pnin"),pnst=$("#pnst");
+let ws=null,name=store.get("chatName")||"",key=store.get("chatKey"),joined=false,backoff=1000,from="gate",last="",ids=new Set(),ping=0;
+if(!key||!/^[a-f0-9]{32}$/.test(key)){const a=new Uint8Array(16);crypto.getRandomValues(a);key=[...a].map(x=>x.toString(16).padStart(2,"0")).join("");store.set("chatKey",key)}
+const ERR={name_len:"Ime mora imati od 2 do 20 znakova.",name_chars:"Ime može imati slova, brojeve, razmak, tačku i crtice.",name_bad:"To ime nije dozvoljeno.",name_taken:"To ime je zauzeto. Izaberi drugo.",name_many:"Previše novih imena. Pokušaj kasnije.",key:"Greška. Osveži stranicu.",nojoin:"Prvo izaberi ime.",banned:"Privremeno ne možeš da pišeš.",long:"Poruka je duža od 300 znakova.",fast:"Polako, sačekaj par sekundi.",dup:"Ista poruka je već poslata.",bad:"Poruka ima uvredljive reči i nije poslata.",link:"Linkovi i imejlovi nisu dozvoljeni.",phone:"Brojevi telefona nisu dozvoljeni.",off:"Veza je prekinuta, povezujem ponovo…",wait:"Povezujem…",saved:"Sačuvano.",rules:"Čuvanjem prihvataš pravila razgovora."};
+const say=(el,k)=>{el.textContent=k?(ERR[k]||k):"";apply(el)};
+const ucol=n=>{let h=5381;for(const c of n.toLocaleLowerCase("sr"))h=(h*33+c.codePointAt(0))>>>0;return h%8};
+const hhmm=t=>{const d=new Date(t);return d.getHours()+":"+String(d.getMinutes()).padStart(2,"0")};
+const ui=()=>{side.classList.toggle("locked",!name||gate.dataset.open==="1");$("#cname").textContent=name;pnin.value=name;$("#gcancel").hidden=!name};
+const empty=()=>{if(!box.children.length){box.innerHTML='<p class="m empty">Još nema poruka. Napiši prvu.</p>';apply(box)}};
+const add=m=>{if(ids.has(m.id))return;ids.add(m.id);box.querySelector(".empty")?.remove();
+ const stick=pane.scrollHeight-pane.scrollTop-pane.clientHeight<90;
+ const d=document.createElement("div");d.className="msg"+(m.n===name?" me":"");d.dataset.id=m.id;
+ d.innerHTML='<span class="tm nt"></span> <b class="nt u'+ucol(m.n)+'"></b><span class="nt">: </span><span class="x nt"></span>'+(m.n===name?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
+ const t=d.querySelectorAll(".nt");t[0].textContent=hhmm(m.at);t[1].textContent=m.n;t[3].textContent=m.x;apply(d);box.append(d);
+ while(box.children.length>200)box.firstElementChild.remove();
+ if(stick)pane.scrollTop=pane.scrollHeight};
+const viewers=n=>{const c=$("#viewers");$("#vn").textContent=Number(n).toLocaleString("sr-RS");c.style.visibility="visible"};
+const send=o=>{if(ws&&ws.readyState===1){ws.send(JSON.stringify(o));return true}return false};
+const join=(n,src)=>{from=src;if(!send({t:"join",name:n,key}))say(src==="gate"?gerr:pnst,"wait")};
+const connect=()=>{
+ ws=new WebSocket((location.protocol==="https:"?"wss://":"ws://")+location.host+"/api/chat");
+ ws.onopen=()=>{backoff=1000;say(cst,"");if(name)send({t:"join",name,key});clearInterval(ping);ping=setInterval(()=>{try{ws.send("ping")}catch(e){}},45000)};
+ ws.onmessage=e=>{if(e.data==="pong")return;let d;try{d=JSON.parse(e.data)}catch(x){return}
+  if(d.t==="init"){box.innerHTML="";ids.clear();d.msgs.forEach(add);empty();pane.scrollTop=pane.scrollHeight;viewers(d.v)}
+  else if(d.t==="m")add(d.m);
+  else if(d.t==="v")viewers(d.n);
+  else if(d.t==="del")d.ids.forEach(i=>{box.querySelector('[data-id="'+i+'"]')?.remove();ids.delete(i)});
+  else if(d.t==="ok"){joined=true;const was=name;name=d.name;store.set("chatName",name);if(was!==name){box.querySelectorAll(".msg").forEach(m=>{const me=m.querySelector("b").textContent===name;m.classList.toggle("me",me);if(me)m.querySelector(".flag")?.remove()})}if(from==="gate"&&gate.dataset.open==="1"){gate.dataset.open="";say(gerr,"")}if(from==="profile")say(pnst,"saved");from="";ui()}
+  else if(d.t==="err"){const k=d.code;if(/^name_|^key$/.test(k)){say(from==="profile"?pnst:gerr,k);if(!name){side.classList.add("locked")}}else{say(cst,k);if(last&&!cin.value){cin.value=last}}}};
+ ws.onclose=()=>{joined=false;clearInterval(ping);say(cst,"off");setTimeout(connect,backoff);backoff=Math.min(backoff*2,30000)}};
+gate.addEventListener("submit",e=>{e.preventDefault();const n=gname.value.trim();if(n.length<2){say(gerr,"name_len");return}store.set("chatRules","1");join(n,"gate")});
+$("#gcancel").onclick=()=>{gate.dataset.open="";say(gerr,"");ui()};
+$("#crename").onclick=()=>{gate.dataset.open="1";gname.value=name;ui();gname.focus()};
+$("#pname").addEventListener("submit",e=>{e.preventDefault();const n=pnin.value.trim();if(n===name&&joined){say(pnst,"saved");return}if(n.length<2){say(pnst,"name_len");return}store.set("chatRules","1");join(n,"profile")});
+$("#cbox").addEventListener("submit",e=>{e.preventDefault();const x=cin.value.trim();if(!x)return;if(!joined){say(cst,"wait");return}last=x;if(send({t:"msg",x})){cin.value="";say(cst,"")}});
+pane.addEventListener("click",e=>{const f=e.target.closest(".flag");if(!f||f.disabled)return;const id=+f.closest(".msg").dataset.id;if(send({t:"report",id})){f.setAttribute("aria-pressed","true");f.disabled=true;f.textContent="Prijavljeno";apply(f)}});
+const dlg=$("#rulesDlg");$$('a[href="#pravila"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","")}));
+$("#rulesClose").onclick=()=>dlg.close?dlg.close():dlg.removeAttribute("open");
+say(pnst,"rules");ui();connect();
+}
+/* info: upcoming features */
+{const b=$("#infoBtn"),p=$("#infoPop");const set=o=>{p.hidden=!o;b.setAttribute("aria-expanded",o)};
+b.onclick=e=>{e.stopPropagation();set(p.hidden)};
+document.addEventListener("click",e=>{if(!p.hidden&&!p.contains(e.target))set(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!p.hidden){set(false);b.focus()}});}
+
+const rowHTML=(s,i,tag="div")=>s.pause?`<div class="row"><span class="t">${hm(s.t)}</span><span class="m">Pauza</span><span class="d">1 h</span></div>`
+ :`<${tag} ${tag==="button"?'type="button" ':''}class="row${s.live?" live":""}" data-i="${i}"><span class="t">${hm(s.t)}</span><span>${s.m.name}</span><span class="d">${s.live?'<i class="sq"></i>':dur(s.d)}</span><span class="l">${groups[s.m.g][1]}, ${s.l.charAt(0).toLowerCase()+s.l.slice(1)}${s.warn?", opomena":""}</span></${tag}>`;
+
+const elapsed=live.t+live.d-36000-3600,spoke=new Set(talks.map(s=>s.m.i)),warns=talks.filter(s=>s.warn).length;
+const KP=[["Trajanje",dur(elapsed)],["Govori",talks.length],["Govornici",spoke.size+" / 250"],["Opomene",warns]];
+
+$$('[role=tab]').forEach(b=>b.onclick=()=>{$$('[role=tab]').forEach(x=>{const on=x===b;x.setAttribute("aria-selected",on);$("#"+x.getAttribute("aria-controls")).hidden=!on});$("#compose").hidden=b.id!=="t-chat"});
+
+
+/* hall */
+const SH=groups.map((_,i)=>`var(--p${i})`);
+const order=[...mps].sort((a,b)=>a.g-b.g||a.name.localeCompare(b.name,"sr"));
+const seatOf=new Map(order.map((m,i)=>[m,i]));
+const maxT=Math.max(...mps.map(m=>m.t)),hall=$("#hall"),svg=$("#hallSvg"),tip=$("#tip"),board=$("#salaBoard");
+let view="groups",active=live,focusMp=live.m;const geo={};
+function drawMap(T=SALA){
+ const hall=T.el,svg=T.svg,tip=T.tip,geo=T.geo,LIVE=T.live,V=LIVE?"live":view;
+ const W=hall.clientWidth,H=hall.clientHeight;if(!W)return;
+ const SPK=V1?mps.find(m=>/^Председник Народне/.test(m.role||"")):null,inHall=SPK?mps.filter(m=>m!==SPK):mps,HN=inHall.length;
+ const BH=Math.max(26,Math.round(H*.09)),R=Math.min(W/2-16,H-24-BH),cx=W/2,cy=H-12-BH,rows=10,r0=R*.4,step=(R-r0)/(rows-1);
+ const radii=[...Array(rows)].map((_,i)=>r0+i*step),sum=radii.reduce((a,b)=>a+b,0);
+ const counts=radii.map(r=>Math.round(HN*r/sum));counts[rows-1]+=HN-counts.reduce((a,b)=>a+b,0);
+ const seats=[],secs=4;radii.forEach((r,i)=>{const n=counts[i],g=step*.9/r,u=(Math.PI-.1-(secs-1)*g)/secs,per=[0,0,0,0].map((_,k)=>Math.floor(n/secs)+((k===1||k===2)&&k-1<n%secs?1:0)+(k===0&&n%secs===3?1:0));
+  per.forEach((nk,k)=>{const st=Math.PI-.05-k*(u+g);for(let j=0;j<nk;j++){const a=st-(j+.5)*u/nk;seats.push({a,i,k,x:cx+r*Math.cos(a),y:cy-r*Math.sin(a)})}})});
+ seats.forEach(p=>p.z=1);
+ /* wedges left to right as seen from the chair: Studentska lista on the chair's left, minority lists in the middle (they asked to sit right of the chair), then the one unaffiliated MP, then Srbija pobedjuje on the right.
+    Group leaders and vice-presidents take the front row nearest the centre; everyone else fills their wedge in alphabetical order. */
+ const gk=m=>V1&&m.g===6&&!m.pg?5.5:m.g;
+ const keys=[...new Set(inHall.map(gk))].sort((a,b)=>a-b);
+ const byA=[...seats].sort((p,q)=>q.a-p.a||p.i-q.i);
+ const rank=m=>{const pg=m.pg||"";return /\(председник\)/.test(pg)?0:/\(заменик/.test(pg)?1:/^Потпредседник/.test(m.role||"")?2:3};
+ const posOf=new Map();geo.pos=posOf;const blocks=groups.map(()=>[]);let at=0;
+ keys.forEach(k=>{const mem=inHall.filter(m=>gk(m)===k).sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name,"sr"));
+  const slice=byA.slice(at,at+mem.length);at+=mem.length;
+  const front=[...slice].sort((p,q)=>p.i-q.i||Math.abs(p.a-Math.PI/2)-Math.abs(q.a-Math.PI/2)),used=new Set();
+  mem.filter(m=>rank(m)<3).forEach((m,j)=>{used.add(front[j]);posOf.set(m,front[j])});
+  const rest=slice.filter(p=>!used.has(p));mem.filter(m=>rank(m)===3).forEach((m,j)=>posOf.set(m,rest[j]));
+  mem.forEach(m=>blocks[m.g].push(posOf.get(m)))});
+ geo.blocks=blocks;
+ const s=Math.max(3,Math.floor(Math.min(step,(Math.PI-.1-.3)*r0/counts[0])*.64));
+ /* predsednistvo: the Speaker sits at the bench (not in the hall), the secretary general (not an MP) beside him; vice-presidents sit with their group */
+ const benW=Math.max(60,Math.min(r0*1.1,W*.32)),benX=cx-benW/2,benY=cy+BH*.25,benH=Math.max(14,BH*.55),benC=benY+benH/2,bk=Math.max(4,Math.round(Math.min(s,benH*.6)));
+ geo.bench={x:cx,y:benC,w:benW,h:benH};
+ if(SPK)posOf.set(SPK,{x:cx,y:benC,z:1,a:Math.PI/2,i:-1});
+ let bench=(LIVE?`<g>`:`<g data-bench="1" style="cursor:pointer">`)+`<rect x="${Math.round(benX)}" y="${Math.round(benY)}" width="${Math.round(benW)}" height="${Math.round(benH)}" fill="var(--card)" stroke="var(--line)" rx="2"></rect>`;
+ if(!SPK)bench+=`<rect x="${Math.round(cx-bk/2)}" y="${Math.round(benC-bk/2)}" width="${bk}" height="${bk}" fill="var(--ink)"></rect>`;
+ bench+=`<rect x="${Math.round(cx+benW*.3-bk/2)+.75}" y="${Math.round(benC-bk/2)+.75}" width="${bk-1.5}" height="${bk-1.5}" fill="none" stroke="var(--mute)" stroke-width="1.5"></rect><title>Predsedništvo</title></g>`;
+ const sq=(p,z,fill,op=1,g="")=>{const k=Math.max(2,Math.round(z*(p.z||1)));return `<rect ${g!==""?`data-g="${g}" `:""}x="${Math.round(p.x-k/2)}" y="${Math.round(p.y-k/2)}" width="${k}" height="${k}" fill="${fill}" opacity="${op}"></rect>`};
+ /* who spoke today: hollow = not yet, filled and bigger = spoke more; neighbours spread so big ones never overlap */
+ const key=W+"x"+H;if(LIVE&&geo.key!==key){geo.key=key;const R=new Map();
+  mps.forEach(m=>{const p=posOf.get(m),f=m.t/maxT,sz=Math.round((m.t?s*(1+1.3*Math.sqrt(f)):s*.95)*(p.z||1));R.set(m,{x:p.x,y:p.y,ox:p.x,oy:p.y,sz,r:sz/2,fix:m===SPK})});
+  const A=[...R.values()];
+  for(let it=0;it<40;it++){for(let i=0;i<A.length;i++){const a=A[i];for(let j=i+1;j<A.length;j++){const b=A[j],dx=b.x-a.x,dy=b.y-a.y,lim=a.r+b.r+1.5;if(Math.abs(dx)>lim||Math.abs(dy)>lim)continue;const d=Math.hypot(dx,dy)||.01;if(d<lim){const ov=(lim-d),wa=b.r/(a.r+b.r);a.x-=dx/d*ov*wa;a.y-=dy/d*ov*wa;b.x+=dx/d*ov*(1-wa);b.y+=dy/d*ov*(1-wa)}}}
+   A.forEach(p=>{if(p.fix){p.x=p.ox;p.y=p.oy;return}p.x+=(p.ox-p.x)*.04;p.y+=(p.oy-p.y)*.04;p.y=Math.min(p.y,cy-4)})}
+  geo.R=R}
+ const RP=geo.R;
+ const seat=(m,col,op=1,g="")=>{const p=RP.get(m),k=p.sz,x=Math.round(p.x-k/2),y=Math.round(p.y-k/2),d=g!==""?`data-g="${g}" `:"";
+  return m.t?`<rect ${d}x="${x}" y="${y}" width="${k}" height="${k}" fill="${col}" opacity="${op}"></rect>`:`<rect ${d}x="${x+.75}" y="${y+.75}" width="${k-1.5}" height="${k-1.5}" fill="var(--board)" stroke="${col}" stroke-width="1.5" opacity="${op}"></rect>`};
+ const fm=V==="day"?active.m:V==="mps"?focusMp:live.m;let o=bench;
+ mps.forEach(m=>{const p=posOf.get(m);
+  if(LIVE)o+=seat(m,SH[m.g],1);
+  else if(V==="groups"){const any=selG!==null||popFor==="bench",lead=m===SPK||/^Потпредседник/.test(m.role||""),hl=popFor==="bench"?lead:(!any||selG===m.g);o+=hl?sq(p,any?s*1.15:s,popFor==="bench"?"var(--ink)":SH[m.g],1,m.g):sq(p,s*.85,"var(--seat)",1,m.g)}
+  else if(V==="mps")o+=m===fm?"":sq(p,s,SH[m.g],m.g===fm.g?.75:.25);
+  else{const f=m.t/maxT;o+=m===fm?"":(m.t?sq(p,s*(.7+.8*Math.sqrt(f)),SH[m.g]):sq(p,s*.45,"var(--seat)"))}});
+
+ const ap=LIVE?RP.get(fm):posOf.get(fm);
+ if(V!=="groups"&&!LIVE)o+=sq({x:ap.x,y:ap.y},s*2,SH[fm.g]);
+ const k=Math.round(LIVE?RP.get(fm).sz+8:V==="groups"?s+8:s*2+8);if(V!=="groups")o+=`<rect x="${Math.round(ap.x-k/2)}" y="${Math.round(ap.y-k/2)}" width="${k}" height="${k}" fill="none" stroke="var(--ink)" stroke-width="1.5"></rect>`;
+ svg.innerHTML=o;
+ if(V==="groups"){
+  tip.style.visibility="hidden";placeFocus();return;
+  if(selG===null){return}
+  const bl=blocks[selG],c=bl[Math.floor(bl.length/2)];
+  tip.innerHTML=`<span>${groups[selG][2]} ${groups[selG][2]===1?"mesto":groups[selG][2]<5?"mesta":"mesta"}</span><b>${groups[selG][0]}</b>`;apply(tip);tip.style.visibility="visible";
+  const bw=tip.offsetWidth,bh=tip.offsetHeight;tip.style.left=Math.min(Math.max(c.x-bw/2,8),W-bw-8)+"px";let y=c.y-bh-12;if(y<6)y=c.y+12;tip.style.top=y+"px";return}
+ tip.style.visibility="visible";
+ const head=LIVE?"govori sada":V==="day"?(active.live?"govori":hm(active.t)+"  "+dur(active.d)):groups[fm.g][1];
+ tip.innerHTML=`<span>${head}</span><b>${fm.name}</b>${LIVE?groups[fm.g][1]:V==="day"?active.l:(V1?"":fm.t?dur(fm.t)+" danas":"danas nije govorio")}`;apply(tip);
+ const bw=tip.offsetWidth,bh=tip.offsetHeight;let x=Math.min(Math.max(ap.x-bw/2,8),W-bw-8),y=ap.y-bh-k/2-6;if(y<6)y=ap.y+k/2+6;tip.style.left=x+"px";tip.style.top=y+"px";
+}
+const SALA={el:hall,svg,tip,geo,live:false};
+const hallRO=new ResizeObserver(()=>drawMap());hallRO.observe(hall);
+
+/* sastav panel: a plain list; details open in a small window */
+let selG=null;
+const pct=x=>x<.01?"<1%":Math.round(x*100)+"%";
+const pop=$("#pop");
+function renderSastav(){
+ const el=$("#vGroups");
+ el.innerHTML=`<div class="barwrap"><div class="bar100">${groups.map((g,i)=>`<i style="width:${g[2]/2.5}%;background:${SH[i]};opacity:${selG===null||selG===i?1:.3}"></i>`).join("")}</div></div>
+ <div class="plist2">${groups.map((g,i)=>`<button type="button" class="prow" data-g="${i}" aria-expanded="${selG===i}" aria-controls="pop"><i style="width:12px;height:12px;background:${SH[i]}"></i><span>${g[0]}</span><span class="num">${g[2]}</span><span class="chev" aria-hidden="true">›</span></button>`).join("")}
+ <button type="button" class="prow" data-bench="1"><i style="width:12px;height:12px;background:var(--ink)"></i><span>Predsedništvo</span><span class="num"></span><span class="chev" aria-hidden="true">›</span></button></div>`;
+ apply(el);
+}
+const roleOf=m=>((m.pg||"").match(/\(([^)]+)\)\s*$/)||[])[1]||"";
+const pgName=m=>(m.pg||"").replace(/\s*\([^)]*\)\s*$/,"").replace(/^Посланичка група\s*/,"").replace(/[„“”"]/g,"");
+const lat=x=>[...(x||"")].map(c=>({А:"A",Б:"B",В:"V",Г:"G",Д:"D",Ђ:"Đ",Е:"E",Ж:"Ž",З:"Z",И:"I",Ј:"J",К:"K",Л:"L",Љ:"Lj",М:"M",Н:"N",Њ:"Nj",О:"O",П:"P",Р:"R",С:"S",Т:"T",Ћ:"Ć",У:"U",Ф:"F",Х:"H",Ц:"C",Ч:"Č",Џ:"Dž",Ш:"Š"}[c]??({а:"a",б:"b",в:"v",г:"g",д:"d",ђ:"đ",е:"e",ж:"ž",з:"z",и:"i",ј:"j",к:"k",л:"l",љ:"lj",м:"m",н:"n",њ:"nj",о:"o",п:"p",р:"r",с:"s",т:"t",ћ:"ć",у:"u",ф:"f",х:"h",ц:"c",ч:"č",џ:"dž",ш:"š"}[c]??c))).join("");
+function realGroup(mem){
+ const by=new Map();mem.forEach(m=>{const k=pgName(m)||"";if(!by.has(k))by.set(k,[]);by.get(k).push(m)});
+ return [...by.entries()].map(([k,list])=>{const pres=list.find(m=>/^председник/.test(roleOf(m))),dep=list.find(m=>/заменик/.test(roleOf(m)));
+  return `<div class="sec"><span class="lab">${k?"Poslanička grupa":"Bez poslaničke grupe"}</span>${k?`<div class="r"><span>Naziv</span><span>${lat(k)}</span></div>`:""}${pres?`<div class="r"><span>Predsednik</span><span>${pres.name}</span></div>`:""}${dep?`<div class="r"><span>Zamenik</span><span>${dep.name}</span></div>`:""}${by.size>1||!k?`<div class="r"><span>Poslanika</span><span>${list.length}</span></div>`:""}</div>`}).join("");
+}
+function groupPop(i){
+ const g=groups[i],L=V1?null:LEAD[i],mem=mps.filter(m=>m.g===i),tk=talks.filter(t=>t.m.g===i),tT=tk.reduce((a,t)=>a+t.d,0);
+ const top=[...mem].filter(m=>m.t).sort((a,b)=>b.t-a.t).slice(0,3),silent=mem.filter(m=>!m.t).length;
+ return `<div class="phd"><i style="width:12px;height:12px;background:${SH[i]}"></i><h3>${g[0]}</h3><button type="button" class="x" aria-label="Zatvori">×</button></div>
+ ${V1?realGroup(mem):""}<div class="sec"${V1?" hidden":""}><span class="lab">Poslanička grupa</span>${L?`${L[2]?`<div class="r"><span>Naziv</span><span>${L[2]}</span></div>`:""}<div class="r"><span>Predsednik</span><span>${L[0]}</span></div><div class="r"><span>Zamenik</span><span>${L[1]}</span></div>`:`<span class="m">Još nije objavljeno</span>`}</div>
+ <div class="sec"${V1?" hidden":""}><span class="lab">Danas</span><div class="big"><div><span class="px">${tk.length}</span><span class="lab">govora</span></div><div><span class="px">${tT?dur(tT).replace(" min","m").replace(" h ","h "):"0"}</span><span class="lab">za govornicom</span></div><div><span class="px">${g[2]-silent}/${g[2]}</span><span class="lab">govorilo</span></div></div>
+ ${top.length?`<span class="lab" style="margin-top:6px">Najviše govorili</span>${top.map(m=>`<div class="r"><span>${m.name}</span><span class="m">${dur(m.t)}</span></div>`).join("")}`:`<span class="m">Danas niko nije govorio</span>`}</div>
+ <div class="sec"><details><summary>Izbori 2026</summary><div class="r"><span>Glasova</span><span>${VOTES[i].toLocaleString("sr-RS")}</span></div><div class="r"><span>Udeo glasova</span><span>${pct(VOTES[i]/VOTERS)}</span></div><div class="r"><span>Udeo mesta</span><span>${pct(g[2]/250)}</span></div></details></div>
+ <button type="button" class="b dark" data-members="${i}">Svi poslanici (${g[2]})</button>`;
+}
+function benchPop(){
+ if(V1){const sp=REAL.filter(r=>r.role).sort((a,b)=>(/^Председник/.test(b.role)?1:0)-(/^Председник/.test(a.role)?1:0)||a.l.localeCompare(b.l,"sr"));return `<div class="phd"><i style="width:12px;height:12px;background:var(--ink)"></i><h3>Predsedništvo</h3><button type="button" class="x" aria-label="Zatvori">×</button></div>
+ <div class="sec">${sp.length?sp.map(r=>`<div class="r"><span>${r.l}</span><span class="m">${lat(r.role).replace(/ Narodne skupštine.*$/,"")}</span></div>`).join(""):`<span class="m">Podaci uskoro</span>`}</div><div class="sec"><div class="r"><span>Mirjana Radaković</span><span class="m">Generalna sekretarka</span></div></div>`}
+ return `<div class="phd"><i style="width:12px;height:12px;background:var(--ink)"></i><h3>Predsedništvo</h3><button type="button" class="x" aria-label="Zatvori">×</button></div>
+ <div class="sec"><span class="lab">Predsednik Skupštine</span><div class="r"><span>Aleksandar Čupić</span><span class="m">kandidat Studentske liste</span></div></div>
+ <div class="sec"><span class="lab">Potpredsednici</span><span class="m">Biraju se na konstitutivnoj sednici</span></div>
+ <div class="sec"><span class="lab">Danas predsedava</span><span class="m">Prikazuje se tokom sednice</span></div>`;
+}
+let popFor=null;
+const plink=$("#plink");
+function placeFocus(){
+ if(popFor===null||pop.hidden||view!=="groups"){svg.style.transform="";plink.hidden=true;return}
+ const W=hall.clientWidth,H=hall.clientHeight,mob=innerWidth<=760;
+ const pts=popFor==="bench"?[geo.bench]:mps.filter(m=>m.g===popFor).map(m=>geo.pos.get(m));if(!pts||!pts.length)return;
+ let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,sx=0,sy=0;pts.forEach(p=>{x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y);sx+=p.x;sy+=p.y});
+ const c={x:sx/pts.length,y:sy/pts.length};
+ const pw=mob?0:Math.min(360,W-24),side=c.x<W/2?"right":"left";
+ let vH=H;if(mob){const t=pop.getBoundingClientRect().top-hall.getBoundingClientRect().top;vH=Math.max(80,Math.min(H,t))}
+ const f0=mob?0:side==="left"?pw+24:0,f1=mob?W:side==="left"?W:W-pw-24,fw=f1-f0,fx=(f0+f1)/2,fy=vH*.5;
+ const bw=Math.max(x1-x0,popFor==="bench"?geo.bench.w:18),bh=Math.max(y1-y0,18);
+ const z=Math.max(mob?.6:1,Math.min(2.6,fw*.72/bw,vH*.7/bh));
+ svg.style.transform=`translate(${(fx-z*c.x).toFixed(1)}px,${(fy-z*c.y).toFixed(1)}px) scale(${z.toFixed(3)})`;
+ if(mob){pop.style.left="";pop.style.top="";plink.hidden=true;return}
+ pop.style.left=(side==="left"?12:W-pw-12)+"px";
+ const ph=pop.offsetHeight,bH=board.clientHeight,top=Math.max(12,Math.min(fy-34,bH-ph-12));pop.style.top=top+"px";
+ const ly=Math.min(Math.max(fy,top+20),top+ph-20),edge=side==="left"?12+pw:W-pw-12,tx=fx+(side==="left"?-Math.min(bw*z/2,fw*.3):Math.min(bw*z/2,fw*.3));
+ plink.hidden=false;plink.classList.toggle("rev",side==="right");
+ const a=Math.min(edge,tx),b=Math.max(edge,tx);plink.style.left=a+"px";plink.style.width=Math.max(0,b-a-6)+"px";plink.style.top=ly+"px";
+ if(side==="right")plink.style.left=(a+6)+"px";
+}
+function openPop(what,anchor){popFor=what;pop.innerHTML=what==="bench"?benchPop():groupPop(what);apply(pop);pop.hidden=false;
+ selG=what==="bench"?null:what;renderSastav();drawMap();pop.querySelector(".x").focus({preventScroll:true})}
+function closePop(){if(pop.hidden)return;pop.hidden=true;popFor=null;selG=null;svg.style.transform="";plink.hidden=true;renderSastav();drawMap()}
+pop.addEventListener("click",e=>{if(e.target.closest(".x"))closePop();const m=e.target.closest("[data-members]");if(m){gFilter=+m.dataset.members;closePop();renderMps("");setView("mps")}});
+$("#vGroups").addEventListener("click",e=>{const b=e.target.closest(".prow");if(!b)return;const w=b.dataset.bench?"bench":+b.dataset.g;popFor===w?closePop():openPop(w)});
+svg.addEventListener("click",e=>{if(view!=="groups")return;if(e.target.closest("[data-bench]")){popFor==="bench"?closePop():openPop("bench");return}const r=e.target.closest("rect[data-g]");if(r){const g=+r.dataset.g;popFor===g?closePop():openPop(g)}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
+document.addEventListener("click",e=>{if(!pop.hidden&&!e.target.closest("#pop,.prow,#hallSvg"))closePop()});
+renderSastav();
+
+/* lens lists: the row in the middle is the focused one */
+function lens(list,onFocus){let raf=0,cur=null;
+ const pad=()=>{const p=Math.max(0,list.clientHeight/2-30)+"px";list.style.paddingTop=p;list.style.paddingBottom=p};
+ const run=()=>{raf=0;const r=list.getBoundingClientRect();if(!r.height)return;const mid=r.top+r.height/2;let best=null,bd=1e9;
+  for(const li of list.children){const b=li.getBoundingClientRect();if(b.bottom<r.top-80||b.top>r.bottom+80){li.style.setProperty("--f",0);continue}
+   const d=Math.abs(b.top+b.height/2-mid);li.style.setProperty("--f",Math.max(0,1-d/(r.height*.42)).toFixed(3));if(d<bd&&li.dataset.i){bd=d;best=li}}
+  if(best&&best!==cur){cur?.classList.remove("on");best.classList.add("on");cur=best;onFocus(best.dataset.i)}};
+ list.addEventListener("scroll",()=>{raf||(raf=requestAnimationFrame(run))},{passive:true});
+ list.addEventListener("click",e=>{const li=e.target.closest("li[data-i]");if(li)list.scrollTo({top:li.offsetTop-list.clientHeight/2+li.offsetHeight/2,behavior:reduce?"auto":"smooth"})});
+ const ro=new ResizeObserver(()=>{pad();run()});ro.observe(list);
+ return {run,center:i=>{const li=list.querySelector(`li[data-i="${i}"]`);if(li){list.scrollTop=li.offsetTop-list.clientHeight/2+li.offsetHeight/2;run()}}};
+}
+/* poslanici list */
+const fold=x=>tr(x).toLowerCase();
+const mpl=$("#mplist");
+let gFilter=null;
+const renderMps=q=>{const f=fold(q||"");const list=order.filter(m=>(gFilter===null||m.g===gFilter)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));
+ const fc=$("#fchip");fc.hidden=gFilter===null;if(gFilter!==null){fc.innerHTML=`<button type="button" aria-label="Ukloni filter"><i style="background:${SH[gFilter]}"></i>${groups[gFilter][0]}<span aria-hidden="true">×</span></button>`;apply(fc)}
+ mpl.innerHTML=list.length?list.map(m=>`<li data-i="${m.i}"><button type="button"><span class="ph" aria-hidden="true"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span><span><span class="nm">${m.name}</span><br><span class="g">${groups[m.g][1]}</span></span><span class="d">${m.t?dur(m.t):""}${m.w?`<span class="w">${m.w}</span>`:""}</span></button></li>`).join(""):`<li class="empty">Nema rezultata</li>`;apply(mpl);mpLens.run()};
+const mpLens=lens(mpl,i=>{focusMp=mps[i];if(view==="mps")drawMap()});
+$("#q").addEventListener("input",e=>{renderMps(e.target.value);mpl.scrollTop=0});
+$("#fchip").addEventListener("click",()=>{gFilter=null;renderMps($("#q").value);mpl.scrollTop=0});renderMps("");
+/* day timeline */
+const tl=$("#tl");
+tl.innerHTML=sp.map((s,i)=>s.pause?`<li class="pause"><button type="button" tabindex="-1"><span class="t">${hm(s.t)}</span><span class="m">Pauza</span><span class="d">1 h</span></button></li>`
+ :`<li data-i="${i}"><button type="button"><span class="t">${hm(s.t)}</span><span class="nm">${s.m.name}</span><span class="d">${s.live?'<i class="sq"></i>':dur(s.d)}</span><span class="l">${groups[s.m.g][1]}, ${s.l.charAt(0).toLowerCase()+s.l.slice(1)}${s.warn?", opomena":""}</span></button></li>`).join("");
+const dayLens=lens(tl,i=>{active=sp[i];if(view==="day")drawMap()});
+/* views */
+const setView=v=>{if(v!=="groups")closePop();view=v;board.dataset.view=v;$$("#salaSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v));
+ requestAnimationFrame(()=>{if(v==="mps"){mpl.scrollTop=0;mpLens.run()}if(v==="day"){if(!setView.d){dayLens.center(sp.indexOf(live));setView.d=1}dayLens.run()}drawMap()})};
+$$("#salaSeg button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+$$(".links a[data-v]").forEach(a=>a.addEventListener("click",()=>setView(a.dataset.v)));
+
+/* numbers: live fun cards (Uživo) + period card (Rang) */
+const totalT=mps.reduce((a,m)=>a+m.t,0);const SHMX=Math.max(...groups.map((g,gi)=>Math.max(g[2]/250,mps.filter(m=>m.g===gi).reduce((a,m)=>a+m.t,0)/totalT)));
+const shareCard=title=>`<h3>${title}<span class="keys"><span><i></i>mesta</span><span class="k2"><i></i>vreme</span></span></h3>${groups.map((g,gi)=>{const s=g[2]/250,tt=mps.filter(m=>m.g===gi).reduce((a,m)=>a+m.t,0)/totalT;return `<div class="sr"><span>${g[1]}</span><span class="tr"><i class="a" style="width:${s/SHMX*100}%"></i><i class="b2" style="width:${tt/SHMX*100}%;background:${SH[gi]}"></i></span><span class="v2">${Math.round(s*100)} / ${Math.round(tt*100)}%</span></div>`}).join("")}`;
+if(!V1){const byT=[...mps].filter(m=>m.t).sort((a,b)=>b.t-a.t),lg=[...talks].filter(t=>!t.live).sort((a,b)=>b.d-a.d)[0],
+  warnT=talks.filter(t=>t.warn),rep=talks.filter(t=>/^Replika/.test(t.l)),repBy=new Map();rep.forEach(t=>repBy.set(t.m,(repBy.get(t.m)||0)+1));
+  const topRep=[...repBy.entries()].sort((a,b)=>b[1]-a[1])[0];
+  const big=v=>String(v).replace(" min","m").replace(" h ","h ");
+  const who=m=>`<span class="g"><i style="background:${SH[m.g]}"></i>${groups[m.g][1]}</span>`;
+  
+  $("#dayLen").innerHTML='<i class="sq"></i>u toku';
+  $("#liveCards").innerHTML=[
+   `<article class="lc wide kpi4">${KP.map(([a,v])=>`<div><span>${a}</span><b>${v}</b></div>`).join("")}</article>`,
+   `<article class="lc wide"><h3>Sala danas<span class="keys"><span><i class="ho"></i>nije govorio</span><span><i></i>govorio, veće = duže</span></span></h3><div class="lfig" id="lhall"><svg id="lhallSvg" role="img" aria-label="Ko je danas govorio u sali"></svg><div class="tip" id="ltip"></div></div></article>`,
+   `<article class="lc"><h3>Najviše govori</h3><div class="hero2"><b>${byT[0].name}</b><span class="px">${big(dur(byT[0].t))}</span>${who(byT[0])}</div><ol>${byT.slice(1,4).map((m,j)=>`<li><span class="n">${j+2}</span><i style="background:${SH[m.g]}"></i><span>${m.name}</span><span class="val">${dur(m.t)}</span></li>`).join("")}</ol></article>`,
+   `<article class="lc"><h3>Najduži govor</h3><div class="hero2"><b>${lg.m.name}</b><span class="px">${big(dur(lg.d))}</span>${who(lg.m)}</div><p class="m">u ${hm(lg.t)}, ${lg.l.charAt(0).toLowerCase()+lg.l.slice(1)}</p></article>`,
+   `<article class="lc"><h3>Opomene danas</h3><div class="hero2"><span class="px">${warnT.length}</span></div><ol>${warnT.slice(0,4).map(t=>`<li><span class="n">${hm(t.t)}</span><i style="background:${SH[t.m.g]}"></i><span>${t.m.name}</span><span class="val"></span></li>`).join("")}</ol></article>`,
+   `<article class="lc"><h3>Replike danas</h3><div class="hero2"><span class="px">${rep.length}</span></div>${topRep?`<p class="m">Najviše: ${topRep[0].name} (${topRep[1]} ${topRep[1]===1?"replika":"replike"})</p>`:""}</article>`
+  ].join("");}
+if(!V1){const LIVEMAP={el:$("#lhall"),svg:$("#lhallSvg"),tip:$("#ltip"),geo:{},live:true};
+const lhRO=new ResizeObserver(()=>drawMap(LIVEMAP));lhRO.observe(LIVEMAP.el);}
+
+/* tabs (phones) */
+const setTab=t=>{document.body.dataset.tab=t;$$(".tabbar button").forEach(b=>b.toggleAttribute("aria-current",b.dataset.tab===t));$$(".tabbar button[aria-current]").forEach(b=>b.setAttribute("aria-current","page"));scrollTo(0,0);store.set("tab",t);if(t==="sala")requestAnimationFrame(()=>{drawMap();mpLens.run()})};
+$$(".tabbar button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+setTab("live");
+/* rang liste */
+if(!V1){const cnt=f=>{const c=new Map();talks.forEach(t=>{if(f(t))c.set(t.m,(c.get(t.m)||0)+1)});return c};
+ const fromMap=(m,fmt)=>[...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5).map(([mp,v])=>({mp,v:fmt(v)}));
+ const longest=[...talks].filter(t=>!t.live).sort((a,b)=>b.d-a.d).slice(0,5).map(t=>({mp:t.m,v:dur(t.d),sub:"u "+hm(t.t)}));
+ const AW=[
+  ["Najviše za govornicom",fromMap(new Map(mps.filter(m=>m.t).map(m=>[m,m.t])),dur)],
+  ["Najviše opomena",fromMap(new Map(mps.filter(m=>m.w).map(m=>[m,m.w])),v=>v)],
+  ["Najviše javljanja",fromMap(cnt(()=>true),v=>v)],
+  ["Najduži govor",longest],
+  ["Najviše replika",fromMap(cnt(t=>/^Replika/.test(t.l)),v=>v)],
+  ["Najviše povreda Poslovnika",fromMap(cnt(t=>/Poslovnika/.test(t.l)),v=>v)]];
+ const big=v=>String(v).replace(" min","m").replace(" h ","h ");
+ $("#awards").innerHTML=AW.map(([title,list])=>{const w=list[0];return `<article class="aw"><div class="t">${I_TROPHY}${title}</div>${w?`<div class="top"><b>${w.mp.name}</b><span class="px">${big(w.v)}</span><span class="g"><i style="background:${SH[w.mp.g]}"></i>${groups[w.mp.g][1]}${w.sub?", "+w.sub:""}</span></div><ol>${list.slice(1).map((x,j)=>`<li><span class="n">${j+2}</span><i style="background:${SH[x.mp.g]}"></i><span>${x.mp.name}</span><span class="val">${x.v}</span></li>`).join("")}</ol>`:`<p class="m">Još nema podataka</p>`}</article>`}).join("");
+ $$("#rangSeg button").forEach(b=>b.onclick=()=>$$("#rangSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b)));
+}
+/* mutes: one shared set (live bar, Govornici tab, Profil) */
+const muted=new Set();
+function renderMuteUI(){
+ const b=$("#mute"),on=muted.has(live.m);b.setAttribute("aria-pressed",on);b.innerHTML=on?I_POFF:I_PON;b.title=on?"Utišan kad god govori. Klikni da ga ponovo čuješ.":"Utišaj ovog poslanika kad god govori";b.setAttribute("aria-label",(on?"Ponovo čuj ":"Utišaj kad god govori: ")+live.m.name);apply(b);
+ $("#mutedList").innerHTML=muted.size?[...muted].map(m=>`<span>${m.name}</span>`).join(""):'<span class="m" style="background:none;box-shadow:none;padding:0">Nema</span>';apply($("#mutedList"));
+ renderSpeakers();
+}
+const toggleMute=m=>{muted.has(m)?muted.delete(m):muted.add(m);try{localStorage.setItem("utisani",JSON.stringify([...muted].map(x=>x.name)))}catch(e){}renderMuteUI();if(typeof applyAudio==="function"){autoNow=undefined;applyAudio()}};
+$("#mute").onclick=()=>toggleMute(live.m);
+try{(JSON.parse(localStorage.getItem("utisani")||"[]")).forEach(n=>{const m=mps.find(x=>x.name===n);if(m)muted.add(m)})}catch(e){}
+/* govornici today */
+function renderSpeakers(){
+ const by=new Map();talks.forEach(t=>{const o=by.get(t.m)||{t:0,n:0};o.t+=t.d;o.n++;by.set(t.m,o)});
+ const list=[...by.entries()].sort((a,b)=>b[1].t-a[1].t);
+ $("#spkCount").textContent=list.length+" govornika danas";
+ const ua=$("#unmuteAll");ua.hidden=!muted.size;ua.textContent="Poništi ("+muted.size+")";
+ const mx=list.length?list[0][1].t:1;
+ $("#spkList").innerHTML=list.map(([m,o])=>`<li class="${muted.has(m)?"is-muted":""}${m===live.m?" now":""}"><i class="bar" style="background:${SH[m.g]}"></i><div class="nm"><span>${m.name}</span><small>${groups[m.g][1]}</small></div><span class="tm"><b>${dur(o.t)}</b><small>${o.n} ${o.n===1?"govor":o.n<5?"govora":"govora"}</small></span><i class="prog" style="width:${o.t/mx*100}%;background:${SH[m.g]}"></i><button type="button" class="mbtn" data-mi="${m.i}" aria-pressed="${muted.has(m)}" aria-label="${muted.has(m)?"Uključi zvuk za":"Utišaj"} ${m.name}">${muted.has(m)?I_SOFF:I_SON}</button></li>`).join("");
+ apply($("#p-tok"));
+}
+$("#spkList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]");if(b)toggleMute(mps[b.dataset.mi])});
+$("#unmuteAll").onclick=()=>{muted.clear();try{localStorage.removeItem("utisani")}catch(e){}renderMuteUI();if(typeof applyAudio==="function"){autoNow=undefined;applyAudio()}};
+renderMuteUI();
+
+/* arhiva: every sitting day, newest first */
+if(!V1){const today={n:3,date:"Čet 19. nov",title:"Prva sednica, 3. dan",live:true};
+ const spoke=new Set(talks.map(t=>t.m)),tops=[...new Map(talks.map(t=>[t.m,t.m.t])).entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
+ const DAYS=[
+  {...today,k:[["Trajanje",dur(elapsed)],["Govori",talks.length],["Govornici",spoke.size],["Opomene",talks.filter(t=>t.warn).length]],
+   ag:[["Predlog zakona o lokalnim putevima","u raspravi"],["Predlog zakona o budžetskom sistemu","sledi"]],votes:[],
+   top:tops.map(([m,t])=>[m,dur(t)]),video:"u toku",steno:"stiže sutra"},
+  {n:2,date:"Sre 18. nov",title:"Prva sednica, 2. dan",k:[["Trajanje","6 h 10 min"],["Govori",58],["Govornici",41],["Opomene",2]],
+   ag:[["Izbor potpredsednika Narodne skupštine","usvojeno"],["Imenovanje generalnog sekretara","usvojeno"],["Izbor članova radnih tela","odloženo"]],
+   votes:[["Izbor potpredsednika",[143,98,0,9]],["Imenovanje generalnog sekretara",[141,0,97,12]]],
+   top:mps.filter(m=>m.t).slice(0,5).map((m,i)=>[m,(42-i*6)+" min"]),video:"ceo dan",steno:"privremena"},
+  {n:1,date:"Uto 17. nov",title:"Konstitutivna sednica",k:[["Trajanje","7 h 5 min"],["Govori",34],["Govornici",27],["Opomene",0]],
+   ag:[["Potvrđivanje mandata narodnih poslanika","usvojeno"],["Izbor predsednika Narodne skupštine","usvojeno"],["Izbor potpredsednika","nastavak 18. nov"]],
+   votes:[["Izbor predsednika Narodne skupštine",[142,0,0,108]]],
+   top:mps.filter(m=>m.t).slice(5,10).map((m,i)=>[m,(38-i*5)+" min"]),video:"ceo dan",steno:"autorizovana"}];
+ let cur=0;const dv=$("#dayview");
+ const VC=["var(--ink)","var(--mute)","var(--seat)"];
+ const vote=([t,[za,pr,uz,ng]])=>{const tot=za+pr+uz+ng;return `<div class="vote"><span>${t}</span><div class="vbar"><i style="width:${za/tot*100}%;background:var(--ink)"></i><i style="width:${pr/tot*100}%;background:var(--mute)"></i><i style="width:${uz/tot*100}%;background:var(--mute2)"></i></div><div class="vleg"><span>Za ${za}</span><span>Protiv ${pr}</span><span>Uzdržano ${uz}</span><span>Nije glasalo ${ng}</span><span>${za>=126?"Usvojeno":"Odbijeno"}</span></div></div>`};
+ function renderDays(){$("#days").innerHTML=DAYS.map((d,i)=>`<li><button type="button" data-d="${i}" aria-current="${i===cur}"><span class="n">${d.n}.</span><span class="d">${d.date}</span><span class="s">${d.title}</span><span class="st">${d.live?'<i class="sq"></i>uživo':d.k[0][1]}</span></button></li>`).join("");apply($("#days"))}
+ function renderDay(){const d=DAYS[cur];
+  dv.innerHTML=`<div class="dv-h"><div><button type="button" class="b light dv-back" id="dvBack">‹ Arhiva</button><h3>${d.n}. dan  ${d.date}</h3><p>${d.title}${d.live?", u toku":""}</p></div>${d.live?'<span class="chip"><i class="sq"></i>Uživo</span>':""}</div>
+  <div class="dv-k">${d.k.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join("")}</div>
+  <div class="dv-g"><div class="dv-s"><h4>Dnevni red</h4><ol class="ag">${d.ag.map(([t,st])=>`<li><span>${t}</span><span class="tagx${st==="usvojeno"?" ok":""}">${st}</span></li>`).join("")}</ol></div>
+  <div class="dv-s"><h4>Glasanja</h4>${d.votes.length?d.votes.map(vote).join(""):'<p class="m" style="font-size:15px">Danas još nije bilo glasanja</p>'}</div>
+  <div class="dv-s"><h4>Najviše govorili</h4><ol class="tops">${d.top.map(([m,v])=>`<li><i style="background:${SH[m.g]}"></i><span>${m.name}</span><span class="v">${v}</span></li>`).join("")}</ol></div>
+  <div class="dv-s"><h4>Zapis</h4><div class="vleg" style="font-size:15px;display:grid;gap:4px"><span>Snimak: ${d.video}</span><span>Stenografska beleška: ${d.steno}</span></div><div class="dv-links" style="margin-top:10px"><a class="b light" href="#sala" id="dvTok">Tok dana</a><a class="b light" href="#">Snimak</a><a class="b light" href="#">Beleška</a></div></div></div>`;
+  apply(dv);const bk=$("#dvBack");if(bk)bk.onclick=()=>{dv.hidden=true};
+  $("#dvTok").onclick=e=>{if(innerWidth<=760){e.preventDefault();dv.hidden=true;setTab("sala")}setView("day")}}
+ $("#days").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(!b)return;cur=+b.dataset.d;renderDays();renderDay();dv.hidden=false;if(innerWidth>760)dv.scrollIntoView({block:"nearest",behavior:reduce?"auto":"smooth"})});
+ renderDays();renderDay();if(innerWidth<=760)dv.hidden=true;
+}
+/* mini player: when the live window scrolls away on larger screens, the video keeps playing in a corner */
+{const vb=$("#vbox");let closed=false;
+ const io2=new IntersectionObserver(e=>{const out=!e[0].isIntersecting&&e[0].boundingClientRect.top<0;vb.classList.toggle("mini",out&&!closed&&innerWidth>760);if(!out)closed=false},{threshold:0});
+ io2.observe(vb);$("#vx").onclick=()=>{closed=true;vb.classList.remove("mini")};}
+/* fullscreen with chat beside the stream */
+{const b=$("#vfs");
+ const set=on=>{document.body.classList.toggle("theater",on);b.setAttribute("aria-pressed",on);b.innerHTML=on?I_FSX:I_FS;b.setAttribute("aria-label",on?"Izađi iz celog ekrana":"Ceo ekran sa razgovorom");$("#vbox").classList.remove("mini");
+  if(on){try{const p=document.documentElement.requestFullscreen?.();p&&p.then(()=>screen.orientation?.lock?.("landscape").catch(()=>{})).catch(()=>{})}catch(e){}}
+  else{try{document.fullscreenElement&&document.exitFullscreen();screen.orientation?.unlock?.()}catch(e){}}};
+ b.onclick=()=>set(!document.body.classList.contains("theater"));
+ document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("theater"))set(false)});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("theater"))set(false)});}
+/* live player + mute engine
+   - plays @ParlamentSrbija live through YouTube's IFrame Player API (YouTube's player is never covered)
+   - the speaker feed is a timeline in STREAM time: [{from, to, mp}] (seconds of the live stream).
+     Each viewer compares it with their OWN playback position, so muting stays exact even if they lag, pause or rewind.
+   - in production the timeline comes from our Worker (/api/live/speakers, refreshed every few seconds);
+     in this draft it falls back to the sample "now speaking". */
+const CH="UCghngrfQwzJ4aaPZ-UgNIZQ",PAD_IN=.8,PAD_OUT=1.2;
+let yt=null,ytReady=false,userMuted=false,vol=100,TL=[],autoNow=null,onceUnmuted=null;
+const speakerAt=t=>{if(TL.length&&t!=null){for(let i=TL.length-1;i>=0;i--){const x=TL[i];if(t>=x.from-PAD_IN&&t<=(x.to==null?1e12:x.to)+PAD_OUT)return x.mp}return null}return live.m};
+function applyAudio(){
+ let t=null;try{t=ytReady?yt.getCurrentTime():null}catch(e){}
+ const sp=speakerAt(t);if(onceUnmuted&&sp!==onceUnmuted)onceUnmuted=null;
+ const auto=sp&&muted.has(sp)&&onceUnmuted!==sp?sp:null;
+ if(auto!==autoNow){autoNow=auto;renderVstat()}
+ if(ytReady){try{(userMuted||auto)?yt.mute():yt.unMute();yt.setVolume(vol)}catch(e){}}
+}
+function renderVstat(){const m=autoNow||live.m,meta=$("#nowMeta"),bar=meta.closest(".vbar");$("#nowName").textContent=m.name;
+ meta.textContent=groups[m.g][1];bar.classList.toggle("auto",!!autoNow);apply(meta.parentElement)}
+$("#vmute").onclick=e=>{userMuted=!userMuted;const b=e.currentTarget;b.setAttribute("aria-pressed",userMuted);b.innerHTML=userMuted?I_SOFF:I_SON;b.setAttribute("aria-label",userMuted?"Uključi zvuk prenosa":"Isključi zvuk prenosa");applyAudio()};
+
+setInterval(applyAudio,250);
+async function pullTimeline(){try{const r=await fetch("/api/live/speakers",{cache:"no-store"});if(r.ok){const j=await r.json();TL=(j.segments||[]).map(x=>({from:x.from,to:x.to,mp:mps.find(m=>m.id===x.mp)||null})).filter(x=>x.mp)}}catch(e){}}
+setInterval(pullTimeline,4000);
+renderVstat();
+$("#play").onclick=()=>{const v=$("#video"),f=document.createElement("iframe");
+ f.id="ytp";f.src="https://www.youtube-nocookie.com/embed/live_stream?channel="+CH+"&autoplay=1&playsinline=1&rel=0&enablejsapi=1&origin="+encodeURIComponent(location.origin);
+ f.title="Prenos Narodne skupštine";f.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";f.referrerPolicy="strict-origin-when-cross-origin";
+ $("#play").remove();v.appendChild(f);
+ const hook=()=>{try{yt=new YT.Player("ytp",{events:{onReady:()=>{ytReady=true;applyAudio()}}})}catch(e){}};
+ if(window.YT&&YT.Player)hook();else{window.onYouTubeIframeAPIReady=hook;const sc=document.createElement("script");sc.src="https://www.youtube.com/iframe_api";document.head.appendChild(sc)}};
+/* v1: what's live now */
+if(V1){$("#heroLead").textContent="Pratite sednice uživo i upoznajte svih 250 narodnih poslanika.";$("#heroAlt").href="#sala";$("#heroAlt").textContent="Poslanici";
+ $("#salaNote").textContent="Podaci: parlament.gov.rs. Raspored je približan: Studentska lista levo od predsedavajućeg, manjinske liste u sredini, Srbija pobeđuje desno. Predsednik Skupštine sedi za predsedničkim stolom.";setTab(innerWidth<=760?"sala":"live")}
+{const f=$("#cform"),st=$("#cstat");if(f)f.addEventListener("submit",async e=>{e.preventDefault();const b=f.querySelector("button[type=submit]");b.disabled=true;st.textContent="Šaljem…";apply(st);
+ try{const r=await fetch("/api/contact",{method:"POST",body:new FormData(f)});const j=await r.json();st.textContent=j.ok?"Hvala, poruka je poslata.":j.err==="limit"?"Previše poruka danas, pokušajte sutra.":"Poruka nije poslata. Proverite tekst.";if(j.ok)f.reset()}catch(err){st.textContent="Poruka nije poslata. Pokušajte ponovo."}
+ apply(st);b.disabled=false})}
+/* boot */
+setMode(store.get("tema")||(root.dataset.theme==="dark"||(!root.dataset.theme&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"));
+if(store.get("pismo")==="cyr")setScript("cyr");
+
+}
+</script>
+</body>
+</html>
