@@ -34,6 +34,17 @@ async function checkPw(pw, stored) {
   return !!salt && (await hashPw(pw, salt)) === stored;
 }
 
+/** Google popup sign-in gives an access token: check with Google that it was issued to our app, then read the account. */
+async function verifyAccessToken(token, env) {
+  const t = String(token || "");
+  if (!t || t.length > 4096 || !env.GOOGLE_CLIENT_ID) return null;
+  const info = await (await fetch("https://oauth2.googleapis.com/tokeninfo?access_token=" + encodeURIComponent(t))).json();
+  if (info.aud !== env.GOOGLE_CLIENT_ID || !info.sub || !info.email || String(info.email_verified) !== "true") return null;
+  const me = await (await fetch("https://openidconnect.googleapis.com/v1/userinfo", { headers: { authorization: "Bearer " + t } })).json().catch(() => ({}));
+  if (me.sub && me.sub !== info.sub) return null;
+  return { email: String(info.email).toLowerCase(), sub: String(info.sub), name: me.given_name || me.name || "" };
+}
+
 const pub = (u) => u && { id: u.id, name: u.name, color: u.color, email: u.email, google: !!u.sub };
 
 /** The signed-in user (row from users), or null. */
@@ -87,7 +98,7 @@ export async function authRoute(req, env, u, p, checkName) {
 
   // Google: an existing account signs in; a new one gets a short ticket and picks a name and colour next.
   if (p === "/api/auth/google") {
-    const g = await verifyGoogleToken(body.credential, env).catch(() => null);
+    const g = body.access_token ? await verifyAccessToken(body.access_token, env).catch(() => null) : await verifyGoogleToken(body.credential, env).catch(() => null);
     if (!g) return json({ ok: false, err: "google" }, 400);
     let user = await env.DB.prepare("SELECT * FROM users WHERE sub=?").bind(g.sub).first();
     if (!user) {

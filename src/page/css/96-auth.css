@@ -27,4 +27,7 @@
 .cjoin:active{transform:translateY(1px)}
 .cjoin .gpx{width:20px;height:20px;padding:4px;box-sizing:content-box;border-radius:6px;background:#fff;flex:none}
 .cjoin[hidden],.cbox[hidden],.cme[hidden],#cacct[hidden],#authPw[hidden],.aemail[hidden]{display:none!important}
-.aemail{align-self:center;background:none;border:0;padding:6px;font-size:14px;text-decoration:underline;cursor:pointer;color:var(--mute)}
+.adlg h3.act{text-align:center;margin:4px 0 8px}
+.agoogle{margin-top:4px}
+.or span{padding:0 2px}
+.aemail{align-self:center;background:none;border:0;padding:8px;font:inherit;font-size:15px;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}

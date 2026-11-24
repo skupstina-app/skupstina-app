@@ -60,11 +60,14 @@ function signedIn(u){me=u;close();ui();reconnect()}
 function openAuth(){if(me)return;step("start");$("#authPw").hidden=true;$("#aEmailT").hidden=false;show();loadGsi()}
 /* the Google button should be ready the moment someone taps "Napravi nalog": load Google's script once the chat is on screen */
 let pre=false;function preloadGsi(){if(pre)return;pre=true;new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();loadGsi()}}).observe($("#compose"))}
+/* Google: our own button opens Google's sign-in popup; the server checks the token with Google */
+let gClient=null;
 function loadGsi(){if(gsiReady||!clientId)return;gsiReady=true;const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;
- s.onload=()=>{google.accounts.id.initialize({client_id:clientId,callback:async r=>{const j=await post("/api/auth/google",{credential:r.credential});
-   if(!j.ok){say(aErr,j.err||"google");return}if(j.user){signedIn(j.user);return}ticket=j.ticket;pendPw=null;openProfile(j.suggest||"")}});
-  google.accounts.id.renderButton($("#gsi"),{theme:"filled_black",size:"large",shape:"pill",text:"signup_with",width:320})};
+ s.onload=()=>{gClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:"openid email profile",callback:async r=>{
+   if(!r||!r.access_token){say(aErr,"google");return}const j=await post("/api/auth/google",{access_token:r.access_token});
+   if(!j.ok){say(aErr,j.err||"google");return}if(j.user){signedIn(j.user);return}ticket=j.ticket;pendPw=null;openProfile(j.suggest||"")}})};
  document.head.appendChild(s)}
+$("#aGoogle").onclick=()=>{say(aErr,"");if(gClient)gClient.requestAccessToken({prompt:"select_account"});else{loadGsi();say(aErr,"wait")}};
 function setColor(c){color=c;dlg.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.c===c));$("#aPrev").className="nt u"+c}
 function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
  $("#aName").value=edit?me.name:(suggest||"");setColor(edit?me.color:Math.floor(Math.random()*8));$("#aPrev").textContent=$("#aName").value||"Ime";
