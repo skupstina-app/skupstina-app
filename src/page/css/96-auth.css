@@ -25,6 +25,6 @@
 .cjoin{width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:12px;border:0;border-radius:10px;background:var(--btn);color:var(--btn-ink);font:500 16px/1 "Wix Madefor Text",sans-serif;cursor:pointer;box-shadow:var(--raise)}
 .cjoin:hover{filter:brightness(.96)}
 .cjoin:active{transform:translateY(1px)}
-.cjoin .gpx{width:20px;height:20px;padding:3px;box-sizing:content-box;border-radius:6px;background:#fff;flex:none}
+.cjoin .gpx{width:20px;height:20px;padding:4px;box-sizing:content-box;border-radius:6px;background:#fff;flex:none}
 .cjoin[hidden],.cbox[hidden],.cme[hidden],#cacct[hidden],#authPw[hidden],.aemail[hidden]{display:none!important}
 .aemail{align-self:center;background:none;border:0;padding:6px;font-size:14px;text-decoration:underline;cursor:pointer;color:var(--mute)}
