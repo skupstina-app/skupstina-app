@@ -26,7 +26,7 @@
 .cjoin:hover{filter:brightness(.96)}
 .cjoin:active{transform:translateY(1px)}
 .cjoin .gpx{width:20px;height:20px;padding:4px;box-sizing:content-box;border-radius:6px;background:#fff;flex:none}
-.cjoin[hidden],.cbox[hidden],.cme[hidden],#cacct[hidden],#authPw[hidden],.aemail[hidden]{display:none!important}
+.cjoin[hidden],.cbox[hidden],.cme[hidden],.anote[hidden],#authPw[hidden],.aemail[hidden]{display:none!important}
 .adlg h3.act{text-align:center;margin:4px 0 8px}
 .agoogle{margin-top:4px}
 .or span{padding:0 2px}
@@ -35,3 +35,4 @@
 .aseg{display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:10px;box-shadow:0 0 0 1px var(--line) inset;margin:6px 32px 6px 0}
 .aseg button{min-height:40px;border:0;border-radius:8px;background:none;color:var(--mute);font:inherit;font-size:15px;cursor:pointer}
 .aseg button[aria-pressed=true]{background:var(--btn);color:var(--btn-ink);font-weight:500}
+.anote{font-size:13px;margin:6px 0 0}

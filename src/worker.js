@@ -224,7 +224,7 @@ function adminPage(title, body, refresh) {
   return H("<!doctype html><meta charset=utf-8><meta name=robots content=noindex>" + (refresh ? '<meta http-equiv=refresh content="' + refresh + '">' : "") + "<title>" + title + '</title><body style="font:16px system-ui;padding:24px"><h1>' + title + "</h1>" + body, "text/html; charset=utf-8", { "cache-control": "no-store" });
 }
 __name(adminPage, "adminPage");
-// ---- chat (v0: open names, basic filter; login + full moderation later) ----
+// ---- chat: anyone reads; only registered accounts (D1 users) write. Name, colour and bans come from the account. ----
 var CHAT_KEEP = 1e3, CHAT_INIT = 80, CHAT_GAP = 3e3, CHAT_LEN = 300, REPORTS_TO_HIDE = 3;
 var LOOK = { "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "х": "x", "у": "y", "к": "k", "м": "m", "т": "t", "в": "b", "н": "h", "і": "i", "ј": "j" };
 var LEET = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b", "9": "g", "@": "a", "$": "s", "!": "i", "|": "i", "€": "e" };
@@ -267,6 +267,13 @@ function checkText(x) {
 __name(checkText, "checkText");
 var nameKey = /* @__PURE__ */ __name((n) => fold(n, false).replace(/[^a-z0-9]/g, ""), "nameKey");
 var RESERVED = /admin|moder|skupstin|sistem|system|official|zvanic|support|podrska/;
+/** banned_until in ms (written as ms; an ISO date also works) */
+function untilMs(v) {
+  if (!v) return 0;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : Date.parse(v) || 0;
+}
+__name(untilMs, "untilMs");
 function checkName(n) {
   n = (n || "").replace(/\s+/g, " ").trim();
   if (n.length < 2 || n.length > 20) return ["len", n];
@@ -287,17 +294,18 @@ var ChatRoom = class {
     this.sql = ctx.storage.sql;
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
     this.sql.exec("CREATE TABLE IF NOT EXISTS msgs(id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER, name TEXT, nk TEXT, text TEXT, ip TEXT, hidden INTEGER DEFAULT 0)");
-    this.sql.exec("CREATE TABLE IF NOT EXISTS reports(mid INTEGER, ip TEXT, at INTEGER, PRIMARY KEY(mid, ip))");
-    this.sql.exec("CREATE TABLE IF NOT EXISTS bans(ip TEXT PRIMARY KEY, until INTEGER, why TEXT)");
-    this.sql.exec("CREATE TABLE IF NOT EXISTS names(nk TEXT PRIMARY KEY, name TEXT, key TEXT, ip TEXT, seen INTEGER)");
-    this.sql.exec("CREATE INDEX IF NOT EXISTS names_key ON names(key)");
+    // reports are per account (rid = reporter's user id); the old per-IP name and ban tables are gone
+    this.sql.exec("DROP TABLE IF EXISTS names");
+    this.sql.exec("DROP TABLE IF EXISTS bans");
+    try { if (!this.q("SELECT 1 FROM pragma_table_info('reports') WHERE name='rid'").length) this.sql.exec("DROP TABLE IF EXISTS reports"); } catch (e) { }
+    this.sql.exec("CREATE TABLE IF NOT EXISTS reports(mid INTEGER, rid INTEGER, at INTEGER, PRIMARY KEY(mid, rid))");
     for (const c of ["color INTEGER", "uid INTEGER"]) try { this.sql.exec("ALTER TABLE msgs ADD COLUMN " + c); } catch (e) { }
   }
   q(sql, ...a) {
     return [...this.sql.exec(sql, ...a)];
   }
   pub(m) {
-    return { id: m.id, n: m.name, x: m.text, at: m.at, c: m.color ?? null };
+    return { id: m.id, n: m.name, x: m.text, at: m.at, c: m.color ?? null, u: m.uid ?? null };
   }
   send(ws, o) {
     try {
@@ -312,9 +320,12 @@ var ChatRoom = class {
     } catch (e) {
     }
   }
-  banned(ip) {
-    const b = this.q("SELECT until FROM bans WHERE ip=?", ip)[0];
-    return b && b.until > Date.now();
+  /** The writer's account, read fresh from D1 on every message (so a rename or a ban applies at once). */
+  user(uid) {
+    return uid ? this.env.DB.prepare("SELECT id,name,color,banned_until FROM users WHERE id=?").bind(uid).first() : null;
+  }
+  async banUser(uid, ms) {
+    await this.env.DB.prepare("UPDATE users SET banned_until=? WHERE id=?").bind(ms > 0 ? Date.now() + ms : 0, uid).run();
   }
   async countSoon() {
     if (!await this.ctx.storage.getAlarm()) await this.ctx.storage.setAlarm(Date.now() + 4e3);
@@ -323,13 +334,13 @@ var ChatRoom = class {
     this.all({ t: "v", n: this.ctx.getWebSockets().length });
   }
   async fetch(req) {
-    const u = new URL(req.url), ip = req.headers.get("x-ip") || "?";
+    const u = new URL(req.url);
     if (u.pathname === "/ws") {
       const [client, server] = Object.values(new WebSocketPair());
       this.ctx.acceptWebSocket(server);
       let user = null;
       try { user = JSON.parse(req.headers.get("x-user") || "null"); } catch (e) { }
-      server.serializeAttachment({ ip, uid: user?.id ?? null, name: user?.name ?? null, nk: user?.nk ?? null, color: user?.color ?? 0, ban: user?.banned || 0, last: 0, lastText: "" });
+      server.serializeAttachment({ uid: user?.id ?? null, last: 0, lastText: "" });
       // no history: a viewer sees the chat from the moment they join
       this.send(server, { t: "init", msgs: [], v: this.ctx.getWebSockets().length, me: user ? { name: user.name, color: user.color } : null });
       await this.countSoon();
@@ -337,7 +348,7 @@ var ChatRoom = class {
     }
     if (u.pathname === "/admin") {
       const rows = this.q("SELECT m.*, (SELECT COUNT(*) FROM reports r WHERE r.mid=m.id) rep FROM msgs m ORDER BY id DESC LIMIT 200");
-      const bans = this.q("SELECT * FROM bans WHERE until>? ORDER BY until DESC", Date.now());
+      const bans = (await this.env.DB.prepare("SELECT id,name,email,banned_until until FROM users WHERE CAST(banned_until AS INTEGER)>? ORDER BY banned_until DESC").bind(Date.now()).all()).results;
       return json({ rows, bans, online: this.ctx.getWebSockets().length });
     }
     if (u.pathname === "/admin/hide") {
@@ -347,13 +358,14 @@ var ChatRoom = class {
       return json({ ok: true });
     }
     if (u.pathname === "/admin/ban") {
-      const b = u.searchParams.get("ip"), h = +(u.searchParams.get("h") || 24);
+      const b = +u.searchParams.get("uid"), h = +(u.searchParams.get("h") || 24);
+      if (!b) return json({ ok: false }, 400);
+      await this.banUser(b, h * 36e5);
       if (h > 0) {
-        this.sql.exec("INSERT OR REPLACE INTO bans(ip,until,why) VALUES(?,?,?)", b, Date.now() + h * 36e5, "admin");
-        const ids = this.q("SELECT id FROM msgs WHERE ip=? AND hidden=0 AND at>?", b, Date.now() - 864e5).map((r) => r.id);
-        this.sql.exec("UPDATE msgs SET hidden=2 WHERE ip=? AND at>?", b, Date.now() - 864e5);
+        const ids = this.q("SELECT id FROM msgs WHERE uid=? AND hidden=0 AND at>?", b, Date.now() - 864e5).map((r) => r.id);
+        this.sql.exec("UPDATE msgs SET hidden=2 WHERE uid=? AND at>?", b, Date.now() - 864e5);
         if (ids.length) this.all({ t: "del", ids });
-      } else this.sql.exec("DELETE FROM bans WHERE ip=?", b);
+      }
       return json({ ok: true });
     }
     return new Response("not found", { status: 404 });
@@ -367,43 +379,22 @@ var ChatRoom = class {
       return;
     }
     const a = ws.deserializeAttachment() || {};
-    if (m.t === "join") return this.send(ws, { t: "err", code: "login" });
-    if (m.t === "join_old") {
-      const [err, name, nk] = checkName(m.name);
-      if (err) return this.send(ws, { t: "err", code: "name_" + err });
-      const key = typeof m.key === "string" && /^[a-f0-9]{32,64}$/.test(m.key) ? (await sha256(new TextEncoder().encode(m.key))).slice(0, 32) : null;
-      if (!key) return this.send(ws, { t: "err", code: "key" });
-      const now2 = Date.now();
-      this.sql.exec("DELETE FROM names WHERE seen<?", now2 - 90 * 864e5);
-      const own = this.q("SELECT key FROM names WHERE nk=?", nk)[0];
-      if (own && own.key !== key) return this.send(ws, { t: "err", code: "name_taken" });
-      if (!own) {
-        const recent = this.q("SELECT COUNT(*) n FROM names WHERE ip=? AND seen>?", a.ip, now2 - 36e5)[0].n;
-        if (recent >= 20) return this.send(ws, { t: "err", code: "name_many" });
-      }
-      this.sql.exec("DELETE FROM names WHERE key=? AND nk<>?", key, nk);
-      this.sql.exec("INSERT OR REPLACE INTO names(nk,name,key,ip,seen) VALUES(?,?,?,?,?)", nk, name, key, a.ip, now2);
-      a.name = name;
-      a.nk = nk;
-      ws.serializeAttachment(a);
-      return this.send(ws, { t: "ok", name });
-    }
     if (m.t === "msg") {
-      if (!a.uid) return this.send(ws, { t: "err", code: "login" });
-      if (this.banned(a.ip) || a.ban > Date.now()) return this.send(ws, { t: "err", code: "banned" });
+      const me = await this.user(a.uid);
+      if (!me) return this.send(ws, { t: "err", code: "login" });
+      if (untilMs(me.banned_until) > Date.now()) return this.send(ws, { t: "err", code: "banned" });
       const x = String(m.x || "").replace(/[\u0000-\u001f\u007f​-‏‪-‮⁠-⁤﻿]/g, " ").replace(/\s+/g, " ").trim();
       if (!x) return;
       if (x.length > CHAT_LEN) return this.send(ws, { t: "err", code: "long" });
       const now2 = Date.now();
       if (now2 - (a.last || 0) < CHAT_GAP) return this.send(ws, { t: "err", code: "fast" });
       if (x === a.lastText && now2 - a.last < 6e4) return this.send(ws, { t: "err", code: "dup" });
-      const perMin = this.q("SELECT COUNT(*) n FROM msgs WHERE ip=? AND at>?", a.ip, now2 - 6e4)[0].n;
+      const perMin = this.q("SELECT COUNT(*) n FROM msgs WHERE uid=? AND at>?", me.id, now2 - 6e4)[0].n;
       if (perMin >= 12) return this.send(ws, { t: "err", code: "fast" });
       const bad = checkText(x);
       if (bad) return this.send(ws, { t: "err", code: bad });
-      const row = this.q("INSERT INTO msgs(at,name,nk,text,ip,color,uid) VALUES(?,?,?,?,?,?,?) RETURNING *", now2, a.name, a.nk, x, a.ip, a.color, a.uid)[0];
+      const row = this.q("INSERT INTO msgs(at,name,text,color,uid) VALUES(?,?,?,?,?) RETURNING *", now2, me.name, x, me.color, me.id)[0];
       this.sql.exec("DELETE FROM msgs WHERE id<?", row.id - CHAT_KEEP);
-      this.sql.exec("UPDATE names SET seen=? WHERE nk=?", now2, a.nk);
       a.last = now2;
       a.lastText = x;
       ws.serializeAttachment(a);
@@ -411,15 +402,16 @@ var ChatRoom = class {
       return;
     }
     if (m.t === "report") {
-      const id = +m.id, msg = this.q("SELECT ip,hidden FROM msgs WHERE id=?", id)[0];
-      if (!msg || msg.hidden || msg.ip === a.ip) return;
-      this.sql.exec("INSERT OR IGNORE INTO reports(mid,ip,at) VALUES(?,?,?)", id, a.ip, Date.now());
+      if (!a.uid) return this.send(ws, { t: "err", code: "login" });
+      const id = +m.id, msg = this.q("SELECT uid,hidden FROM msgs WHERE id=?", id)[0];
+      if (!msg || msg.hidden || msg.uid === a.uid) return;
+      this.sql.exec("INSERT OR IGNORE INTO reports(mid,rid,at) VALUES(?,?,?)", id, a.uid, Date.now());
       const n = this.q("SELECT COUNT(*) n FROM reports WHERE mid=?", id)[0].n;
       if (n >= REPORTS_TO_HIDE) {
         this.sql.exec("UPDATE msgs SET hidden=1 WHERE id=?", id);
         this.all({ t: "del", ids: [id] });
-        const lost = this.q("SELECT COUNT(*) n FROM msgs WHERE ip=? AND hidden=1 AND at>?", msg.ip, Date.now() - 36e5)[0].n;
-        if (lost >= 3) this.sql.exec("INSERT OR REPLACE INTO bans(ip,until,why) VALUES(?,?,?)", msg.ip, Date.now() + 864e5, "reports");
+        const lost = this.q("SELECT COUNT(*) n FROM msgs WHERE uid=? AND hidden=1 AND at>?", msg.uid, Date.now() - 36e5)[0].n;
+        if (lost >= 3 && msg.uid) await this.banUser(msg.uid, 864e5);
       }
       this.sql.exec("DELETE FROM reports WHERE at<?", Date.now() - 7 * 864e5);
       return;
@@ -439,21 +431,18 @@ var ChatRoom = class {
 };
 function chatAdminPage(d, key) {
   const k = encodeURIComponent(key), t = /* @__PURE__ */ __name((ms) => new Date(ms).toISOString().slice(5, 16).replace("T", " "), "t");
-  const rows = d.rows.map((r) => "<tr" + (r.hidden ? ' style="opacity:.45"' : "") + "><td>" + t(r.at) + "</td><td><b>" + esc(r.name) + "</b></td><td>" + esc(r.text) + "</td><td>" + (r.rep || "") + "</td><td>" + (r.hidden ? '<a href="/admin/chat/hide?id=' + r.id + "&undo=1&key=" + k + '">vrati</a>' : '<a href="/admin/chat/hide?id=' + r.id + "&key=" + k + '">sakrij</a>') + ' \xB7 <a href="/admin/chat/ban?ip=' + r.ip + "&h=24&key=" + k + '">ban 24h</a> \xB7 <a href="/admin/chat/ban?ip=' + r.ip + "&h=720&key=" + k + '">30 dana</a></td></tr>').join("");
-  const bans = d.bans.map((b) => "<li>" + esc(b.ip) + " do " + t(b.until) + " (" + esc(b.why) + ') <a href="/admin/chat/ban?ip=' + b.ip + "&h=0&key=" + k + '">skini</a></li>').join("");
+  const rows = d.rows.map((r) => "<tr" + (r.hidden ? ' style="opacity:.45"' : "") + "><td>" + t(r.at) + "</td><td><b>" + esc(r.name) + "</b></td><td>" + esc(r.text) + "</td><td>" + (r.rep || "") + "</td><td>" + (r.hidden ? '<a href="/admin/chat/hide?id=' + r.id + "&undo=1&key=" + k + '">vrati</a>' : '<a href="/admin/chat/hide?id=' + r.id + "&key=" + k + '">sakrij</a>') + ' \xB7 <a href="/admin/chat/ban?uid=' + r.uid + "&h=24&key=" + k + '">ban 24h</a> \xB7 <a href="/admin/chat/ban?uid=' + r.uid + "&h=720&key=" + k + '">30 dana</a></td></tr>').join("");
+  const bans = d.bans.map((b) => "<li><b>" + esc(b.name) + "</b> (" + esc(b.email) + ") do " + t(untilMs(b.until)) + ' <a href="/admin/chat/ban?uid=' + b.id + "&h=0&key=" + k + '">skini</a></li>').join("");
   return adminPage("Razgovor", "<p>Na sajtu: " + d.online + "</p>" + (bans ? "<h3>Banovani</h3><ul>" + bans + "</ul>" : "") + '<table cellpadding=6 style="border-collapse:collapse;font-size:14px"><tr><th>Vreme</th><th>Ime</th><th>Poruka</th><th>Prijave</th><th></th></tr>' + rows + "</table>", 30);
 }
 __name(chatAdminPage, "chatAdminPage");
 async function chatRoute(req, env, u) {
-  const ip = req.headers.get("cf-connecting-ip") || "local";
-  const ipHash = (await sha256(new TextEncoder().encode(ip + "|chat|" + (env.SALT || "")))).slice(0, 16);
   const stub = env.CHAT.get(env.CHAT.idFromName("main"));
   const h = new Headers(req.headers);
-  h.set("x-ip", ipHash);
   h.delete("x-user");
   if (u.pathname === "/api/chat") {
     const user = await currentUser(req, env).catch(() => null);
-    if (user) h.set("x-user", JSON.stringify({ id: user.id, name: user.name, nk: user.nk, color: user.color, banned: user.banned_until || 0 }));
+    if (user) h.set("x-user", JSON.stringify({ id: user.id, name: user.name, color: user.color }));
   }
   return stub.fetch(new Request(new URL(u.pathname === "/api/chat" ? "/ws" : u.pathname.replace("/admin/chat", "/admin") + u.search, u.origin), { headers: h }));
 }

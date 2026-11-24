@@ -39,8 +39,14 @@ Map of this repo. Read this first, then open only the file you need.
 - Visitor accounts (`src/auth.js`, D1 `users`): Sign in with Google (same `GOOGLE_CLIENT_ID`) or email + password
   (PBKDF2). A new account picks a chat name (the chat's name rules, unique) and a colour 0-7 (`.u0`-`.u7`).
   Session cookie `sk_s` signed with `SALT`, 180 days. Routes `/api/auth/me|google|login|register|profile|logout`.
+- One account per email; chat names are unique per account (unique indexes on `users.email`, `users.nk`, `users.sub`,
+  created by `src/auth.js`). There are no other names: the old anonymous names (browser key + IP) are removed.
+- The name can be changed once every 15 days (`users.name_changed_at`, `NAME_DAYS` in auth.js; the first name at sign-up
+  doesn't count); colour any time. Name, colour and sign-out live in Profil, not under the chat box.
 - Chat (`ChatRoom` in worker.js, page `js/20-chat.js`): anyone can read; there is no history (a viewer sees messages
-  from when they open the page). Only signed-in users can post; the Worker passes the user to the room as `x-user`.
+  from when they open the page). Only signed-in users can post; the Worker passes the user id to the room as `x-user`,
+  and the room reads name, colour and `banned_until` (ms) from D1 `users` on every message. Rate limits, reports
+  and bans are per account (`/admin/chat/ban?uid=…`); 3 messages hidden by reports in an hour = 24 h ban.
 - Test locally: `npx wrangler dev --local --local-upstream localhost:8787` (needs `.dev.vars` with `SALT`, and the
   tables created with `wrangler d1 execute DB --local`).
 

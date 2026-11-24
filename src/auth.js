@@ -3,6 +3,7 @@
 // Session: cookie sk_s = "<user id>|<expiry ms>|<HMAC>" signed with the SALT secret, 180 days, HttpOnly.
 import { verifyGoogleToken } from "./admin.js";
 
+const NAME_DAYS = 15; // a chat name can be changed once every 15 days (colour any time)
 const COOKIE = "sk_s", DAYS = 180, TICKET_MIN = 15, PBKDF2_ITER = 100_000;
 const enc = new TextEncoder();
 const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -45,7 +46,9 @@ async function verifyAccessToken(token, env) {
   return { email: String(info.email).toLowerCase(), sub: String(info.sub), name: me.given_name || me.name || "" };
 }
 
-const pub = (u) => u && { id: u.id, name: u.name, color: u.color, email: u.email, google: !!u.sub };
+/** When the name can next be changed (ms), or 0 if it can be changed now. */
+const nameNext = (u) => { const t = Date.parse(u?.name_changed_at || "") + NAME_DAYS * 86400_000; return t > Date.now() ? t : 0; };
+const pub = (u) => u && { id: u.id, name: u.name, color: u.color, email: u.email, google: !!u.sub, nameNext: nameNext(u) };
 
 /** The signed-in user (row from users), or null. */
 export async function currentUser(req, env) {
@@ -77,6 +80,19 @@ const fail = (env, ip) => env.DB.batch([
   env.DB.prepare("DELETE FROM auth_fail WHERE at<?").bind(Date.now() - 86400_000),
 ]);
 
+/** One account per email, per chat name and per Google account: enforced by unique indexes (once per isolate). */
+let indexed = false;
+async function ensureIndexes(env) {
+  if (indexed) return;
+  for (const [n, c] of [["users_email", "email"], ["users_nk", "nk"], ["users_sub", "sub"]]) {
+    try { await env.DB.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS ${n} ON users(${c})`).run(); } catch (e) { console.log("index " + n + ": " + e.message); }
+  }
+  try { await env.DB.prepare("ALTER TABLE users ADD COLUMN name_changed_at TEXT").run(); } catch (e) { } // already there
+  indexed = true;
+}
+/** A unique-index error from D1 → our error code. */
+const clash = (e) => /UNIQUE/i.test(String(e?.message)) ? (/email/.test(e.message) ? "email_taken" : "name_taken") : null;
+
 /** Name and colour from a request body; returns [error code, name, name key, colour]. */
 function profileOf(body, checkName) {
   const [err, name, nk] = checkName(body.name);
@@ -95,6 +111,7 @@ export async function authRoute(req, env, u, p, checkName) {
   if (p === "/api/auth/logout") return json({ ok: true }, 200, { "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
   if (req.method !== "POST") return json({ ok: false }, 405);
   const ip = await ipKey(req, env);
+  await ensureIndexes(env);
 
   // Google: an existing account signs in; a new one gets a short ticket and picks a name and colour next.
   if (p === "/api/auth/google") {
@@ -146,8 +163,14 @@ export async function authRoute(req, env, u, p, checkName) {
     }
     if (await env.DB.prepare("SELECT 1 FROM users WHERE nk=?").bind(nk).first()) return json({ ok: false, err: "name_taken" }, 409);
     if (await env.DB.prepare("SELECT 1 FROM users WHERE email=?").bind(email).first()) return json({ ok: false, err: "email_taken" }, 409);
-    const user = await env.DB.prepare("INSERT INTO users(sub,email,pw,name,nk,color,created_at,created_ip,seen_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING *")
-      .bind(sub, email, pw, name, nk, color, now(), ip, now()).first();
+    let user;
+    try {
+      user = await env.DB.prepare("INSERT INTO users(sub,email,pw,name,nk,color,created_at,created_ip,seen_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING *")
+        .bind(sub, email, pw, name, nk, color, now(), ip, now()).first();
+    } catch (e) {
+      const c = clash(e); if (c) return json({ ok: false, err: c }, 409);
+      throw e;
+    }
     return json({ ok: true, user: pub(user) }, 200, { "set-cookie": await sessionCookie(env, user.id) });
   }
 
@@ -156,8 +179,16 @@ export async function authRoute(req, env, u, p, checkName) {
   if (p === "/api/auth/profile") {
     const [err, name, nk, color] = profileOf(body, checkName);
     if (err) return json({ ok: false, err }, 400);
+    const renamed = name !== user.name;
+    if (renamed && nameNext(user)) return json({ ok: false, err: "name_wait", next: nameNext(user) }, 429);
     if (nk !== user.nk && await env.DB.prepare("SELECT 1 FROM users WHERE nk=? AND id<>?").bind(nk, user.id).first()) return json({ ok: false, err: "name_taken" }, 409);
-    const row = await env.DB.prepare("UPDATE users SET name=?,nk=?,color=? WHERE id=? RETURNING *").bind(name, nk, color, user.id).first();
+    let row;
+    try {
+      row = renamed
+        ? await env.DB.prepare("UPDATE users SET name=?,nk=?,color=?,name_changed_at=? WHERE id=? RETURNING *").bind(name, nk, color, now(), user.id).first()
+        : await env.DB.prepare("UPDATE users SET color=? WHERE id=? RETURNING *").bind(color, user.id).first();
+    }
+    catch (e) { if (clash(e)) return json({ ok: false, err: "name_taken" }, 409); throw e; }
     return json({ ok: true, user: pub(row) });
   }
   return json({ ok: false }, 404);
