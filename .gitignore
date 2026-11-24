@@ -165,3 +165,6 @@ dist
 .env*
 !.env.example
 .wrangler/
+
+# built from src/page/ by build.mjs
+src/generated/

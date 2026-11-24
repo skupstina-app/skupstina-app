@@ -1,6 +1,7 @@
 {
   "name": "skupstina",
   "main": "src/worker.js",
+  "build": { "command": "node build.mjs" },
   "workers_dev": false,
   "preview_urls": false,
   "compatibility_date": "2026-11-01",
@@ -40,6 +41,9 @@
       "persist": true,
       "head_sampling_rate": 1
     }
+  },
+  "exports": {
+    "ChatRoom": { "type": "durable-object", "storage": "sqlite" }
   },
   "durable_objects": {
     "bindings": [

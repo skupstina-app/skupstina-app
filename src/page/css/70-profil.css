@@ -1,0 +1,8 @@
+/* profil */
+.plist{display:grid;gap:12px}
+.plist .pref .b{width:100%}
+.plist a.rowlink{display:flex;justify-content:space-between;padding:12px 2px;border-top:1px solid var(--line)}
+.plist a.rowlink:first-of-type{border-top:0}
+.muted{display:flex;flex-wrap:wrap;gap:6px}
+.muted span{font-size:14px;padding:4px 8px;border-radius:4px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+

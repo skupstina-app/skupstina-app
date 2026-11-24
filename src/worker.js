@@ -2,7 +2,8 @@ var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
 // src/worker.js
-import PAGE from "./index.html";
+import PAGE from "./generated/index.html";
+import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
 var PG = "https://www.parlament.gov.rs";
@@ -186,13 +187,13 @@ async function fonts(req, ctx, name) {
 }
 __name(fonts, "fonts");
 async function page(env, ctx, req) {
-  const row = await env.DB.prepare("SELECT v FROM assets WHERE name='index.html'").first().catch(() => null);
-  const ver = row ? "d" + row.v : "b" + (env.PAGE_V || "1");
+  // The page is built from src/page/ at deploy time (build.mjs); its content hash keys the cache,
+  // so every deploy that changes the page is served at once.
+  const ver = "h" + PAGE_HASH;
   const cache = caches.default, key = new Request(new URL(req.url).origin + "/__page_" + ver);
   let r = await cache.match(key);
   if (r) return r;
-  let html = PAGE;
-  if (row) html = (await env.DB.prepare("SELECT body FROM assets WHERE name='index.html'").first()).body;
+  const html = PAGE;
   const data = JSON.stringify(await mpsJson(env)).replace(/</g, "\\u003c");
   r = H(html.replace("/*MPS*/[]", data), "text/html; charset=utf-8", { "cache-control": "public, max-age=300" });
   ctx.waitUntil(cache.put(key, r.clone()));

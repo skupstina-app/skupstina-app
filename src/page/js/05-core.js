@@ -1,0 +1,12 @@
+/* script */
+const MAP={"Dž":"Џ","DŽ":"Џ","dž":"џ","Lj":"Љ","LJ":"Љ","lj":"љ","Nj":"Њ","NJ":"Њ","nj":"њ"};
+"abcčćdđefghijklmnoprsštuvzž".split("").forEach((c,i)=>{const y="абцчћдђефгхијклмнопрсштувзж"[i];MAP[c]=y;MAP[c.toUpperCase()]=y.toUpperCase()});
+const tr=s=>s.replace(/D[žŽ]|dž|L[jJ]|lj|N[jJ]|nj|./g,c=>MAP[c]??c);
+let cyr=false;const orig=new WeakMap();
+const apply=el=>{const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const p=n.parentElement;if(!p||p.closest(".nt,script,style"))continue;if(!orig.has(n))orig.set(n,n.nodeValue);n.nodeValue=cyr?tr(orig.get(n)):orig.get(n)}};
+const press=(sel,v,attr)=>$$(sel).forEach(b=>b.setAttribute("aria-pressed",b.dataset[attr]===v));
+const setScript=v=>{cyr=v==="cyr";press("[data-script]",v,"script");root.lang=cyr?"sr-Cyrl":"sr-Latn";apply(document.body);store.set("pismo",v)};
+const setMode=v=>{root.dataset.mode=v;press("[data-mode]",v,"mode");store.set("tema",v)};
+$$("[data-script]").forEach(b=>b.onclick=()=>setScript(b.dataset.script));
+$$("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+

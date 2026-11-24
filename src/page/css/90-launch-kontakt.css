@@ -1,0 +1,17 @@
+/* v1 launch: hide what needs live session data */
+body.v1 .nv1,body.v1 #danas,body.v1 #uzivo>.sample,body.v1 #rang,body.v1 #arhiva,body.v1 .who{display:none!important}
+body.v1 .vol{margin-left:auto}
+@media(max-width:760px){body.v1 .tabbar{grid-template-columns:repeat(3,1fr)}}
+/* kontakt */
+.kgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;align-items:start}
+.kform{display:grid;gap:14px}
+.kform label{display:grid;gap:6px;font-size:15px}
+.kform input,.kform textarea,.kform select{font:16px "Wix Madefor Text",sans-serif;color:var(--ink);background:var(--chip);border:0;border-radius:6px;box-shadow:0 0 0 1px var(--line) inset;padding:10px 12px;min-height:44px}
+.kform textarea{resize:vertical}
+.pop .sec[hidden]{display:none}
+.kform .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.krow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kabout{display:grid;gap:10px;font-size:15px}
+.kabout h3{margin:0;font:500 18px/1.3 "Wix Madefor Display",sans-serif}
+.kabout a{text-decoration:underline;text-underline-offset:2px}
+@media(max-width:900px){.kgrid{grid-template-columns:minmax(0,1fr)}}
