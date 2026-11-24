@@ -21,7 +21,7 @@ function ui(){
  box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&m.querySelector("b").textContent===me.name;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
 }
 document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
- if(id==="cjoin"||id==="plogin")openAuth();else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="cedit"||id==="pedit")openProfile();
+ if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="cedit"||id==="pedit")openProfile();
  else if(id==="pout")post("/api/auth/logout").then(()=>{me=null;ui();reconnect()})});
 
 const empty=()=>{};
@@ -57,7 +57,10 @@ const close=()=>{dlg.close?dlg.close():dlg.removeAttribute("open");ticket=null;p
 $("#authX").onclick=close;
 dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
 function signedIn(u){me=u;close();ui();reconnect()}
-function openAuth(){if(me)return;step("start");$("#authPw").hidden=true;$("#aEmailT").hidden=false;show();loadGsi()}
+let amode="in";
+function setMode(m){amode=m;dlg.querySelectorAll(".aseg [data-am]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.am===m));$("#aPwGo").textContent=m==="in"?"Uloguj se":"Dalje";$("#aPw").autocomplete=m==="in"?"current-password":"new-password";say(aErr,"");apply(dlg)}
+dlg.querySelector(".aseg").addEventListener("click",e=>{const b=e.target.closest("[data-am]");if(b)setMode(b.dataset.am)});
+function openAuth(mode){if(me)return;setMode(mode||"in");step("start");$("#authPw").hidden=true;$("#aEmailT").hidden=false;show();loadGsi()}
 /* the Google button should be ready the moment someone taps "Napravi nalog": load Google's script once the chat is on screen */
 let pre=false;function preloadGsi(){if(pre)return;pre=true;new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();loadGsi()}}).observe($("#compose"))}
 /* Google: our own button opens Google's sign-in popup; the server checks the token with Google */
@@ -75,7 +78,7 @@ function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
  step("profile");show();$("#aName").focus()}
 dlg.querySelector(".sws").addEventListener("click",e=>{const b=e.target.closest(".sw");if(b)setColor(+b.dataset.c)});
 $("#aName").addEventListener("input",()=>{$("#aPrev").textContent=$("#aName").value||"Ime"});
-$("#authPw").addEventListener("submit",async e=>{e.preventDefault();const act=e.submitter?.dataset.act||"login",email=$("#aEmail").value.trim(),password=$("#aPw").value;
+$("#authPw").addEventListener("submit",async e=>{e.preventDefault();const act=amode==="up"?"signup":"login",email=$("#aEmail").value.trim(),password=$("#aPw").value;
  if(act==="signup"){if(password.length<8){say(aErr,"password");return}pendPw={email,password};ticket=null;openProfile(email.split("@")[0].slice(0,20));return}
  const j=await post("/api/auth/login",{email,password});if(j.ok)signedIn(j.user);else say(aErr,j.err)});
 $("#authProf").addEventListener("submit",async e=>{e.preventDefault();const name=$("#aName").value.trim();

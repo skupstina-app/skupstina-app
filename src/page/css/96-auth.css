@@ -31,3 +31,7 @@
 .agoogle{margin-top:4px}
 .or span{padding:0 2px}
 .aemail{align-self:center;background:none;border:0;padding:8px;font:inherit;font-size:15px;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.aseg{display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:10px;box-shadow:0 0 0 1px var(--line) inset;margin:6px 32px 6px 0}
+.aseg button{min-height:40px;border:0;border-radius:8px;background:none;color:var(--mute);font:inherit;font-size:15px;cursor:pointer}
+.aseg button[aria-pressed=true]{background:var(--btn);color:var(--btn-ink);font-weight:500}
