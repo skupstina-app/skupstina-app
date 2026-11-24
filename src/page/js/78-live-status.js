@@ -1,5 +1,13 @@
-/* "not live" screen: only if nothing plays for a while, not when paused or buffering, and not while the reader reports a broadcast */
-let pOffT=0;function pOffCheck(ms){clearTimeout(pOffT);pOffT=setTimeout(()=>{if(pState!==1&&pState!==2&&pState!==3&&!apiLive)PC.off.hidden=false},ms)}
+/* "not live" screen: shown at once while the reader says nothing is live, and YouTube isn't even loaded then
+   (no YouTube "offline" picture, no wasted data). When the session starts, the screen goes and the player starts.
+   A viewer still playing (paused, rewound) is never cut off. Tapping the screen loads the player anyway. */
+let pInView=false,pForce=false;
+function liveGate(){const off=PC.off;off.classList.remove("wait");
+ if(apiLive||pForce){off.hidden=true;if(pInView)pCreate();return}
+ if(!yt||(pState!==1&&pState!==2&&pState!==3))off.hidden=false}
+$("#voff").addEventListener("click",()=>{pForce=true;liveGate();pOffCheck(30000)});
+/* YouTube errors or nothing playing for 30 s while forced: show the screen again */
+let pOffT=0;function pOffCheck(ms){clearTimeout(pOffT);pOffT=setTimeout(()=>{if(pState!==1&&pState!==2&&pState!==3&&!apiLive){pForce=false;PC.off.hidden=false}},ms)}
 function pCreate(){if(yt)return;const d=document.createElement("div");d.id="ytp";PV.prepend(d);
  const go=()=>{yt=new YT.Player("ytp",{host:"https://www.youtube-nocookie.com",width:"100%",height:"100%",videoId:"live_stream",
   playerVars:{channel:CH,autoplay:1,mute:1,playsinline:1,controls:0,fs:0,disablekb:1,modestbranding:1,rel:0,iv_load_policy:3,origin:location.origin},
@@ -8,8 +16,8 @@ function pCreate(){if(yt)return;const d=document.createElement("div");d.id="ytp"
    if(store.get("zvuk")!=="0"&&vol>0){userMuted=false;applyAudio();pWatchSound()}else applyAudio();pOffCheck(30000)},
    onStateChange:e=>{if(e.data===1){pStarted=true;PC.off.hidden=true}syncCtl()},onError:()=>pOffCheck(30000)}})};
  if(window.YT&&YT.Player)go();else{window.onYouTubeIframeAPIReady=go;const sc=document.createElement("script");sc.src="https://www.youtube.com/iframe_api";document.head.appendChild(sc)}}
-new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();pCreate()}},{rootMargin:"300px"}).observe(PV);
-setTimeout(()=>{const r=PV.getBoundingClientRect();if(r.bottom>-300&&r.top<innerHeight+300)pCreate()},1500);
+new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();pInView=true;if(apiLive||pForce)pCreate()}},{rootMargin:"300px"}).observe(PV);
+setTimeout(()=>{const r=PV.getBoundingClientRect();if(r.bottom>-300&&r.top<innerHeight+300){pInView=true;if(apiLive||pForce)pCreate()}},1500);
 PC.pp.innerHTML=P_PLAY;syncCtl();
 /* v1: what's live now */
 if(V1){$("#heroLead").textContent="Pratite sednice uživo i upoznajte svih 250 narodnih poslanika.";$("#heroAlt").href="#sala";$("#heroAlt").textContent="Poslanici";

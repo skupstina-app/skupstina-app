@@ -23,5 +23,9 @@ $("#vmute").onclick=()=>setMuted(!userMuted);
 setInterval(applyAudio,250);
 /* live state: the reader says a broadcast is on, or our own player is on a live stream */
 let apiLive=false,plLive=false;const setLive=()=>document.body.classList.toggle("islive",apiLive||plLive);
-async function pullTimeline(){try{const r=await fetch("/api/live/speakers",{cache:"no-store"});if(r.ok){const j=await r.json();apiLive=!!j.live;setLive();TL=(j.segments||[]).map(x=>({from:x.from,to:x.to,mp:mps.find(m=>m.id===x.mp)||null})).filter(x=>x.mp)}}catch(e){}}
-pullTimeline();setInterval(pullTimeline,4000);
+async function pullTimeline(){try{const r=await fetch("/api/live/speakers",{cache:"no-store"});if(r.ok){const j=await r.json();apiLive=!!j.live;setLive();liveGate();TL=(j.segments||[]).map(x=>({from:x.from,to:x.to,mp:mps.find(m=>m.id===x.mp)||null})).filter(x=>x.mp)}}catch(e){}}
+/* how often to ask: every 4 s while live (speaker data); otherwise every minute around session hours
+   (9:45-20:00 Belgrade time) and every 10 minutes the rest of the day; at once when the viewer comes back */
+const bgMin=()=>{try{const p=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Belgrade",hour:"numeric",minute:"numeric",hourCycle:"h23"}).formatToParts(new Date());return +p.find(x=>x.type==="hour").value*60+ +p.find(x=>x.type==="minute").value}catch(e){return 600}};
+let pullT=0;const pullLoop=async()=>{clearTimeout(pullT);await pullTimeline();const m=bgMin();pullT=setTimeout(pullLoop,apiLive?4000:(m>=585&&m<1200?60000:600000))};
+pullLoop();document.addEventListener("visibilitychange",()=>{if(!document.hidden)pullLoop()});
