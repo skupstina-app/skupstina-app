@@ -13,21 +13,25 @@ function drawMap(T=SALA){
  const SEC=[5,3,3,3,3,3,3,5],rows=6,BH=Math.max(26,Math.round(H*.09)),R=Math.min(W/2-16,H-24-BH),cx=W/2,cy=12+BH,r0=R*.56,step=(R-r0)/(rows-1);
  const N0=SEC.reduce((a,b)=>a+b,0),aw=(Math.PI-.04)*r0/(N0+7*1.3)*1.3,seats=[];let arc0=0;
  for(let i=0;i<rows;i++){const r=r0+i*step,ns=SEC.map(n=>n+i),N=ns.reduce((a,b)=>a+b,0),ga=aw/r,span=Math.PI-.04,per=(span-(SEC.length-1)*ga)/N;if(!i)arc0=per*r;
-  let a0=Math.PI-.02;ns.forEach((n,k)=>{for(let j=0;j<n;j++){const a=a0-(j+.5)*per;seats.push({a,i,k,z:1,x:cx-r*Math.cos(a),y:cy+r*Math.sin(a)})}a0-=n*per+ga})}
+  let a0=Math.PI-.02;ns.forEach((n,k)=>{for(let j=0;j<n;j++){const a=a0-(j+.5)*per;seats.push({a,i,k,key:i+"-"+k+"-"+j,z:1,x:cx-r*Math.cos(a),y:cy+r*Math.sin(a)})}a0-=n*per+ga})}
  /* drawn as the broadcast shows the hall: the presidium at the top, MPs facing it. Each group gets a wedge of the hall in proportion to its size
     and fills it from the front; group leaders take the front seats nearest the centre, everyone else follows alphabetically. */
  const gk=m=>V1&&m.g===6&&!m.pg?5.5:m.g;
  const keys=[...new Set(inHall.map(gk))].sort((a,b)=>a-b);
- const byA=[...seats].sort((p,q)=>q.a-p.a||p.i-q.i);
+ /* seats placed by hand in the admin (/admin/sala) win; everyone else is placed automatically in the seats left */
+ const seatBy=new Map(seats.map(p=>[p.key,p])),manual=inHall.filter(m=>m.seat&&seatBy.has(m.seat)),takenS=new Set(manual.map(m=>seatBy.get(m.seat)));
+ const byA=[...seats].filter(p=>!takenS.has(p)).sort((p,q)=>q.a-p.a||p.i-q.i);
  const rank=m=>{const pg=m.pg||"";return /\(председник\)/.test(pg)?0:/\(заменик/.test(pg)?1:/^Потпредседник/.test(m.role||"")?2:3};
  const posOf=new Map();geo.pos=posOf;const blocks=groups.map(()=>[]),empty=[];let at=0,cum=0;
- keys.forEach((k,ki)=>{const mem=inHall.filter(m=>gk(m)===k).sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name,"sr"));
-  cum+=mem.length;let end=ki===keys.length-1?byA.length:Math.round(byA.length*cum/HN);end=Math.max(end,at+mem.length);
+ const autoN=inHall.length-manual.length;
+ keys.forEach((k,ki)=>{const mem=inHall.filter(m=>gk(m)===k&&!manual.includes(m)).sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name,"sr"));
+  cum+=mem.length;let end=ki===keys.length-1?byA.length:Math.round(byA.length*cum/Math.max(1,autoN));end=Math.max(end,at+mem.length);
   const slice=byA.slice(at,end);at=end;
   const front=[...slice].sort((p,q)=>p.i-q.i||Math.abs(p.a-Math.PI/2)-Math.abs(q.a-Math.PI/2)),used=new Set();
   mem.filter(m=>rank(m)<3).forEach((m,j)=>{used.add(front[j]);posOf.set(m,front[j])});
   const rest=slice.filter(p=>!used.has(p)).sort((p,q)=>p.i-q.i||q.a-p.a);mem.filter(m=>rank(m)===3).forEach((m,j)=>{const p=rest.shift();posOf.set(m,p)});
   rest.forEach(p=>empty.push(p));mem.forEach(m=>blocks[m.g].push(posOf.get(m)))});
+ manual.forEach(m=>{const p=seatBy.get(m.seat);posOf.set(m,p);blocks[m.g].push(p)});
  geo.blocks=blocks;geo.empty=empty;
  const s=Math.max(3,Math.floor(Math.min(step*.72,arc0*.74)));
  /* predsednistvo: one row at the top. As seen on the broadcast: three vice-presidents, the secretary general (not an MP) on the Speaker's left, the Speaker, three vice-presidents */

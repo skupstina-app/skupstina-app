@@ -34,6 +34,16 @@ Map of this repo. Read this first, then open only the file you need.
 | Footer | `html/footer.html` | | |
 | Data, helpers, boot | | `00-base` | `00-data`, `05-core`, `25-info`, `40-timeline-views`, `74-install-card` (add to home screen), `99-boot` |
 
+## Admin
+
+- `/admin/sala`: seat map editor (`src/admin/sala.html`, routes in `src/admin.js`). Sign in with Google: the ID token
+  is checked against `GOOGLE_CLIENT_ID`; only emails in `ADMIN_EMAILS` (both in wrangler.jsonc vars) get a session
+  cookie (signed with the `SALT` secret, 30 days). Seats are saved in `mps.seat` as `row-section-index`
+  (row 0 nearest the presidium; section 0 and index 0 on the right as seen on the broadcast, same as `30-hall.js`).
+- The public Sala map uses hand-placed seats first and places everyone else automatically. The page's MP data is
+  cached up to 5 minutes, so seat changes show on the site within 5 minutes.
+- Other `/admin/*` pages still use `?key=ADMIN_KEY`.
+
 ## Style
 
 Dark/light via `:root[data-mode=dark]` CSS variables (`--bg`, `--card`, `--ink`, `--mute`, `--line`, `--live` teal…).

@@ -5,6 +5,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
 import PAGE from "./generated/index.html";
 import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
+import { adminRoute } from "./admin.js";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
 var PG = "https://www.parlament.gov.rs";
 var LIST_URL = PG + "/" + encodeURI("\u043D\u0430\u0440\u043E\u0434\u043D\u0430-\u0441\u043A\u0443\u043F\u0448\u0442\u0438\u043D\u0430/\u0441\u0430\u0441\u0442\u0430\u0432/\u043D\u0430\u0440\u043E\u0434\u043D\u0438-\u043F\u043E\u0441\u043B\u0430\u043D\u0438\u0446\u0438/\u0430\u043A\u0442\u0443\u0435\u043B\u043D\u0438-\u0441\u0430\u0437\u0438\u0432.11.html");
@@ -165,8 +166,8 @@ async function importLeadership(env) {
 }
 __name(importLeadership, "importLeadership");
 async function mpsJson(env) {
-  const { results } = await env.DB.prepare("SELECT m.id,m.name_lat,m.name_cyr,m.electoral_list,m.mp_group,m.party,m.party_code,m.place,m.birth_year,m.assembly_role,m.title,m.profession,m.mandate_date,(SELECT 1 FROM photos p WHERE p.id=m.id) AS ph FROM mps m WHERE m.active=1 AND m.name_lat IS NOT NULL ORDER BY m.last_name,m.first_name").all();
-  return results.map((r) => ({ id: r.id, l: r.name_lat, c: r.name_cyr, list: r.electoral_list, pg: r.mp_group, party: r.party, code: r.party_code, place: r.place, by: r.birth_year, role: r.assembly_role, prof: r.profession, md: r.mandate_date, ph: r.ph ? 1 : 0 }));
+  const { results } = await env.DB.prepare("SELECT m.id,m.name_lat,m.name_cyr,m.electoral_list,m.mp_group,m.party,m.party_code,m.place,m.birth_year,m.assembly_role,m.title,m.profession,m.mandate_date,m.seat,(SELECT 1 FROM photos p WHERE p.id=m.id) AS ph FROM mps m WHERE m.active=1 AND m.name_lat IS NOT NULL ORDER BY m.last_name,m.first_name").all();
+  return results.map((r) => ({ id: r.id, l: r.name_lat, c: r.name_cyr, list: r.electoral_list, pg: r.mp_group, party: r.party, code: r.party_code, place: r.place, by: r.birth_year, role: r.assembly_role, prof: r.profession, md: r.mandate_date, seat: r.seat, ph: r.ph ? 1 : 0 }));
 }
 __name(mpsJson, "mpsJson");
 var H = /* @__PURE__ */ __name((body, type, extra = {}) => new Response(body, { headers: { "content-type": type, "x-content-type-options": "nosniff", "referrer-policy": "strict-origin-when-cross-origin", ...extra } }), "H");
@@ -469,6 +470,10 @@ var worker_default = {
         return chatRoute(req, env, u);
       }
       if (p === "/robots.txt") return H(env.LAUNCHED === "1" ? "User-agent: *\nAllow: /\n" : "User-agent: *\nDisallow: /\n", "text/plain");
+      if (p === "/admin/sala" || p.startsWith("/admin/api/")) {
+        const r = await adminRoute(req, env, u, p);
+        if (r) return r;
+      }
       if (p.startsWith("/admin/")) {
         if (!env.ADMIN_KEY || u.searchParams.get("key") !== env.ADMIN_KEY) return new Response("no", { status: 403 });
         if (p === "/admin/import-mps") {

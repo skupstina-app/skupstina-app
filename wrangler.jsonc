@@ -60,6 +60,8 @@
     }
   ],
   "vars": {
+    "GOOGLE_CLIENT_ID": "",
+    "ADMIN_EMAILS": "",
     "LAUNCHED": "1",
     "PAGE_V": "5"
   }
