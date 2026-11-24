@@ -15,7 +15,7 @@ const post=async(url,body)=>{try{const r=await fetch(url,{method:"POST",headers:
 function ui(){
  $("#cacct").innerHTML=me?`Pišeš kao <b class="nt u${me.color}">${esc(me.name)}</b> · <button type="button" class="lnk" id="cedit">izmeni</button>`:"";
  $("#pacctBody").innerHTML=me?`<p><b class="nt">${esc(me.name)}</b><span class="m"> · ${esc(me.email||"")}${me.google?" · Google":""}</span></p><div class="abtns"><button type="button" class="b light" id="pedit">Izmeni ime i boju</button><button type="button" class="b light" id="pout">Odjavi se</button></div>`:`<div class="abtns"><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button></div>`;
- $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$("#cacct").hidden=!me;
+ $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$(".cme").hidden=!me;
  if(!me)preloadGsi();
  apply($("#cacct"));apply($("#pacctBody"));
  box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&m.querySelector("b").textContent===me.name;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
