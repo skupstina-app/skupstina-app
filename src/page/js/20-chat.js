@@ -13,17 +13,18 @@ const post=async(url,body)=>{try{const r=await fetch(url,{method:"POST",headers:
 
 /* the account line under the message box, and the Profil section */
 function ui(){
- $("#cacct").innerHTML=me?`Pišeš kao <b class="nt u${me.color}">${esc(me.name)}</b> · <button type="button" class="lnk" id="cedit">izmeni</button>`:`<button type="button" class="lnk" id="clogin">Prijavi se da pišeš</button>`;
- $("#pacctBody").innerHTML=me?`<p><b class="nt">${esc(me.name)}</b><span class="m"> · ${esc(me.email||"")}${me.google?" · Google":""}</span></p><div class="abtns"><button type="button" class="b light" id="pedit">Izmeni ime i boju</button><button type="button" class="b light" id="pout">Odjavi se</button></div>`:`<p class="m">Nisi prijavljen. Nalog ti treba samo za pisanje u razgovoru.</p><div class="abtns"><button type="button" class="b dark" id="plogin">Prijavi se ili napravi nalog</button></div>`;
- cin.placeholder=me?"Napiši poruku":"Prijavi se da pišeš";
+ $("#cacct").innerHTML=me?`Pišeš kao <b class="nt u${me.color}">${esc(me.name)}</b> · <button type="button" class="lnk" id="cedit">izmeni</button>`:"";
+ $("#pacctBody").innerHTML=me?`<p><b class="nt">${esc(me.name)}</b><span class="m"> · ${esc(me.email||"")}${me.google?" · Google":""}</span></p><div class="abtns"><button type="button" class="b light" id="pedit">Izmeni ime i boju</button><button type="button" class="b light" id="pout">Odjavi se</button></div>`:`<div class="abtns"><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button></div>`;
+ $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$("#cacct").hidden=!me;
+ if(!me)preloadGsi();
  apply($("#cacct"));apply($("#pacctBody"));
  box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&m.querySelector("b").textContent===me.name;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
 }
 document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
- if(id==="clogin"||id==="plogin")openAuth();else if(id==="cedit"||id==="pedit")openProfile();
+ if(id==="cjoin"||id==="plogin")openAuth();else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="cedit"||id==="pedit")openProfile();
  else if(id==="pout")post("/api/auth/logout").then(()=>{me=null;ui();reconnect()})});
 
-const empty=()=>{if(!box.children.length){box.innerHTML='<p class="m empty">Ovde se pojavljuju poruke od trenutka kad si došao.</p>';apply(box)}};
+const empty=()=>{};
 const add=m=>{if(ids.has(m.id))return;ids.add(m.id);box.querySelector(".empty")?.remove();
  const stick=pane.scrollHeight-pane.scrollTop-pane.clientHeight<90,mine=!!me&&m.n===me.name;
  const d=document.createElement("div");d.className="msg"+(mine?" me":"");d.dataset.id=m.id;
@@ -47,7 +48,6 @@ function connect(){
 function reconnect(){const old=ws;ws=null;try{old&&old.close()}catch(e){}connect()}
 
 $("#cbox").addEventListener("submit",e=>{e.preventDefault();if(!me){openAuth();return}const x=cin.value.trim();if(!x)return;last=x;if(send({t:"msg",x})){cin.value="";say(cst,"")}else say(cst,"wait")});
-cin.addEventListener("focus",()=>{if(!me)openAuth()});
 pane.addEventListener("click",e=>{const f=e.target.closest(".flag");if(!f||f.disabled)return;const id=+f.closest(".msg").dataset.id;if(send({t:"report",id})){f.setAttribute("aria-pressed","true");f.disabled=true;f.textContent="Prijavljeno";apply(f)}});
 
 /* sign-in dialog */
@@ -57,11 +57,13 @@ const close=()=>{dlg.close?dlg.close():dlg.removeAttribute("open");ticket=null;p
 $("#authX").onclick=close;
 dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
 function signedIn(u){me=u;close();ui();reconnect()}
-function openAuth(){if(me)return;step("start");show();loadGsi()}
+function openAuth(){if(me)return;step("start");$("#authPw").hidden=true;$("#aEmailT").hidden=false;show();loadGsi()}
+/* the Google button should be ready the moment someone taps "Napravi nalog": load Google's script once the chat is on screen */
+let pre=false;function preloadGsi(){if(pre)return;pre=true;new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();loadGsi()}}).observe($("#compose"))}
 function loadGsi(){if(gsiReady||!clientId)return;gsiReady=true;const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;
  s.onload=()=>{google.accounts.id.initialize({client_id:clientId,callback:async r=>{const j=await post("/api/auth/google",{credential:r.credential});
    if(!j.ok){say(aErr,j.err||"google");return}if(j.user){signedIn(j.user);return}ticket=j.ticket;pendPw=null;openProfile(j.suggest||"")}});
-  google.accounts.id.renderButton($("#gsi"),{theme:"outline",size:"large",shape:"pill",text:"continue_with",width:Math.min(320,$("#gsi").clientWidth||320)})};
+  google.accounts.id.renderButton($("#gsi"),{theme:"filled_black",size:"large",shape:"pill",text:"signup_with",width:320})};
  document.head.appendChild(s)}
 function setColor(c){color=c;dlg.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.c===c));$("#aPrev").className="nt u"+c}
 function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
