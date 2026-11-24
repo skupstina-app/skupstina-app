@@ -18,7 +18,7 @@ function ui(){
  $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$(".cme").hidden=!me;
  if(!me)preloadGsi();
  apply($("#cacct"));apply($("#pacctBody"));
- box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&m.querySelector("b").textContent===me.name;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
+ box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&+m.dataset.u===me.id;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
 }
 document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
  if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="cedit"||id==="pedit")openProfile();
@@ -26,8 +26,8 @@ document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
 
 const empty=()=>{};
 const add=m=>{if(ids.has(m.id))return;ids.add(m.id);box.querySelector(".empty")?.remove();
- const stick=pane.scrollHeight-pane.scrollTop-pane.clientHeight<90,mine=!!me&&m.n===me.name;
- const d=document.createElement("div");d.className="msg"+(mine?" me":"");d.dataset.id=m.id;
+ const stick=pane.scrollHeight-pane.scrollTop-pane.clientHeight<90,mine=!!me&&m.u!=null&&m.u===me.id;
+ const d=document.createElement("div");d.className="msg"+(mine?" me":"");d.dataset.id=m.id;if(m.u!=null)d.dataset.u=m.u;
  d.innerHTML='<span class="tm nt"></span> <b class="nt u'+(m.c!=null?m.c:ucol(m.n))+'"></b><span class="nt">: </span><span class="x nt"></span>'+(mine?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
  const t=d.querySelectorAll(".nt");t[0].textContent=hhmm(m.at);t[1].textContent=m.n;t[3].textContent=m.x;apply(d);box.append(d);
  while(box.children.length>200)box.firstElementChild.remove();

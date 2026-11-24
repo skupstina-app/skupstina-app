@@ -77,6 +77,18 @@ const fail = (env, ip) => env.DB.batch([
   env.DB.prepare("DELETE FROM auth_fail WHERE at<?").bind(Date.now() - 86400_000),
 ]);
 
+/** One account per email, per chat name and per Google account: enforced by unique indexes (once per isolate). */
+let indexed = false;
+async function ensureIndexes(env) {
+  if (indexed) return;
+  for (const [n, c] of [["users_email", "email"], ["users_nk", "nk"], ["users_sub", "sub"]]) {
+    try { await env.DB.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS ${n} ON users(${c})`).run(); } catch (e) { console.log("index " + n + ": " + e.message); }
+  }
+  indexed = true;
+}
+/** A unique-index error from D1 → our error code. */
+const clash = (e) => /UNIQUE/i.test(String(e?.message)) ? (/email/.test(e.message) ? "email_taken" : "name_taken") : null;
+
 /** Name and colour from a request body; returns [error code, name, name key, colour]. */
 function profileOf(body, checkName) {
   const [err, name, nk] = checkName(body.name);
@@ -95,6 +107,7 @@ export async function authRoute(req, env, u, p, checkName) {
   if (p === "/api/auth/logout") return json({ ok: true }, 200, { "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
   if (req.method !== "POST") return json({ ok: false }, 405);
   const ip = await ipKey(req, env);
+  await ensureIndexes(env);
 
   // Google: an existing account signs in; a new one gets a short ticket and picks a name and colour next.
   if (p === "/api/auth/google") {
@@ -146,8 +159,14 @@ export async function authRoute(req, env, u, p, checkName) {
     }
     if (await env.DB.prepare("SELECT 1 FROM users WHERE nk=?").bind(nk).first()) return json({ ok: false, err: "name_taken" }, 409);
     if (await env.DB.prepare("SELECT 1 FROM users WHERE email=?").bind(email).first()) return json({ ok: false, err: "email_taken" }, 409);
-    const user = await env.DB.prepare("INSERT INTO users(sub,email,pw,name,nk,color,created_at,created_ip,seen_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING *")
-      .bind(sub, email, pw, name, nk, color, now(), ip, now()).first();
+    let user;
+    try {
+      user = await env.DB.prepare("INSERT INTO users(sub,email,pw,name,nk,color,created_at,created_ip,seen_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING *")
+        .bind(sub, email, pw, name, nk, color, now(), ip, now()).first();
+    } catch (e) {
+      const c = clash(e); if (c) return json({ ok: false, err: c }, 409);
+      throw e;
+    }
     return json({ ok: true, user: pub(user) }, 200, { "set-cookie": await sessionCookie(env, user.id) });
   }
 
@@ -157,7 +176,9 @@ export async function authRoute(req, env, u, p, checkName) {
     const [err, name, nk, color] = profileOf(body, checkName);
     if (err) return json({ ok: false, err }, 400);
     if (nk !== user.nk && await env.DB.prepare("SELECT 1 FROM users WHERE nk=? AND id<>?").bind(nk, user.id).first()) return json({ ok: false, err: "name_taken" }, 409);
-    const row = await env.DB.prepare("UPDATE users SET name=?,nk=?,color=? WHERE id=? RETURNING *").bind(name, nk, color, user.id).first();
+    let row;
+    try { row = await env.DB.prepare("UPDATE users SET name=?,nk=?,color=? WHERE id=? RETURNING *").bind(name, nk, color, user.id).first(); }
+    catch (e) { if (clash(e)) return json({ ok: false, err: "name_taken" }, 409); throw e; }
     return json({ ok: true, user: pub(row) });
   }
   return json({ ok: false }, 404);
