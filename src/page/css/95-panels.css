@@ -1,0 +1,52 @@
+/* speaker bar: photo (opens the profile) with today's talk time on it, mute next to the name, podium far right */
+.vbar[role=group] .who{gap:10px}
+.phw{position:relative;flex:none;display:block;width:40px;height:40px}
+.vbar[role=group] .who .ph{display:block;width:40px;height:40px;padding:0;border:0;border-radius:6px;cursor:pointer;color:var(--ink)}
+.phx{position:absolute;inset:0;display:none;place-items:center;border-radius:6px;background:var(--btn);color:var(--btn-ink);pointer-events:none}
+.phw.open .phx{display:grid}
+.phx .mi,.pod .mi{width:18px;height:18px}
+.tbadge{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);padding:0 5px;border-radius:6px;background:var(--bg);box-shadow:0 0 0 1px var(--line) inset;font:12px/16px "Departure Mono",ui-monospace,monospace;color:var(--ink);white-space:nowrap;pointer-events:none}
+.phw.open .tbadge{display:none}
+.vbar[role=group] .mmp{margin:0 0 0 2px}
+.pod{flex:none;width:44px;height:44px;margin-left:auto;border:0;border-radius:6px;display:grid;place-items:center;background:var(--card);color:var(--p0);box-shadow:var(--raise);cursor:pointer}
+.pod .px{display:none}
+.pod.open{background:var(--btn);color:var(--btn-ink);box-shadow:none}
+.pod.open .pi{display:none}.pod.open .px{display:grid}
+.vsticky .vbar[role=group]{padding-bottom:10px}
+
+/* the panels take the chat's place */
+body[data-xv=stats] .side>:not(#p-stats),body[data-xv=prof] .side>:not(#p-prof){display:none!important}
+.xpane{flex:1 1 auto;overflow-y:auto;min-height:0}
+@media(max-width:1020px){.xpane{flex:none;overflow:visible}body[data-xv] .side{height:auto!important;min-height:0!important}}
+.xpane[hidden]{display:none}
+.xin{padding:14px 16px 18px;display:flex;flex-direction:column;gap:14px}
+.xin h3{margin:0;font-size:15px;font-weight:500;color:var(--mute)}
+.smap{display:block;width:100%;max-width:420px;margin:0 auto}
+.xlist{list-style:none;margin:0;padding:0}
+.xlist button{width:100%;display:flex;align-items:center;gap:10px;padding:10px 0;border:0;border-top:1px solid var(--line);background:none;text-align:left;min-height:52px}
+.xlist .rk{width:18px;flex:none;color:var(--mute);font-size:14px}
+.xlist i{width:8px;height:8px;border-radius:4px;flex:none}
+.xlist .nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.xlist .nm b{font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xlist .nm small{font-size:13px;color:var(--mute)}
+.xlist .tm{font-variant-numeric:tabular-nums;font-size:16px}
+.phead{display:flex;align-items:center;gap:10px}
+.phead h3{font-size:19px;color:var(--ink)}
+.pph{width:40px;height:40px;border-radius:6px;background:var(--seat);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.gchip,.pchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;box-shadow:0 0 0 1px var(--line) inset;font-size:13px}
+.gchip i{width:8px;height:8px;border-radius:4px}
+.pchip{color:var(--mute)}
+.bio{margin:0;font-size:16px;line-height:1.45}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;box-shadow:0 0 0 1px var(--line) inset;min-width:0}
+.fact small{font-size:12px;color:var(--mute)}
+.fact span{font-size:15px;overflow-wrap:anywhere}
+.pbtns{display:flex;gap:8px}
+.pbtns>*{flex:1;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.pbtns .mi{width:16px;height:16px}
+.src{margin:0;font-size:12px;color:var(--mute)}
+
+/* chat: pixel send button */
+.cbox .csend{width:46px;min-width:46px;padding:0;display:grid;place-items:center}
+.cbox .csend .mi{width:18px;height:18px}

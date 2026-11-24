@@ -19,7 +19,7 @@ const FN=["Milena","Dragan","Jelena","Nebojša","Ivana","Zoran","Tamara","Bojan"
 const LN=["Kostić","Radovanović","Pantelić","Milovanović","Đurić","Stanković","Lazić","Bogdanović","Živković","Tomić","Ristić","Vasiljević","Janković","Nedeljković","Ćirić","Mladenović","Šarac","Pejović","Lukić","Gavrilović","Jakšić","Rakić"];
 const used=new Set(),mps=[];
 const listGroup=r=>{const x=(r.list||r.pg||"").toUpperCase();return /СТУДЕНТ/.test(x)?0:/МАЂАР|MAGYAR/.test(x)?1:/АЛБАН|SHQIP/.test(x)?2:/ЉАЈИЋ|ЉУДСКИ/.test(x)?3:/SDA|СДА|САНЏАК|SANDŽAK/.test(x)?4:/ПОКРЕТ ЗА УЈЕДИЊЕЊЕ|POKRET ZA UJEDINJENJE/.test(x)?5:/УЈЕДИЊЕНА СРБИЈА|ВУЧИЋ/.test(x)?6:-1};
-if(V1){groups.forEach(g=>g[2]=0);REAL.forEach(r=>{const g=listGroup(r);if(g<0)return;groups[g][2]++;mps.push({i:mps.length,g,name:r.l,c:r.c,id:r.id,ph:r.ph,pg:r.pg,party:r.party,role:r.role,t:0,w:0})})}
+if(V1){groups.forEach(g=>g[2]=0);REAL.forEach(r=>{const g=listGroup(r);if(g<0)return;groups[g][2]++;mps.push({i:mps.length,g,name:r.l,c:r.c,id:r.id,ph:r.ph,pg:r.pg,party:r.party,role:r.role,place:r.place,by:r.by,prof:r.prof,md:r.md,t:0,w:0})})}
 else groups.forEach((g,gi)=>{for(let k=0;k<g[2];k++){let n;do n=pick(FN)+" "+pick(LN);while(used.has(n));used.add(n);mps.push({i:mps.length,g:gi,name:n,t:0,w:0})}});
 const LINES=["Amandman na član 4","Povreda Poslovnika, član 107","Replika","Rokovi za javnu raspravu","Amandman na član 12","Budžet lokalnih samouprava","Vraćanje tačke odboru","Zaključci odbora","Pitanje ministru","Amandman na član 21","Primedbe iz javne rasprave","Greška u tekstu predloga"];
 const pool=[];while(pool.length<46){const i=Math.floor(rnd()*250);if(!pool.includes(i))pool.push(i)}

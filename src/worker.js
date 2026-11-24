@@ -165,8 +165,8 @@ async function importLeadership(env) {
 }
 __name(importLeadership, "importLeadership");
 async function mpsJson(env) {
-  const { results } = await env.DB.prepare("SELECT m.id,m.name_lat,m.name_cyr,m.electoral_list,m.mp_group,m.party,m.party_code,m.place,m.birth_year,m.assembly_role,m.title,(SELECT 1 FROM photos p WHERE p.id=m.id) AS ph FROM mps m WHERE m.active=1 AND m.name_lat IS NOT NULL ORDER BY m.last_name,m.first_name").all();
-  return results.map((r) => ({ id: r.id, l: r.name_lat, c: r.name_cyr, list: r.electoral_list, pg: r.mp_group, party: r.party, code: r.party_code, place: r.place, by: r.birth_year, role: r.assembly_role, ph: r.ph ? 1 : 0 }));
+  const { results } = await env.DB.prepare("SELECT m.id,m.name_lat,m.name_cyr,m.electoral_list,m.mp_group,m.party,m.party_code,m.place,m.birth_year,m.assembly_role,m.title,m.profession,m.mandate_date,(SELECT 1 FROM photos p WHERE p.id=m.id) AS ph FROM mps m WHERE m.active=1 AND m.name_lat IS NOT NULL ORDER BY m.last_name,m.first_name").all();
+  return results.map((r) => ({ id: r.id, l: r.name_lat, c: r.name_cyr, list: r.electoral_list, pg: r.mp_group, party: r.party, code: r.party_code, place: r.place, by: r.birth_year, role: r.assembly_role, prof: r.profession, md: r.mandate_date, ph: r.ph ? 1 : 0 }));
 }
 __name(mpsJson, "mpsJson");
 var H = /* @__PURE__ */ __name((body, type, extra = {}) => new Response(body, { headers: { "content-type": type, "x-content-type-options": "nosniff", "referrer-policy": "strict-origin-when-cross-origin", ...extra } }), "H");
