@@ -79,8 +79,8 @@ button:hover{border-color:rgba(255,255,255,.3)}
 <div id="login" hidden><p>Prijavi se Google nalogom administratora.</p><div id="gbtn"></div><p class="m" id="lerr"></p></div>
 <div id="card" hidden role="dialog" aria-label="Poslanik"></div>
 <div id="app" hidden>
- <div id="hallWrap"><p class="m" style="text-align:center;margin:0 0 10px">Pogled kao na prenosu i na mapi Sale · predsedništvo gore (9 mesta, predsednik u sredini)</p><div id="hall"></div>
- <p class="m" style="text-align:center;margin-top:14px">Prevuci poslanika iz liste na mesto, ili sa mesta na mesto (zauzeto mesto = zamena). Prevuci ga nazad u listu da ga skloniš sa mesta. Dodir/klik otvara karticu, gde se poslanik može zaključati: zaključan se ne može pomeriti niti zameniti. Zum: + / −, dvoklik na prazno, Ctrl/⌘ + točkić ili dva prsta. Predsednik i potpredsednici se pomeraju samo po predsedništvu (9 mesta); GS (generalni sekretar, nije poslanik) stoji odmah desno od predsednika kako se vidi na prenosu, ili na prvom slobodnom mestu.</p></div>
+ <div id="hallWrap"><p class="m" style="text-align:center;margin:0 0 10px">Pogled kao na prenosu i na mapi Sale · predsedništvo gore: 3 PP · ZGS · predsednik · GS · 3 PP</p><div id="hall"></div>
+ <p class="m" style="text-align:center;margin-top:14px">Prevuci poslanika iz liste na mesto, ili sa mesta na mesto (zauzeto mesto = zamena). Prevuci ga nazad u listu da ga skloniš sa mesta. Dodir/klik otvara karticu, gde se poslanik može zaključati: zaključan se ne može pomeriti niti zameniti. Zum: + / −, dvoklik na prazno, Ctrl/⌘ + točkić ili dva prsta. Predsednik i potpredsednici se pomeraju samo po predsedništvu. GS (generalni sekretar) i ZGS (zamenik) nisu poslanici i imaju stalna mesta pored predsednika.</p></div>
  <div id="side">
   <div class="tools"><input type="search" id="q" placeholder="Traži poslanika"><div class="chips" id="chips"></div><label class="m"><input type="checkbox" id="only"> samo neraspoređeni</label></div>
   <ul id="list"></ul>
@@ -103,14 +103,17 @@ let HW=1000,SLOTS=[];
 /* presidium leads: the Speaker and the vice-presidents; they sit on the bench, everyone else in the hall */
 const isLead=m=>/^(Председник Народне|Потпредседник)/.test(m.r||"");
 const leads=()=>{const spk=MPS.find(m=>/^Председник Народне/.test(m.r||"")),vps=MPS.filter(m=>/^Потпредседник/.test(m.r||"")).sort((a,b)=>a.n.split(" ").pop().localeCompare(b.n.split(" ").pop(),"sr"));return [spk,vps]};
-/* same as benchSlots() in src/page/js/30-hall.js */
+/* the presidium bench: 9 places, left to right as seen on the broadcast:
+   3 vice-presidents · deputy secretary general ("GSD", index 3) · the Speaker (index 4) · secretary general ("SG", index 5) · 3 vice-presidents.
+   SG and GSD are not MPs: their places are fixed. Places set in the admin (seat "p-0".."p-8") win; anyone else takes their default place
+   or the free place nearest the middle. Same function in src/admin/sala.html and src/page/js/30-hall.js. */
+const BENCH_FIX={3:"GSD",5:"SG"},BENCH_NEAR=[4,6,2,7,1,8,0];
 function benchSlots(spk,vps,seatOf){
- const S=Array(9).fill(null),near=[4,5,3,6,2,7,1,8,0],all=[spk,...vps].filter(Boolean);
+ const S=Array(9).fill(null),all=[spk,...vps].filter(Boolean);for(const j in BENCH_FIX)S[j]=BENCH_FIX[j];
  all.forEach(m=>{const x=/^p-([0-8])$/.exec(seatOf(m)||"");if(x&&!S[+x[1]])S[+x[1]]=m});
- const def=[[spk,4],[vps[0],6],[vps[1],7],[vps[2],8],[vps[3],1],[vps[4],2],[vps[5],3],[vps[6],0]].filter(d=>d[0]&&!S.includes(d[0]));
- const late=[];def.forEach(([m,j])=>{if(!S[j]&&j!==5)S[j]=m;else late.push(m)});vps.slice(7).forEach(m=>{if(!S.includes(m))late.push(m)});
- late.forEach(m=>{const k=near.find(i=>!S[i]&&i!==5)??near.find(i=>!S[i]);if(k!=null)S[k]=m});
- const g=!S[5]?5:near.find(i=>!S[i]);if(g!=null)S[g]="SG";
+ const def=[[spk,4],[vps[0],6],[vps[1],7],[vps[2],8],[vps[3],0],[vps[4],1],[vps[5],2]].filter(d=>d[0]&&!S.includes(d[0]));
+ const late=[];def.forEach(([m,j])=>{if(!S[j])S[j]=m;else late.push(m)});vps.slice(6).forEach(m=>{if(!S.includes(m))late.push(m)});
+ late.forEach(m=>{const k=BENCH_NEAR.find(i=>!S[i]);if(k!=null)S[k]=m});
  return S}
 function drawHall(){
  const W=HW,cx0=W/2,R=W/2-16,r0=R*.56,step=(R-r0)/(ROWS-1),N0=SEC.reduce((a,b)=>a+b,0),aw=(Math.PI-.04)*r0/(N0+7*1.3)*1.3,pts=[];let minArc=1e9;
@@ -123,9 +126,9 @@ function drawHall(){
  const slotX=j=>benX+gap*.2+gap*j+gap/2;
  let h=`<div class="bench" style="left:${benX}px;top:${benY}px;width:${benW}px;height:${benH}px"></div>`;
  SLOTS.forEach((m,j)=>{const x=slotX(j),key="p-"+j,st=`--s:${bk}px;left:${x}px;top:${benC}px;`;
-  if(m==="SG")h+=`<button class="seat lead sg" data-seat="${key}" style="${st}" title="Generalni sekretar (nije poslanik) · mesto ${j+1} u predsedništvu"></button>`;
+  if(typeof m==="string")h+=`<div class="seat lead sg" style="${st}" title="${m==="SG"?"Generalni sekretar":"Zamenik generalnog sekretara"} (nije poslanik) · stalno mesto"></div>`;
   else h+=`<button class="seat lead${m?" taken":""}${m&&m.lk?" lk":""}${m&&sel===m?" sel":""}" data-seat="${key}" style="${st}${m?`--c:var(--p${gOf(m)});${m.ph?`background-image:url(/p/${m.id})`:""}`:""}" title="${m?esc(m.n)+" · "+(m===SPK?"predsednik Skupštine":"potpredsednik")+(m.s?"":" (automatski)")+" · ":""}mesto ${j+1} u predsedništvu">${m&&!m.ph?`<span>${esc(ini(m.n))}</span>`:""}</button>`;
-  h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${m==="SG"?"GS":m===SPK?"Predsednik":m?"PP":""}</span>`});
+  h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${m==="SG"?"GS":m==="GSD"?"ZGS":m===SPK?"Predsednik":m?"PP":""}</span>`});
  pts.forEach(p=>{const key=`${p.i}-${p.k}-${p.j}`,m=bySeat.get(key),x=cx-p.r*Math.cos(p.a),y=cy+p.r*Math.sin(p.a);
   h+=`<button class="seat${m?" taken":""}${m&&m.lk?" lk":""}${m&&sel===m?" sel":""}" data-seat="${key}" title="${m?esc(m.n)+(m.lk?" (zaključan)":"")+" · ":""}red ${p.i+1}, sektor ${8-p.k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;${m?`--c:var(--p${gOf(m)});${m.ph?`background-image:url(/p/${m.id})`:""}`:""}">${m&&!m.ph?`<span>${esc(ini(m.n))}</span>`:""}</button>`});
  /* row numbers just above both ends of each row */
@@ -164,18 +167,18 @@ wrap.addEventListener("touchend",e=>{if(e.touches.length<2)pinch=null});
 new ResizeObserver(()=>{if(!zoomed&&MPS.length)setZoom(fit())}).observe(wrap);
 async function save(changes){status("Čuvam…");const j=await api("/admin/api/seats",{set:changes}).catch(()=>({ok:false}));status(j.ok?"Sačuvano":j.err==="locked"?"Nije sačuvano: neko od njih je zaključan":"Greška: nije sačuvano",j.ok);if(!j.ok)load()}
 /* who is shown in a seat: hall seats from the saved seat, bench places from benchSlots (saved or automatic) */
-const at=key=>{if(key.startsWith("p-")){const m=SLOTS[+key.slice(2)];return m&&m!=="SG"?m:null}return bySeat.get(key)||null};
+const at=key=>{if(key.startsWith("p-")){const m=SLOTS[+key.slice(2)];return m&&typeof m!=="string"?m:null}return bySeat.get(key)||null};
 /* put m in seat key; whoever sat there goes to m's old seat (swap) or off the map.
    Leads go only on the bench, everyone else only in the hall. On the bench every lead's place is saved, so nobody jumps around.
    Locked MPs never move: they can't be dragged, and nobody can be dropped on their seat. */
-const NEAR=[4,5,3,6,2,7,1,8,0];
-function canPlace(m,key){if(!m||m.lk)return false;const onBench=key.startsWith("p-");if(onBench!==isLead(m))return false;const o=at(key);return !(o&&o!==m&&o.lk)}
+function canPlace(m,key){if(!m||m.lk)return false;const onBench=key.startsWith("p-");if(onBench&&BENCH_FIX[key.slice(2)])return false;if(onBench!==isLead(m))return false;const o=at(key);return !(o&&o!==m&&o.lk)}
 function place(m,key){if(!m)return;const onBench=key.startsWith("p-");
  if(m.lk){status(m.n+" je zaključan",false);return}
  if(onBench!==isLead(m)){status(onBench?"Na mesta predsedništva idu samo predsednik i potpredsednici":"Predsednik i potpredsednici sede u predsedništvu",false);return}
  const other=at(key);if(other===m)return;if(other&&other.lk){status(other.n+" je zaključan na tom mestu",false);return}
- if(onBench){const S=SLOTS.map(x=>x==="SG"?null:x),from=S.indexOf(m),to=+key.slice(2);S[to]=m;if(from>=0)S[from]=other;else if(other){const k=NEAR.find(i=>!S[i]);if(k!=null)S[k]=other}
-  const ch=[];S.forEach((x,j)=>{if(x&&x.s!=="p-"+j){x.s="p-"+j;ch.push({id:x.id,seat:x.s})}});draw();if(ch.length)save(ch);return}
+ if(onBench){if(BENCH_FIX[key.slice(2)]){status("To je stalno mesto generalnog sekretara / zamenika",false);return}
+  const S=SLOTS.slice(),from=S.indexOf(m),to=+key.slice(2);S[to]=m;if(from>=0)S[from]=other;else if(other){const k=BENCH_NEAR.find(i=>!S[i]);if(k!=null)S[k]=other}
+  const ch=[];S.forEach((x,j)=>{if(x&&typeof x!=="string"&&x.s!=="p-"+j){x.s="p-"+j;ch.push({id:x.id,seat:x.s})}});draw();if(ch.length)save(ch);return}
  const old=m.s||null;const ch=[{id:m.id,seat:key}];
  if(other){other.s=old;ch.push({id:other.id,seat:old})}m.s=key;draw();save(ch)}
 function unseat(m){if(!m||!m.s)return;if(m.lk){status(m.n+" je zaključan",false);return}m.s=null;draw();save([{id:m.id,seat:null}])}

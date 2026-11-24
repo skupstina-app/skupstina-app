@@ -57,8 +57,8 @@ Map of this repo. Read this first, then open only the file you need.
   cookie (signed with the `SALT` secret, 30 days). Seats are saved in `mps.seat` as `row-section-index`
   (row 0 nearest the presidium; section 0 and index 0 on the right as seen on the broadcast, same as `30-hall.js`).
   The Speaker and vice-presidents sit on the presidium bench instead: 9 places `p-0`..`p-8` (left to right as on the
-  broadcast, `p-4` the middle); `benchSlots()` (same in `30-hall.js` and `admin/sala.html`) fills unsaved ones and puts the
-  secretary general (not an MP) on `p-5` or the nearest free place.
+  broadcast): 3 VPs, `p-3` deputy secretary general, `p-4` the Speaker, `p-5` secretary general, 3 VPs. GS and GSD are
+  not MPs and their places are fixed. `benchSlots()` (same in `30-hall.js` and `admin/sala.html`) fills unsaved places.
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
   with simple info, lock and remove. `mps.seat_lock` = 1 locks an MP on his seat (column added by `ensureLockCol` in
   admin.js; `POST /admin/api/lock {id,lock}`); `POST /admin/api/seats` refuses (409 `locked`) any change that moves a locked

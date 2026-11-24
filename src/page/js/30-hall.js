@@ -4,16 +4,17 @@ const order=[...mps].sort((a,b)=>a.g-b.g||a.name.localeCompare(b.name,"sr"));
 const seatOf=new Map(order.map((m,i)=>[m,i]));
 const maxT=Math.max(...mps.map(m=>m.t)),hall=$("#hall"),svg=$("#hallSvg"),tip=$("#tip"),board=$("#salaBoard");
 let view="groups",active=live,focusMp=live.m;const geo={};
-/* the presidium bench: 9 places, the Speaker in the middle (index 4), four on each side, left to right as seen on the broadcast.
-   Places set in the admin (seat "p-0".."p-8") win; anyone else takes their default place or the free place nearest the middle.
-   "SG" = the secretary general (not an MP), by default on the Speaker's left (index 5). Same function in src/admin/sala.html. */
+/* the presidium bench: 9 places, left to right as seen on the broadcast:
+   3 vice-presidents · deputy secretary general ("GSD", index 3) · the Speaker (index 4) · secretary general ("SG", index 5) · 3 vice-presidents.
+   SG and GSD are not MPs: their places are fixed. Places set in the admin (seat "p-0".."p-8") win; anyone else takes their default place
+   or the free place nearest the middle. Same function in src/admin/sala.html and src/page/js/30-hall.js. */
+const BENCH_FIX={3:"GSD",5:"SG"},BENCH_NEAR=[4,6,2,7,1,8,0];
 function benchSlots(spk,vps,seatOf){
- const S=Array(9).fill(null),near=[4,5,3,6,2,7,1,8,0],all=[spk,...vps].filter(Boolean);
+ const S=Array(9).fill(null),all=[spk,...vps].filter(Boolean);for(const j in BENCH_FIX)S[j]=BENCH_FIX[j];
  all.forEach(m=>{const x=/^p-([0-8])$/.exec(seatOf(m)||"");if(x&&!S[+x[1]])S[+x[1]]=m});
- const def=[[spk,4],[vps[0],6],[vps[1],7],[vps[2],8],[vps[3],1],[vps[4],2],[vps[5],3],[vps[6],0]].filter(d=>d[0]&&!S.includes(d[0]));
- const late=[];def.forEach(([m,j])=>{if(!S[j]&&j!==5)S[j]=m;else late.push(m)});vps.slice(7).forEach(m=>{if(!S.includes(m))late.push(m)});
- late.forEach(m=>{const k=near.find(i=>!S[i]&&i!==5)??near.find(i=>!S[i]);if(k!=null)S[k]=m});
- const g=!S[5]?5:near.find(i=>!S[i]);if(g!=null)S[g]="SG";
+ const def=[[spk,4],[vps[0],6],[vps[1],7],[vps[2],8],[vps[3],0],[vps[4],1],[vps[5],2]].filter(d=>d[0]&&!S.includes(d[0]));
+ const late=[];def.forEach(([m,j])=>{if(!S[j])S[j]=m;else late.push(m)});vps.slice(6).forEach(m=>{if(!S.includes(m))late.push(m)});
+ late.forEach(m=>{const k=BENCH_NEAR.find(i=>!S[i]);if(k!=null)S[k]=m});
  return S}
 function drawMap(T=SALA){
  const hall=T.el,svg=T.svg,tip=T.tip,geo=T.geo,LIVE=T.live,V=LIVE?"live":view;
@@ -47,12 +48,12 @@ function drawMap(T=SALA){
  const s=Math.max(3,Math.floor(Math.min(step*.72,arc0*.74)));
  /* predsednistvo: one row at the top, 9 places (see benchSlots) */
  const bk=Math.max(4,Math.round(s*1.1)),gap=Math.min(bk*2.4,(W-24)/9.4),benW=gap*9.4,benH=Math.max(14,bk+10),benY=Math.max(4,cy-BH*.3-benH),benX=cx-benW/2,benC=benY+benH/2;
- const slotX=j=>benX+gap*.2+gap*j+gap/2,SLOTS=benchSlots(SPK,VPS,m=>m.seat),SGI=SLOTS.indexOf("SG");
+ const slotX=j=>benX+gap*.2+gap*j+gap/2,SLOTS=benchSlots(SPK,VPS,m=>m.seat);
  geo.bench={x:cx,y:benC,w:benW,h:benH};
- SLOTS.forEach((m,j)=>{if(m&&m!=="SG")posOf.set(m,{x:slotX(j),y:benC,z:1,a:Math.PI/2,i:-1})});
+ SLOTS.forEach((m,j)=>{if(m&&typeof m!=="string")posOf.set(m,{x:slotX(j),y:benC,z:1,a:Math.PI/2,i:-1})});
  let bench=(LIVE?`<g>`:`<g data-bench="1" style="cursor:pointer">`)+`<rect x="${Math.round(benX)}" y="${Math.round(benY)}" width="${Math.round(benW)}" height="${Math.round(benH)}" fill="var(--card)" stroke="var(--line)" rx="2"></rect>`;
- if(!SPK)SLOTS.forEach((m,j)=>{if(m!=="SG")bench+=`<rect x="${Math.round(slotX(j)-bk/2)}" y="${Math.round(benC-bk/2)}" width="${bk}" height="${bk}" fill="${j===4?"var(--ink)":"var(--seat)"}"></rect>`});
- if(SGI>=0)bench+=`<rect x="${Math.round(slotX(SGI)-bk/2)+.75}" y="${Math.round(benC-bk/2)+.75}" width="${bk-1.5}" height="${bk-1.5}" fill="none" stroke="var(--mute)" stroke-width="1.5"></rect>`;bench+=`<title>Predsedništvo</title></g>`;
+ if(!SPK)SLOTS.forEach((m,j)=>{if(typeof m!=="string")bench+=`<rect x="${Math.round(slotX(j)-bk/2)}" y="${Math.round(benC-bk/2)}" width="${bk}" height="${bk}" fill="${j===4?"var(--ink)":"var(--seat)"}"></rect>`});
+ for(const j in BENCH_FIX)bench+=`<rect x="${Math.round(slotX(+j)-bk/2)+.75}" y="${Math.round(benC-bk/2)+.75}" width="${bk-1.5}" height="${bk-1.5}" fill="none" stroke="var(--mute)" stroke-width="1.5"></rect>`;bench+=`<title>Predsedništvo</title></g>`;
  const sq=(p,z,fill,op=1,g="")=>{const k=Math.max(2,Math.round(z*(p.z||1)));return `<rect ${g!==""?`data-g="${g}" `:""}x="${Math.round(p.x-k/2)}" y="${Math.round(p.y-k/2)}" width="${k}" height="${k}" fill="${fill}" opacity="${op}"></rect>`};
  /* who spoke today: hollow = not yet, filled and bigger = spoke more; neighbours spread so big ones never overlap */
  const key=W+"x"+H;if(LIVE&&geo.key!==key){geo.key=key;const R=new Map();
