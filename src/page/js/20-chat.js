@@ -3,25 +3,25 @@
 {
 const box=$("#msgs"),pane=$("#p-chat"),cin=$("#cin"),cst=$("#cst"),dlg=$("#authDlg"),aErr=$("#aErr");
 let ws=null,me=null,backoff=1000,last="",ids=new Set(),ping=0,ticket=null,pendPw=null,color=0,clientId=null,gsiReady=false;
-const ERR={login:"Prijavi se da pišeš.",name_len:"Ime mora imati od 2 do 20 znakova.",name_chars:"Ime može imati slova, brojeve, razmak, tačku i crtice.",name_bad:"To ime nije dozvoljeno.",name_taken:"To ime je zauzeto. Izaberi drugo.",banned:"Privremeno ne možeš da pišeš.",long:"Poruka je duža od 300 znakova.",fast:"Polako, sačekaj par sekundi.",dup:"Ista poruka je već poslata.",bad:"Poruka ima uvredljive reči i nije poslata.",link:"Linkovi i imejlovi nisu dozvoljeni.",phone:"Brojevi telefona nisu dozvoljeni.",off:"Veza je prekinuta, povezujem ponovo…",wait:"Povezujem…",saved:"Sačuvano.",
+const ERR={login:"Prijavi se da pišeš.",name_len:"Ime mora imati od 2 do 20 znakova.",name_chars:"Ime može imati slova, brojeve, razmak, tačku i crtice.",name_bad:"To ime nije dozvoljeno.",name_taken:"To ime je zauzeto. Izaberi drugo.",name_wait:"Ime možeš da menjaš jednom u 15 dana.",banned:"Privremeno ne možeš da pišeš.",long:"Poruka je duža od 300 znakova.",fast:"Polako, sačekaj par sekundi.",dup:"Ista poruka je već poslata.",bad:"Poruka ima uvredljive reči i nije poslata.",link:"Linkovi i imejlovi nisu dozvoljeni.",phone:"Brojevi telefona nisu dozvoljeni.",off:"Veza je prekinuta, povezujem ponovo…",wait:"Povezujem…",saved:"Sačuvano.",
  email:"Proveri email adresu.",password:"Lozinka mora imati bar 8 znakova.",wrong:"Pogrešan email ili lozinka.",use_google:"Ovaj nalog koristi prijavu preko Google-a.",email_taken:"Nalog sa tim emailom već postoji. Prijavi se.",slow:"Previše pokušaja. Probaj ponovo kasnije.",ticket:"Isteklo je vreme. Prijavi se ponovo.",google:"Google prijava nije uspela.",net:"Nema veze. Pokušaj ponovo."};
 const say=(el,k)=>{el.textContent=k?(ERR[k]||k):"";apply(el)};
 const ucol=n=>{let h=5381;for(const c of n.toLocaleLowerCase("sr"))h=(h*33+c.codePointAt(0))>>>0;return h%8};
+const dmy=t=>{const d=new Date(t);return d.getDate()+". "+(d.getMonth()+1)+". "+d.getFullYear()+"."};
 const hhmm=t=>{const d=new Date(t);return d.getHours()+":"+String(d.getMinutes()).padStart(2,"0")};
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
 const post=async(url,body)=>{try{const r=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})});return await r.json()}catch(e){return{ok:false,err:"net"}}};
 
 /* the account line under the message box, and the Profil section */
 function ui(){
- $("#cacct").innerHTML=me?`Pišeš kao <b class="nt u${me.color}">${esc(me.name)}</b> · <button type="button" class="lnk" id="cedit">izmeni</button>`:"";
- $("#pacctBody").innerHTML=me?`<p><b class="nt">${esc(me.name)}</b><span class="m"> · ${esc(me.email||"")}${me.google?" · Google":""}</span></p><div class="abtns"><button type="button" class="b light" id="pedit">Izmeni ime i boju</button><button type="button" class="b light" id="pout">Odjavi se</button></div>`:`<div class="abtns"><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button></div>`;
+ $("#pacctBody").innerHTML=me?`<p><b class="nt">${esc(me.name)}</b><span class="m"> · ${esc(me.email||"")}${me.google?" · Google":""}</span></p>${me.nameNext?`<p class="m anote">Ime možeš ponovo da promeniš ${dmy(me.nameNext)}.</p>`:`<p class="m anote">Ime možeš da menjaš jednom u 15 dana.</p>`}<div class="abtns"><button type="button" class="b light" id="pedit">${me.nameNext?"Izmeni boju":"Izmeni ime i boju"}</button><button type="button" class="b light" id="pout">Odjavi se</button></div>`:`<div class="abtns"><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button></div>`;
  $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$(".cme").hidden=!me;
  if(!me)preloadGsi();
- apply($("#cacct"));apply($("#pacctBody"));
+ apply($("#pacctBody"));
  box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&+m.dataset.u===me.id;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
 }
 document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
- if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="cedit"||id==="pedit")openProfile();
+ if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="pedit")openProfile();
  else if(id==="pout")post("/api/auth/logout").then(()=>{me=null;ui();reconnect()})});
 
 const empty=()=>{};
@@ -73,8 +73,9 @@ function loadGsi(){if(gsiReady||!clientId)return;gsiReady=true;const s=document.
 $("#aGoogle").onclick=()=>{say(aErr,"");if(gClient)gClient.requestAccessToken({prompt:"select_account"});else{loadGsi();say(aErr,"wait")}};
 function setColor(c){color=c;dlg.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.c===c));$("#aPrev").className="nt u"+c}
 function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
- $("#aName").value=edit?me.name:(suggest||"");setColor(edit?me.color:Math.floor(Math.random()*8));$("#aPrev").textContent=$("#aName").value||"Ime";
- $("#authT2").textContent=edit?"Ime i boja":"Tvoje ime u razgovoru";$("#aSave").textContent=edit?"Sačuvaj":"Napravi nalog";
+ $("#aName").value=edit?me.name:(suggest||"");
+ const lock=edit&&!!me.nameNext;$("#aName").disabled=lock;$("#aNameNote").hidden=!edit;$("#aNameNote").textContent=lock?`Ime možeš ponovo da promeniš ${dmy(me.nameNext)}.`:"Ime možeš da menjaš jednom u 15 dana.";setColor(edit?me.color:Math.floor(Math.random()*8));$("#aPrev").textContent=$("#aName").value||"Ime";
+ $("#authT2").textContent=edit?(lock?"Boja imena":"Ime i boja"):"Tvoje ime u razgovoru";$("#aSave").textContent=edit?"Sačuvaj":"Napravi nalog";
  step("profile");show();$("#aName").focus()}
 dlg.querySelector(".sws").addEventListener("click",e=>{const b=e.target.closest(".sw");if(b)setColor(+b.dataset.c)});
 $("#aName").addEventListener("input",()=>{$("#aPrev").textContent=$("#aName").value||"Ime"});
