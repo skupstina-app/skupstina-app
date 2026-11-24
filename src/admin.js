@@ -37,8 +37,8 @@ async function googleKey(kid) {
   return k && crypto.subtle.importKey("jwk", k, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
 }
 
-/** Checks a Google ID token (from Sign in with Google) and returns its verified email, or null. */
-async function verifyGoogle(token, env) {
+/** Checks a Google ID token (from Sign in with Google): {email, sub, name} if valid, else null. */
+export async function verifyGoogleToken(token, env) {
   const parts = String(token || "").split(".");
   if (parts.length !== 3 || !env.GOOGLE_CLIENT_ID) return null;
   const head = JSON.parse(new TextDecoder().decode(unb64u(parts[0])));
@@ -50,7 +50,7 @@ async function verifyGoogle(token, env) {
   if (body.aud !== env.GOOGLE_CLIENT_ID) return null;
   if (body.iss !== "accounts.google.com" && body.iss !== "https://accounts.google.com") return null;
   if (!body.exp || body.exp * 1000 < Date.now() || !body.email_verified) return null;
-  return String(body.email).toLowerCase();
+  return { email: String(body.email).toLowerCase(), sub: String(body.sub), name: body.given_name || body.name || "" };
 }
 
 const SEAT = /^[0-5]-[0-7]-\d{1,2}$/;
@@ -69,7 +69,7 @@ export async function adminRoute(req, env, u, p) {
   if (p === "/admin/api/me") return json({ email: await adminEmail(req, env), clientId: env.GOOGLE_CLIENT_ID || null });
   if (p === "/admin/api/login" && req.method === "POST") {
     const { credential } = await req.json().catch(() => ({}));
-    const email = await verifyGoogle(credential, env).catch(() => null);
+    const email = (await verifyGoogleToken(credential, env).catch(() => null))?.email || null;
     if (!email || !admins(env).includes(email)) return json({ ok: false, err: email ? "not_admin" : "bad_token", email }, 403);
     const exp = String(Date.now() + DAYS * 86400_000);
     const v = encodeURIComponent(email + "|" + exp + "|" + (await hmac(env, email + "|" + exp)));

@@ -1,0 +1,24 @@
+/* chat name colours outside the message list too (account line, sign-in dialog, Profil) */
+.u0{color:#1c7ed6}.u1{color:#2b8a3e}.u2{color:#d9480f}.u3{color:#ae3ec9}.u4{color:#0c8599}.u5{color:#c2255c}.u6{color:#5f3dc4}.u7{color:#b7791f}
+:root[data-mode=dark] .u0{color:#74c0fc}:root[data-mode=dark] .u1{color:#69db7c}:root[data-mode=dark] .u2{color:#ffa94d}:root[data-mode=dark] .u3{color:#e599f7}:root[data-mode=dark] .u4{color:#66d9e8}:root[data-mode=dark] .u5{color:#f783ac}:root[data-mode=dark] .u6{color:#b197fc}:root[data-mode=dark] .u7{color:#ffd43b}
+
+/* sign-in dialog */
+.adlg{width:min(420px,calc(100vw - 24px));max-height:calc(100svh - 24px);overflow:auto;border:0;border-radius:12px;padding:22px 20px 18px;background:var(--card);color:var(--ink);box-shadow:var(--ring)}
+.adlg::backdrop{background:rgba(0,0,0,.55)}
+.adlg h3{margin:0 0 6px;font:500 20px/1.25 "Wix Madefor Display","Wix Madefor Text",sans-serif}
+.adlg p{margin:0 0 14px;font-size:15px}
+.adlg [data-step]{display:flex;flex-direction:column;gap:10px}
+.adlg [data-step][hidden]{display:none}
+.adlg input{width:100%;min-height:46px;padding:0 12px;border-radius:8px;border:0;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;color:var(--ink);font:inherit}
+.adlg form{display:flex;flex-direction:column;gap:10px}
+.ax{position:absolute;top:8px;right:8px;width:40px;height:40px;border:0;background:none;color:var(--mute);font-size:24px;line-height:1;cursor:pointer}
+.gsi{min-height:44px;display:flex;justify-content:center}
+.or{display:flex;align-items:center;gap:10px;font-size:13px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.abtns{display:flex;gap:8px;flex-wrap:wrap}.abtns .b{flex:1;min-height:46px}
+.sws{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+.sw{aspect-ratio:1;min-height:32px;border:0;border-radius:50%;background:currentColor;cursor:pointer;padding:0}
+.sw[aria-pressed=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.prev{margin:0!important}
+.adlg .rules{margin:0;padding-left:18px;font-size:13px;color:var(--mute)}
+.aerr{margin:10px 0 0!important;min-height:1em;font-size:14px;color:#e5484d}
+#pacct p{margin:0 0 10px}

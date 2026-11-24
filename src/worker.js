@@ -6,6 +6,7 @@ import PAGE from "./generated/index.html";
 import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
 import { adminRoute } from "./admin.js";
+import { authRoute, currentUser } from "./auth.js";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
 var PG = "https://www.parlament.gov.rs";
 var LIST_URL = PG + "/" + encodeURI("\u043D\u0430\u0440\u043E\u0434\u043D\u0430-\u0441\u043A\u0443\u043F\u0448\u0442\u0438\u043D\u0430/\u0441\u0430\u0441\u0442\u0430\u0432/\u043D\u0430\u0440\u043E\u0434\u043D\u0438-\u043F\u043E\u0441\u043B\u0430\u043D\u0438\u0446\u0438/\u0430\u043A\u0442\u0443\u0435\u043B\u043D\u0438-\u0441\u0430\u0437\u0438\u0432.11.html");
@@ -290,12 +291,13 @@ var ChatRoom = class {
     this.sql.exec("CREATE TABLE IF NOT EXISTS bans(ip TEXT PRIMARY KEY, until INTEGER, why TEXT)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS names(nk TEXT PRIMARY KEY, name TEXT, key TEXT, ip TEXT, seen INTEGER)");
     this.sql.exec("CREATE INDEX IF NOT EXISTS names_key ON names(key)");
+    for (const c of ["color INTEGER", "uid INTEGER"]) try { this.sql.exec("ALTER TABLE msgs ADD COLUMN " + c); } catch (e) { }
   }
   q(sql, ...a) {
     return [...this.sql.exec(sql, ...a)];
   }
   pub(m) {
-    return { id: m.id, n: m.name, x: m.text, at: m.at };
+    return { id: m.id, n: m.name, x: m.text, at: m.at, c: m.color ?? null };
   }
   send(ws, o) {
     try {
@@ -325,9 +327,11 @@ var ChatRoom = class {
     if (u.pathname === "/ws") {
       const [client, server] = Object.values(new WebSocketPair());
       this.ctx.acceptWebSocket(server);
-      server.serializeAttachment({ ip, name: null, nk: null, last: 0, lastText: "" });
-      const msgs = this.q("SELECT * FROM msgs WHERE hidden=0 ORDER BY id DESC LIMIT ?", CHAT_INIT).reverse().map((m) => this.pub(m));
-      this.send(server, { t: "init", msgs, v: this.ctx.getWebSockets().length });
+      let user = null;
+      try { user = JSON.parse(req.headers.get("x-user") || "null"); } catch (e) { }
+      server.serializeAttachment({ ip, uid: user?.id ?? null, name: user?.name ?? null, nk: user?.nk ?? null, color: user?.color ?? 0, ban: user?.banned || 0, last: 0, lastText: "" });
+      // no history: a viewer sees the chat from the moment they join
+      this.send(server, { t: "init", msgs: [], v: this.ctx.getWebSockets().length, me: user ? { name: user.name, color: user.color } : null });
       await this.countSoon();
       return new Response(null, { status: 101, webSocket: client });
     }
@@ -363,7 +367,8 @@ var ChatRoom = class {
       return;
     }
     const a = ws.deserializeAttachment() || {};
-    if (m.t === "join") {
+    if (m.t === "join") return this.send(ws, { t: "err", code: "login" });
+    if (m.t === "join_old") {
       const [err, name, nk] = checkName(m.name);
       if (err) return this.send(ws, { t: "err", code: "name_" + err });
       const key = typeof m.key === "string" && /^[a-f0-9]{32,64}$/.test(m.key) ? (await sha256(new TextEncoder().encode(m.key))).slice(0, 32) : null;
@@ -384,8 +389,8 @@ var ChatRoom = class {
       return this.send(ws, { t: "ok", name });
     }
     if (m.t === "msg") {
-      if (!a.name) return this.send(ws, { t: "err", code: "nojoin" });
-      if (this.banned(a.ip)) return this.send(ws, { t: "err", code: "banned" });
+      if (!a.uid) return this.send(ws, { t: "err", code: "login" });
+      if (this.banned(a.ip) || a.ban > Date.now()) return this.send(ws, { t: "err", code: "banned" });
       const x = String(m.x || "").replace(/[\u0000-\u001f\u007f​-‏‪-‮⁠-⁤﻿]/g, " ").replace(/\s+/g, " ").trim();
       if (!x) return;
       if (x.length > CHAT_LEN) return this.send(ws, { t: "err", code: "long" });
@@ -396,7 +401,7 @@ var ChatRoom = class {
       if (perMin >= 12) return this.send(ws, { t: "err", code: "fast" });
       const bad = checkText(x);
       if (bad) return this.send(ws, { t: "err", code: bad });
-      const row = this.q("INSERT INTO msgs(at,name,nk,text,ip) VALUES(?,?,?,?,?) RETURNING *", now2, a.name, a.nk, x, a.ip)[0];
+      const row = this.q("INSERT INTO msgs(at,name,nk,text,ip,color,uid) VALUES(?,?,?,?,?,?,?) RETURNING *", now2, a.name, a.nk, x, a.ip, a.color, a.uid)[0];
       this.sql.exec("DELETE FROM msgs WHERE id<?", row.id - CHAT_KEEP);
       this.sql.exec("UPDATE names SET seen=? WHERE nk=?", now2, a.nk);
       a.last = now2;
@@ -445,6 +450,11 @@ async function chatRoute(req, env, u) {
   const stub = env.CHAT.get(env.CHAT.idFromName("main"));
   const h = new Headers(req.headers);
   h.set("x-ip", ipHash);
+  h.delete("x-user");
+  if (u.pathname === "/api/chat") {
+    const user = await currentUser(req, env).catch(() => null);
+    if (user) h.set("x-user", JSON.stringify({ id: user.id, name: user.name, nk: user.nk, color: user.color, banned: user.banned_until || 0 }));
+  }
   return stub.fetch(new Request(new URL(u.pathname === "/api/chat" ? "/ws" : u.pathname.replace("/admin/chat", "/admin") + u.search, u.origin), { headers: h }));
 }
 __name(chatRoute, "chatRoute");
@@ -470,6 +480,7 @@ var worker_default = {
         return chatRoute(req, env, u);
       }
       if (p === "/robots.txt") return H(env.LAUNCHED === "1" ? "User-agent: *\nAllow: /\n" : "User-agent: *\nDisallow: /\n", "text/plain");
+      if (p.startsWith("/api/auth/")) return await authRoute(req, env, u, p, checkName);
       if (p === "/admin/sala" || p.startsWith("/admin/api/")) {
         const r = await adminRoute(req, env, u, p);
         if (r) return r;

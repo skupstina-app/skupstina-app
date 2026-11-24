@@ -34,6 +34,16 @@ Map of this repo. Read this first, then open only the file you need.
 | Footer | `html/footer.html` | | |
 | Data, helpers, boot | | `00-base` | `00-data`, `05-core`, `25-info`, `40-timeline-views`, `74-install-card` (add to home screen), `99-boot` |
 
+## Accounts and chat
+
+- Visitor accounts (`src/auth.js`, D1 `users`): Sign in with Google (same `GOOGLE_CLIENT_ID`) or email + password
+  (PBKDF2). A new account picks a chat name (the chat's name rules, unique) and a colour 0-7 (`.u0`-`.u7`).
+  Session cookie `sk_s` signed with `SALT`, 180 days. Routes `/api/auth/me|google|login|register|profile|logout`.
+- Chat (`ChatRoom` in worker.js, page `js/20-chat.js`): anyone can read; there is no history (a viewer sees messages
+  from when they open the page). Only signed-in users can post; the Worker passes the user to the room as `x-user`.
+- Test locally: `npx wrangler dev --local --local-upstream localhost:8787` (needs `.dev.vars` with `SALT`, and the
+  tables created with `wrangler d1 execute DB --local`).
+
 ## Admin
 
 - `/admin/sala`: seat map editor (`src/admin/sala.html`, routes in `src/admin.js`). Sign in with Google: the ID token
