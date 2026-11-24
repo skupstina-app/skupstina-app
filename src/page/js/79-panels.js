@@ -18,6 +18,8 @@ const groupRole=(m,f)=>{const r=/\(([^)]*)\)\s*$/.exec(c2l(m.pg||""));if(!r)retu
 /* talk time today per MP, up to the viewer's position (or to the end of the timeline if not playing) */
 function talkTotals(){
  let t=null;try{t=ytReady?yt.getCurrentTime():null}catch(e){}
+ /* only count up to the viewer's position while they are actually on today's stream; otherwise the whole day */
+ if(!(apiLive||plLive)||!TL.length||t==null||t<TL[0].from)t=null;
  const by=new Map();
  TL.forEach(x=>{const end=x.to==null?(t==null?x.from:Math.max(x.from,t)):(t==null?x.to:Math.min(x.to,Math.max(x.from,t)));if(t!=null&&x.from>t)return;
   const o=by.get(x.mp)||{t:0,n:0};o.t+=Math.max(0,end-x.from);o.n++;by.set(x.mp,o)});
