@@ -56,6 +56,9 @@ Map of this repo. Read this first, then open only the file you need.
   is checked against `GOOGLE_CLIENT_ID`; only emails in `ADMIN_EMAILS` (both in wrangler.jsonc vars) get a session
   cookie (signed with the `SALT` secret, 30 days). Seats are saved in `mps.seat` as `row-section-index`
   (row 0 nearest the presidium; section 0 and index 0 on the right as seen on the broadcast, same as `30-hall.js`).
+  The Speaker and vice-presidents sit on the presidium bench instead: 9 places `p-0`..`p-8` (left to right as on the
+  broadcast, `p-4` the middle); `benchSlots()` (same in `30-hall.js` and `admin/sala.html`) fills unsaved ones and puts the
+  secretary general (not an MP) on `p-5` or the nearest free place.
 - The public Sala map uses hand-placed seats first and places everyone else automatically. The page's MP data is
   cached up to 5 minutes, so seat changes show on the site within 5 minutes.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.

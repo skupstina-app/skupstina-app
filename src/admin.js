@@ -53,7 +53,7 @@ export async function verifyGoogleToken(token, env) {
   return { email: String(body.email).toLowerCase(), sub: String(body.sub), name: body.given_name || body.name || "" };
 }
 
-const SEAT = /^[0-5]-[0-7]-\d{1,2}$/;
+const SEAT = /^([0-5]-[0-7]-\d{1,2}|p-[0-8])$/; // hall seat row-section-index, or presidium place p-0..p-8
 
 /** Handles /admin/sala and /admin/api/*; returns null for anything else. */
 export async function adminRoute(req, env, u, p) {

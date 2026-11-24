@@ -25,7 +25,8 @@ button:hover{border-color:rgba(255,255,255,.3)}
 .seat,.lead{position:absolute;width:var(--s,24px);height:var(--s,24px);margin:calc(var(--s,24px)/-2) 0 0 calc(var(--s,24px)/-2);border-radius:4px;background:var(--seat);border:2px solid transparent;padding:0;background-size:cover;background-position:center 20%}
 .seat:not(.taken){background:transparent;border:1px solid rgba(255,255,255,.18)}
 .lead{border-color:var(--c,var(--mute))}
-.lead.sg{background:transparent;border:1.5px dashed var(--mute)}
+.seat.lead:not(.taken){background:var(--bg)}
+.seat.lead.sg{background:transparent;border:1.5px dashed var(--mute)}
 .bench{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:4px}
 .blbl,.rlbl{position:absolute;transform:translate(-50%,0);font-size:11px;line-height:12px;color:var(--mute);white-space:nowrap;pointer-events:none}
 .rlbl{transform:translate(-50%,-50%)}
@@ -55,8 +56,8 @@ button:hover{border-color:rgba(255,255,255,.3)}
 <header><h1>Raspored sedenja</h1><span class="m" id="count"></span><span class="sp"></span><label class="m">Veličina <input type="range" id="zoom" min="600" max="3200" step="20"></label><span id="status"></span><span class="m" id="who"></span><button id="out" hidden>Odjavi se</button></header>
 <div id="login" hidden><p>Prijavi se Google nalogom administratora.</p><div id="gbtn"></div><p class="m" id="lerr"></p></div>
 <div id="app" hidden>
- <div id="hallWrap"><p class="m" style="text-align:center;margin:0 0 10px">Pogled kao na prenosu i na mapi Sale · predsedništvo gore (mesta po funkciji)</p><div id="hall"></div>
- <p class="m" style="text-align:center;margin-top:14px">Klikni poslanika u listi pa mesto, ili ga prevuci. Klik na zauzeto mesto pa na drugo menja ih. Promene se čuvaju same.</p></div>
+ <div id="hallWrap"><p class="m" style="text-align:center;margin:0 0 10px">Pogled kao na prenosu i na mapi Sale · predsedništvo gore (9 mesta, predsednik u sredini)</p><div id="hall"></div>
+ <p class="m" style="text-align:center;margin-top:14px">Klikni poslanika u listi pa mesto, ili ga prevuci. Klik na zauzeto mesto pa na drugo menja ih. Predsednik i potpredsednici se pomeraju samo po predsedništvu (9 mesta); GS (generalni sekretar, nije poslanik) stoji odmah desno od predsednika kako se vidi na prenosu, ili na prvom slobodnom mestu. Promene se čuvaju same.</p></div>
  <div id="side">
   <div class="tools"><input type="search" id="q" placeholder="Traži poslanika"><div class="chips" id="chips"></div><label class="m"><input type="checkbox" id="only"> samo neraspoređeni</label></div>
   <ul id="list"></ul>
@@ -76,34 +77,46 @@ async function api(path,body){const r=await fetch(path,body?{method:"POST",heade
 function index(){bySeat.clear();MPS.forEach(m=>{if(m.s)bySeat.set(m.s,m)})}
 /* same geometry as drawMap() in src/page/js/30-hall.js: the presidium at the top, rows as arcs fanning out below it,
    section 0 / index 0 on the right as seen on the broadcast */
-let HW=1000;
+let HW=1000,SLOTS=[];
+/* presidium leads: the Speaker and the vice-presidents; they sit on the bench, everyone else in the hall */
+const isLead=m=>/^(Председник Народне|Потпредседник)/.test(m.r||"");
+const leads=()=>{const spk=MPS.find(m=>/^Председник Народне/.test(m.r||"")),vps=MPS.filter(m=>/^Потпредседник/.test(m.r||"")).sort((a,b)=>a.n.split(" ").pop().localeCompare(b.n.split(" ").pop(),"sr"));return [spk,vps]};
+/* same as benchSlots() in src/page/js/30-hall.js */
+function benchSlots(spk,vps,seatOf){
+ const S=Array(9).fill(null),near=[4,5,3,6,2,7,1,8,0],all=[spk,...vps].filter(Boolean);
+ all.forEach(m=>{const x=/^p-([0-8])$/.exec(seatOf(m)||"");if(x&&!S[+x[1]])S[+x[1]]=m});
+ const def=[[spk,4],[vps[0],6],[vps[1],7],[vps[2],8],[vps[3],1],[vps[4],2],[vps[5],3],[vps[6],0]].filter(d=>d[0]&&!S.includes(d[0]));
+ const late=[];def.forEach(([m,j])=>{if(!S[j]&&j!==5)S[j]=m;else late.push(m)});vps.slice(7).forEach(m=>{if(!S.includes(m))late.push(m)});
+ late.forEach(m=>{const k=near.find(i=>!S[i]&&i!==5)??near.find(i=>!S[i]);if(k!=null)S[k]=m});
+ const g=!S[5]?5:near.find(i=>!S[i]);if(g!=null)S[g]="SG";
+ return S}
 function drawHall(){
  const W=HW,cx0=W/2,R=W/2-16,r0=R*.56,step=(R-r0)/(ROWS-1),N0=SEC.reduce((a,b)=>a+b,0),aw=(Math.PI-.04)*r0/(N0+7*1.3)*1.3,pts=[];let minArc=1e9;
  for(let i=0;i<ROWS;i++){const r=r0+i*step,ns=SEC.map(n=>n+i),N=ns.reduce((a,b)=>a+b,0),ga=aw/r,per=(Math.PI-.04-(SEC.length-1)*ga)/N;minArc=Math.min(minArc,per*r);
   let a0=Math.PI-.02;ns.forEach((n,k)=>{for(let j=0;j<n;j++){const a=a0-(j+.5)*per;pts.push({i,k,j,a,r})}a0-=n*per+ga})}
  const s=Math.max(10,Math.floor(Math.min(step*.85,minArc*.9))),pad=Math.ceil(s/2)+6,cx=cx0+pad;
- /* presidium bench, as seen on the broadcast: VP 4-6, the Speaker, the secretary general (not an MP), VP 1-3 */
- const SPK=MPS.find(m=>/^Председник Народне/.test(m.r||"")),VPS=MPS.filter(m=>/^Потпредседник/.test(m.r||"")).sort((a,b)=>a.n.split(" ").pop().localeCompare(b.n.split(" ").pop(),"sr"));
- const bk=Math.round(s*1.3),gap=Math.min(bk*1.9,(W-24)/8),benW=gap*8.4,benH=bk+12,benY=8,benX=cx-benW/2,benC=benY+benH/2,cy=benY+benH+s*.9+16;
- const slotX=j=>benX+gap*.2+gap*j+gap/2,SLOTS=[[VPS[3],"PP"],[VPS[4],"PP"],[VPS[5],"PP"],[SPK,"Predsednik"],["SG","GS"],[VPS[0],"PP"],[VPS[1],"PP"],[VPS[2],"PP"]];
+ /* presidium bench: 9 places, the Speaker's place in the middle; leads can be moved between them */
+ const [SPK,VPS]=leads();SLOTS=benchSlots(SPK,VPS,m=>m.s);
+ const bk=Math.round(s*1.3),gap=Math.min(bk*1.9,(W-24)/9),benW=gap*9.4,benH=bk+12,benY=8,benX=cx-benW/2,benC=benY+benH/2,cy=benY+benH+s*.9+16;
+ const slotX=j=>benX+gap*.2+gap*j+gap/2;
  let h=`<div class="bench" style="left:${benX}px;top:${benY}px;width:${benW}px;height:${benH}px"></div>`;
- SLOTS.forEach(([m,l],j)=>{const x=slotX(j);
-  if(m==="SG")h+=`<div class="lead sg" style="--s:${bk}px;left:${x}px;top:${benC}px" title="Generalni sekretar (nije poslanik)"></div>`;
-  else h+=`<div class="lead" style="--s:${bk}px;left:${x}px;top:${benC}px;${m?`--c:var(--p${gOf(m)});${m.ph?`background-image:url(/p/${m.id})`:""}`:""}" title="${m?esc(m.n)+" · ":""}${l==="PP"?"potpredsednik":"predsednik Skupštine"} (po funkciji)">${m&&!m.ph?`<span>${esc(ini(m.n))}</span>`:""}</div>`;
-  h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${l}</span>`});
+ SLOTS.forEach((m,j)=>{const x=slotX(j),key="p-"+j,st=`--s:${bk}px;left:${x}px;top:${benC}px;`;
+  if(m==="SG")h+=`<button class="seat lead sg" data-seat="${key}" style="${st}" title="Generalni sekretar (nije poslanik) · mesto ${j+1} u predsedništvu"></button>`;
+  else h+=`<button class="seat lead${m?" taken":""}${m&&sel===m?" sel":""}" data-seat="${key}" style="${st}${m?`--c:var(--p${gOf(m)});${m.ph?`background-image:url(/p/${m.id})`:""}`:""}"${m?` draggable="true"`:""} title="${m?esc(m.n)+" · "+(m===SPK?"predsednik Skupštine":"potpredsednik")+(m.s?"":" (automatski)")+" · ":""}mesto ${j+1} u predsedništvu">${m&&!m.ph?`<span>${esc(ini(m.n))}</span>`:""}</button>`;
+  h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${m==="SG"?"GS":m===SPK?"Predsednik":m?"PP":""}</span>`});
  pts.forEach(p=>{const key=`${p.i}-${p.k}-${p.j}`,m=bySeat.get(key),x=cx-p.r*Math.cos(p.a),y=cy+p.r*Math.sin(p.a);
   h+=`<button class="seat${m?" taken":""}${sel&&sel.s===key?" sel":""}" data-seat="${key}" title="${m?esc(m.n)+" · ":""}red ${p.i+1}, sektor ${8-p.k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;${m?`--c:var(--p${gOf(m)});${m.ph?`background-image:url(/p/${m.id})`:""}`:""}"${m?` draggable="true"`:""}>${m&&!m.ph?`<span>${esc(ini(m.n))}</span>`:""}</button>`});
  /* row numbers just above both ends of each row */
  for(let i=0;i<ROWS;i++){const r=r0+i*step;h+=`<span class="rlbl" style="left:${cx-r}px;top:${cy-s*.95}px">${i+1}</span><span class="rlbl" style="left:${cx+r}px;top:${cy-s*.95}px">${i+1}</span>`}
  const el=$("#hall");el.style.width=(W+2*pad)+"px";el.style.height=(cy+R+s/2+10)+"px";el.style.setProperty("--s",s+"px");el.innerHTML=h;
- const lead=MPS.filter(m=>m.r).length,placed=MPS.filter(m=>m.s&&!m.r).length;$("#count").textContent=`raspoređeno ${placed} / ${MPS.length-lead}`;
+ const lead=MPS.filter(isLead).length,placed=MPS.filter(m=>m.s&&!isLead(m)).length;$("#count").textContent=`raspoređeno ${placed} / ${MPS.length-lead}`;
 }
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const ini=n=>n.split(" ").map(w=>w[0]).join("").slice(0,3);
 function drawList(){
  const q=$("#q").value.trim().toLowerCase(),only=$("#only").checked;
- const rows=MPS.filter(m=>!m.r&&(fg<0||gOf(m)===fg)&&(!only||!m.s)&&(!q||m.n.toLowerCase().includes(q)));
- $("#list").innerHTML=rows.map(m=>`<li draggable="true" data-id="${m.id}" class="${sel===m?"sel":""}" style="--c:var(--p${gOf(m)})"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><span class="nm"><b>${esc(m.n)}</b><span class="st">${GROUPS[gOf(m)][0]}${m.s?` · red ${+m.s.split("-")[0]+1}, sektor ${8-m.s.split("-")[1]}`:" · bez mesta"}</span></span></li>`).join("");
+ const rows=MPS.filter(m=>(fg<0||gOf(m)===fg)&&(!only||!m.s)&&(!q||m.n.toLowerCase().includes(q)));
+ $("#list").innerHTML=rows.map(m=>`<li draggable="true" data-id="${m.id}" class="${sel===m?"sel":""}" style="--c:var(--p${gOf(m)})"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><span class="nm"><b>${esc(m.n)}</b><span class="st">${GROUPS[gOf(m)][0]}${isLead(m)?` · predsedništvo${m.s?`, mesto ${+m.s.slice(2)+1}`:" (automatski)"}`:m.s?` · red ${+m.s.split("-")[0]+1}, sektor ${8-m.s.split("-")[1]}`:" · bez mesta"}</span></span></li>`).join("");
  $("#seltxt").textContent=sel?sel.n+(sel.s?" (na mestu)":" (bez mesta)"):"Ništa nije izabrano";$("#unseat").hidden=!(sel&&sel.s);
 }
 function draw(){index();drawHall();drawList()}
@@ -114,15 +127,23 @@ const setZoom=(v,keep)=>{HW=v;$("#zoom").value=v;if(keep){zoomed=true;try{localS
 $("#zoom").oninput=e=>setZoom(+e.target.value,true);
 new ResizeObserver(()=>{if(!zoomed&&MPS.length)setZoom(fit())}).observe($("#hallWrap"));
 async function save(changes){status("Čuvam…");const j=await api("/admin/api/seats",{set:changes}).catch(()=>({ok:false}));status(j.ok?"Sačuvano":"Greška: nije sačuvano",j.ok);if(!j.ok)load()}
-/* put m in seat key; whoever sat there goes to m's old seat (swap) or off the map */
-function place(m,key){if(!m||m.r)return;const other=bySeat.get(key);if(other===m)return;const old=m.s||null;const ch=[{id:m.id,seat:key}];
+/* who is shown in a seat: hall seats from the saved seat, bench places from benchSlots (saved or automatic) */
+const at=key=>{if(key.startsWith("p-")){const m=SLOTS[+key.slice(2)];return m&&m!=="SG"?m:null}return bySeat.get(key)||null};
+/* put m in seat key; whoever sat there goes to m's old seat (swap) or off the map.
+   Leads go only on the bench, everyone else only in the hall. On the bench every lead's place is saved, so nobody jumps around. */
+function place(m,key){if(!m)return;const onBench=key.startsWith("p-");
+ if(onBench!==isLead(m)){status(onBench?"Na mesta predsedništva idu samo predsednik i potpredsednici":"Predsednik i potpredsednici sede u predsedništvu",false);sel=null;draw();return}
+ const other=at(key);if(other===m)return;
+ if(onBench){const S=SLOTS.map(x=>x==="SG"?null:x),from=S.indexOf(m),to=+key.slice(2);S[to]=m;if(from>=0)S[from]=other;else if(other){const k=[4,5,3,6,2,7,1,8,0].find(i=>!S[i]);if(k!=null)S[k]=other}
+  const ch=[];S.forEach((x,j)=>{if(x&&x.s!=="p-"+j){x.s="p-"+j;ch.push({id:x.id,seat:x.s})}});sel=null;draw();if(ch.length)save(ch);return}
+ const old=m.s||null;const ch=[{id:m.id,seat:key}];
  if(other){other.s=old;ch.push({id:other.id,seat:old})}m.s=key;sel=null;draw();save(ch)}
-$("#hall").addEventListener("click",e=>{const b=e.target.closest("[data-seat]");if(!b)return;const key=b.dataset.seat,m=bySeat.get(key);
+$("#hall").addEventListener("click",e=>{const b=e.target.closest("[data-seat]");if(!b)return;const key=b.dataset.seat,m=at(key);
  if(sel){place(sel,key);return}if(m){sel=m;draw()}});
 $("#list").addEventListener("click",e=>{const li=e.target.closest("[data-id]");if(!li)return;const m=MPS.find(x=>x.id==li.dataset.id);sel=sel===m?null:m;draw()});
 $("#unseat").onclick=()=>{if(!sel||!sel.s)return;const m=sel;m.s=null;sel=null;draw();save([{id:m.id,seat:null}])};
 /* drag and drop (mouse) */
-document.addEventListener("dragstart",e=>{const li=e.target.closest("[data-id]"),st=e.target.closest("[data-seat]");const m=li?MPS.find(x=>x.id==li.dataset.id):st?bySeat.get(st.dataset.seat):null;if(m){e.dataTransfer.setData("text/plain",String(m.id));e.dataTransfer.effectAllowed="move"}});
+document.addEventListener("dragstart",e=>{const li=e.target.closest("[data-id]"),st=e.target.closest("[data-seat]");const m=li?MPS.find(x=>x.id==li.dataset.id):st?at(st.dataset.seat):null;if(m){e.dataTransfer.setData("text/plain",String(m.id));e.dataTransfer.effectAllowed="move"}});
 $("#hall").addEventListener("dragover",e=>{const b=e.target.closest("[data-seat]");if(b){e.preventDefault();document.querySelectorAll(".over").forEach(x=>x.classList.remove("over"));b.classList.add("over")}});
 $("#hall").addEventListener("drop",e=>{e.preventDefault();const b=e.target.closest("[data-seat]");const m=MPS.find(x=>x.id==e.dataTransfer.getData("text/plain"));if(b&&m)place(m,b.dataset.seat)});
 $("#list").addEventListener("dragover",e=>e.preventDefault());
