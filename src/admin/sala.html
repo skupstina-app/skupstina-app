@@ -36,6 +36,9 @@ button:hover{border-color:rgba(255,255,255,.3)}
 .seat.no{outline:2px dashed #e07a6e}
 .seat.taken{cursor:grab;touch-action:none}
 .seat.lk{cursor:pointer}
+.seat,#list li{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.holding{outline:2px solid var(--live);animation:hold .45s linear forwards}
+@keyframes hold{from{outline-offset:9px;outline-color:transparent}to{outline-offset:1px}}
 .seat.lk::after{content:"";position:absolute;right:-5px;top:-5px;width:min(12px,calc(var(--s,24px)*.55));height:min(12px,calc(var(--s,24px)*.55));border-radius:3px;background:var(--live) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23111211' d='M2 1h4v1H2zM2 2h1v2H2zM5 2h1v2H5zM1 4h6v3H1z'/%3E%3C/svg%3E") center/8px no-repeat}
 .dragging,.dragging *{cursor:grabbing!important;user-select:none}
 #ghost{position:fixed;z-index:50;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:6px;border:2px solid var(--c);background:var(--seat) center 20%/cover;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.5)}
@@ -213,8 +216,9 @@ card.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b
  if(b.dataset.act==="lock"){const want=!m.lk;
   /* a lead on an automatic bench place: save that place first, so the lock keeps him there */
   if(want&&isLead(m)&&!m.s){const j=SLOTS.indexOf(m);if(j<0)return;m.s="p-"+j;await save([{id:m.id,seat:m.s}])}
-  status("Čuvam…");const j=await api("/admin/api/lock",{id:m.id,lock:want}).catch(()=>({ok:false}));
-  if(j.ok){m.lk=want?1:0;status(want?"Zaključan":"Otključan");draw()}else status(j.err==="no_seat"?"Prvo ga stavi na mesto":"Greška: nije sačuvano",false)}});
+  setLock(m,want)}});
+async function setLock(m,want){status("Čuvam…");const j=await api("/admin/api/lock",{id:m.id,lock:want}).catch(()=>({ok:false}));
+ if(j.ok){m.lk=want?1:0;status(want?"Zaključan":"Otključan");draw()}else status(j.err==="no_seat"?"Prvo ga stavi na mesto":"Greška: nije sačuvano",false);return j.ok}
 wrap.addEventListener("scroll",placeCard,{passive:true});addEventListener("resize",placeCard);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")hideCard()});
 
@@ -222,9 +226,15 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")hideCard()});
    On touch, list rows scroll; drag them by the photo. */
 let drag=null,press=null;const ghost=document.createElement("div");ghost.id="ghost";
 const mpAt=t=>{const li=t.closest("#list [data-id]");if(li)return {m:MPS.find(x=>x.id==li.dataset.id),el:li,from:null};const st=t.closest("[data-seat]");if(st)return {m:at(st.dataset.seat),el:st,from:st.dataset.seat};return null};
+/* a locked MP doesn't move on a plain drag (so he isn't moved by accident); press and hold him to unlock, then drag */
+const HOLD=450;
+function armHold(){const p=press;if(!p||!p.m||!p.m.lk)return;p.el.classList.add("holding");
+ p.hold=setTimeout(async()=>{if(press!==p)return;p.el.classList.remove("holding");navigator.vibrate?.(15);p.unlocked=true;await setLock(p.m,false)},HOLD)}
+function disarm(p){if(p&&p.hold){clearTimeout(p.hold);p.hold=null}document.querySelectorAll(".holding").forEach(x=>x.classList.remove("holding"))}
+document.addEventListener("contextmenu",e=>{if(e.target.closest("[data-seat],#list [data-id]"))e.preventDefault()});
 document.addEventListener("pointerdown",e=>{if(e.button>0||pinch)return;const hit=mpAt(e.target);if(!hit)return;
- if(e.pointerType==="touch"&&hit.el.matches("#list li")&&!e.target.closest(".ph")){press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId,tapOnly:true};return}
- press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId};if(hit.m)e.preventDefault()});
+ if(e.pointerType==="touch"&&hit.el.matches("#list li")&&!e.target.closest(".ph")){press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId,tapOnly:true};armHold();return}
+ press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId};if(hit.m)e.preventDefault();armHold()});
 const LIFT=e=>e.pointerType==="touch"?56:0;
 function target(x,y){const el=document.elementFromPoint(x,y);if(!el)return null;const st=el.closest("[data-seat]");if(st)return {seat:st};if(el.closest("#side"))return {list:$("#side")};
  if(!el.closest("#hallWrap"))return null;let best=null,bd=Math.max(18,parseFloat(getComputedStyle($("#hall")).getPropertyValue("--s"))||0);
@@ -232,14 +242,14 @@ function target(x,y){const el=document.elementFromPoint(x,y);if(!el)return null;
 function clearOver(){document.querySelectorAll(".over,.no").forEach(x=>x.classList.remove("over","no"))}
 document.addEventListener("pointermove",e=>{if(!press||e.pointerId!==press.id)return;
  if(!drag){if(press.tapOnly||!press.m||Math.hypot(e.clientX-press.x,e.clientY-press.y)<6)return;
-  if(press.m.lk){status(press.m.n+" je zaključan",false);press=null;return}
+  if(press.m.lk){if(!press.unlocked){disarm(press);status(press.m.n+" je zaključan · drži ga da otključaš",false);press=null}return}
   drag={m:press.m,from:press.from};hideCard();ghost.style.setProperty("--c",`var(--p${gOf(drag.m)})`);ghost.style.backgroundImage=drag.m.ph?`url(/p/${drag.m.id})`:"";document.body.appendChild(ghost);document.body.classList.add("dragging")}
  const gy=e.clientY-LIFT(e);ghost.style.left=e.clientX+"px";ghost.style.top=gy+"px";clearOver();const t=target(e.clientX,gy);
  if(t&&t.seat)t.seat.classList.add(canPlace(drag.m,t.seat.dataset.seat)?"over":"no");else if(t&&t.list&&drag.m.s&&!isLead(drag.m))t.list.classList.add("over");
  /* scroll the hall when dragging near its edges */
  const r=wrap.getBoundingClientRect(),E=40;if(e.clientX>r.left&&e.clientX<r.right&&gy>r.top&&gy<r.bottom){
   if(e.clientX<r.left+E)wrap.scrollLeft-=14;else if(e.clientX>r.right-E)wrap.scrollLeft+=14;if(gy<r.top+E)wrap.scrollTop-=14;else if(gy>r.bottom-E)wrap.scrollTop+=14}});
-function endPress(e,cancel){if(!press||e.pointerId!==press.id)return;const p=press;press=null;
+function endPress(e,cancel){if(!press||e.pointerId!==press.id)return;const p=press;press=null;disarm(p);if(p.unlocked&&!drag)return;
  if(drag){const d=drag;drag=null;ghost.remove();document.body.classList.remove("dragging");clearOver();if(cancel)return;
   const t=target(e.clientX,e.clientY-LIFT(e));if(t&&t.seat)place(d.m,t.seat.dataset.seat);else if(t&&t.list&&!isLead(d.m))unseat(d.m);return}
  if(cancel)return;

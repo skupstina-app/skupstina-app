@@ -61,7 +61,8 @@ Map of this repo. Read this first, then open only the file you need.
   on the Speaker's own left, as in the hall). GS and GSD are
   not MPs and their places are fixed. `benchSlots()` (same in `30-hall.js` and `admin/sala.html`) fills unsaved places.
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
-  with simple info, lock and remove. `mps.seat_lock` = 1 locks an MP on his seat (column added by `ensureLockCol` in
+  with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
+  then drag on. `mps.seat_lock` = 1 locks an MP on his seat (column added by `ensureLockCol` in
   admin.js; `POST /admin/api/lock {id,lock}`); `POST /admin/api/seats` refuses (409 `locked`) any change that moves a locked
   MP or puts someone on a locked seat. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch.
 - The public Sala map uses hand-placed seats first and places everyone else automatically. The page's MP data is
