@@ -57,7 +57,8 @@ Map of this repo. Read this first, then open only the file you need.
   cookie (signed with the `SALT` secret, 30 days). Seats are saved in `mps.seat` as `row-section-index`
   (row 0 nearest the presidium; section 0 and index 0 on the right as seen on the broadcast, same as `30-hall.js`).
   The Speaker and vice-presidents sit on the presidium bench instead: 9 places `p-0`..`p-8` (left to right as on the
-  broadcast): 3 VPs, `p-3` deputy secretary general, `p-4` the Speaker, `p-5` secretary general, 3 VPs. GS and GSD are
+  broadcast): 4 VPs, `p-4` the Speaker, `p-5` secretary general, `p-6` deputy secretary general, 2 VPs (GS and ZGS sit
+  on the Speaker's own left, as in the hall). GS and GSD are
   not MPs and their places are fixed. `benchSlots()` (same in `30-hall.js` and `admin/sala.html`) fills unsaved places.
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
   with simple info, lock and remove. `mps.seat_lock` = 1 locks an MP on his seat (column added by `ensureLockCol` in

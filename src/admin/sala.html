@@ -10,16 +10,15 @@
 --p0:#e07a6e;--p1:#8fbd8a;--p2:#eba46c;--p3:#7fa6d1;--p4:#63ae9f;--p5:#cfb567;--p6:#aab3c2;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;flex:none;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
 header h1{font-size:17px;margin:0;font-weight:600}
 header .sp{flex:1}
 .m{color:var(--mute);font-size:13px}
 button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
 button:hover{border-color:rgba(255,255,255,.3)}
 #login{display:grid;place-items:center;gap:14px;padding:80px 16px;text-align:center}
-#app{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:0;height:calc(100vh - 57px)}
-@media(max-width:900px){#app{grid-template-columns:minmax(0,1fr);height:auto}#hallWrap{max-height:75vh}header{flex-wrap:wrap;gap:8px}header .zb input{width:90px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line);max-height:none}}
+#app{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:0;flex:1;min-height:0}
 #hallWrap{overflow:auto;padding:16px;position:relative}
 #hallWrap.panning{cursor:grabbing}
 #hall{position:relative;margin:0 auto}
@@ -37,7 +36,7 @@ button:hover{border-color:rgba(255,255,255,.3)}
 .seat.no{outline:2px dashed #e07a6e}
 .seat.taken{cursor:grab;touch-action:none}
 .seat.lk{cursor:pointer}
-.seat.lk::after{content:"";position:absolute;right:-5px;top:-5px;width:12px;height:12px;border-radius:3px;background:var(--live) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23111211' d='M2 1h4v1H2zM2 2h1v2H2zM5 2h1v2H5zM1 4h6v3H1z'/%3E%3C/svg%3E") center/8px no-repeat}
+.seat.lk::after{content:"";position:absolute;right:-5px;top:-5px;width:min(12px,calc(var(--s,24px)*.55));height:min(12px,calc(var(--s,24px)*.55));border-radius:3px;background:var(--live) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23111211' d='M2 1h4v1H2zM2 2h1v2H2zM5 2h1v2H5zM1 4h6v3H1z'/%3E%3C/svg%3E") center/8px no-repeat}
 .dragging,.dragging *{cursor:grabbing!important;user-select:none}
 #ghost{position:fixed;z-index:50;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:6px;border:2px solid var(--c);background:var(--seat) center 20%/cover;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.5)}
 #side.over{outline:2px dashed var(--live);outline-offset:-4px}
@@ -72,17 +71,17 @@ button:hover{border-color:rgba(255,255,255,.3)}
 #list .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #list .st{font-size:12px;color:var(--mute)}
 #status{font-size:12px;color:var(--mute)}
+@media(max-width:900px){#app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}#hallWrap{padding:6px;max-height:62dvh}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:8px;gap:6px}.chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.chips button{flex:none}#list li{padding:8px}#list .ph{width:36px;height:36px}}
 </style>
 </head>
 <body>
-<header><h1>Raspored sedenja</h1><span class="m" id="count"></span><span class="sp"></span><span class="zb"><button id="zout" title="Umanji (Ctrl/⌘ + točkić, ili dva prsta)">−</button><input type="range" id="zoom" min="320" max="4000" step="20" aria-label="Zum"><button id="zin" title="Uvećaj (Ctrl/⌘ + točkić, dvoklik, ili dva prsta)">+</button><button id="zfit" title="Cela sala na ekranu">Uklopi</button></span><span id="status"></span><span class="m" id="who"></span><button id="out" hidden>Odjavi se</button></header>
+<header><h1>Raspored sedenja</h1><span class="m" id="count"></span><span class="sp"></span><span class="zb"><button id="zout" aria-label="Umanji">−</button><input type="range" id="zoom" min="320" max="4000" step="20" aria-label="Zum"><button id="zin" aria-label="Uvećaj">+</button><button id="zfit">Uklopi</button></span><span id="status"></span><span class="m" id="who"></span><button id="out" hidden>Odjavi se</button></header>
 <div id="login" hidden><p>Prijavi se Google nalogom administratora.</p><div id="gbtn"></div><p class="m" id="lerr"></p></div>
 <div id="card" hidden role="dialog" aria-label="Poslanik"></div>
 <div id="app" hidden>
- <div id="hallWrap"><p class="m" style="text-align:center;margin:0 0 10px">Pogled kao na prenosu i na mapi Sale · predsedništvo gore: 3 PP · ZGS · predsednik · GS · 3 PP</p><div id="hall"></div>
- <p class="m" style="text-align:center;margin-top:14px">Prevuci poslanika iz liste na mesto.</p></div>
+ <div id="hallWrap"><div id="hall"></div></div>
  <div id="side">
-  <div class="tools"><input type="search" id="q" placeholder="Traži poslanika"><div class="chips" id="chips"></div><label class="m"><input type="checkbox" id="only"> samo neraspoređeni</label></div>
+  <div class="tools"><input type="search" id="q" placeholder="Traži"><div class="chips" id="chips"></div><label class="m"><input type="checkbox" id="only"> samo neraspoređeni</label></div>
   <ul id="list"></ul>
  </div>
 </div>
@@ -104,14 +103,15 @@ let HW=1000,SLOTS=[];
 const isLead=m=>/^(Председник Народне|Потпредседник)/.test(m.r||"");
 const leads=()=>{const spk=MPS.find(m=>/^Председник Народне/.test(m.r||"")),vps=MPS.filter(m=>/^Потпредседник/.test(m.r||"")).sort((a,b)=>a.n.split(" ").pop().localeCompare(b.n.split(" ").pop(),"sr"));return [spk,vps]};
 /* the presidium bench: 9 places, left to right as seen on the broadcast:
-   3 vice-presidents · deputy secretary general ("GSD", index 3) · the Speaker (index 4) · secretary general ("SG", index 5) · 3 vice-presidents.
+   4 vice-presidents · the Speaker (index 4) · secretary general ("SG", index 5) · deputy secretary general ("GSD", index 6) · 2 vice-presidents
+   (as in the hall: GS and ZGS on the Speaker's own left, which is the right on the broadcast).
    SG and GSD are not MPs: their places are fixed. Places set in the admin (seat "p-0".."p-8") win; anyone else takes their default place
    or the free place nearest the middle. Same function in src/admin/sala.html and src/page/js/30-hall.js. */
-const BENCH_FIX={3:"GSD",5:"SG"},BENCH_NEAR=[4,6,2,7,1,8,0];
+const BENCH_FIX={5:"SG",6:"GSD"},BENCH_NEAR=[3,7,2,8,1,0];
 function benchSlots(spk,vps,seatOf){
  const S=Array(9).fill(null),all=[spk,...vps].filter(Boolean);for(const j in BENCH_FIX)S[j]=BENCH_FIX[j];
  all.forEach(m=>{const x=/^p-([0-8])$/.exec(seatOf(m)||"");if(x&&!S[+x[1]])S[+x[1]]=m});
- const def=[[spk,4],[vps[0],6],[vps[1],7],[vps[2],8],[vps[3],0],[vps[4],1],[vps[5],2]].filter(d=>d[0]&&!S.includes(d[0]));
+ const def=[[spk,4],[vps[0],3],[vps[1],2],[vps[2],1],[vps[3],0],[vps[4],7],[vps[5],8]].filter(d=>d[0]&&!S.includes(d[0]));
  const late=[];def.forEach(([m,j])=>{if(!S[j])S[j]=m;else late.push(m)});vps.slice(6).forEach(m=>{if(!S.includes(m))late.push(m)});
  late.forEach(m=>{const k=BENCH_NEAR.find(i=>!S[i]);if(k!=null)S[k]=m});
  return S}
@@ -122,13 +122,13 @@ function drawHall(){
  const s=Math.max(10,Math.floor(Math.min(step*.85,minArc*.9))),pad=Math.ceil(s/2)+6,cx=cx0+pad;
  /* presidium bench: 9 places, the Speaker's place in the middle; leads can be moved between them */
  const [SPK,VPS]=leads();SLOTS=benchSlots(SPK,VPS,m=>m.s);
- const bk=Math.round(s*1.3),gap=Math.min(bk*1.9,(W-24)/9),benW=gap*9.4,benH=bk+12,benY=8,benX=cx-benW/2,benC=benY+benH/2,cy=benY+benH+s*.9+16;
+ const bk=Math.round(s*1.3),gap=Math.min(bk*1.9,(W-24)/9),benW=gap*9.4,benH=bk+12,benY=8,benX=cx-benW/2,benC=benY+benH/2,cy=benY+benH+s*.9+26;
  const slotX=j=>benX+gap*.2+gap*j+gap/2;
  let h=`<div class="bench" style="left:${benX}px;top:${benY}px;width:${benW}px;height:${benH}px"></div>`;
  SLOTS.forEach((m,j)=>{const x=slotX(j),key="p-"+j,st=`--s:${bk}px;left:${x}px;top:${benC}px;`;
   if(typeof m==="string")h+=`<div class="seat lead sg" style="${st}" title="${m==="SG"?"Generalni sekretar":"Zamenik generalnog sekretara"} (nije poslanik) · stalno mesto"></div>`;
   else h+=`<button class="seat lead${m?" taken":""}${m&&m.lk?" lk":""}${m&&sel===m?" sel":""}" data-seat="${key}" style="${st}${m?`--c:var(--p${gOf(m)});${m.ph?`background-image:url(/p/${m.id})`:""}`:""}" title="${m?esc(m.n)+" · "+(m===SPK?"predsednik Skupštine":"potpredsednik")+(m.s?"":" (automatski)")+" · ":""}mesto ${j+1} u predsedništvu">${m&&!m.ph?`<span>${esc(ini(m.n))}</span>`:""}</button>`;
-  h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${m==="SG"?"GS":m==="GSD"?"ZGS":m===SPK?"Predsednik":m?"PP":""}</span>`});
+  h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${m==="SG"?"GS":m==="GSD"?"ZGS":m===SPK?(gap<62?"Pred.":"Predsednik"):m?"PP":""}</span>`});
  pts.forEach(p=>{const key=`${p.i}-${p.k}-${p.j}`,m=bySeat.get(key),x=cx-p.r*Math.cos(p.a),y=cy+p.r*Math.sin(p.a);
   h+=`<button class="seat${m?" taken":""}${m&&m.lk?" lk":""}${m&&sel===m?" sel":""}" data-seat="${key}" title="${m?esc(m.n)+(m.lk?" (zaključan)":"")+" · ":""}red ${p.i+1}, sektor ${8-p.k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;${m?`--c:var(--p${gOf(m)});${m.ph?`background-image:url(/p/${m.id})`:""}`:""}">${m&&!m.ph?`<span>${esc(ini(m.n))}</span>`:""}</button>`});
  /* row numbers just above both ends of each row */
@@ -148,7 +148,7 @@ function draw(){index();drawHall();drawList();if(sel)showCard(sel)}
    The point under the cursor / fingers stays put. Remembered per browser. */
 let zoomed=false;
 const wrap=$("#hallWrap"),ZMIN=320,ZMAX=4000;
-const fit=()=>Math.max(ZMIN,wrap.clientWidth-32-40);
+const fit=()=>{const p=parseFloat(getComputedStyle(wrap).paddingLeft)||0;return Math.max(ZMIN,wrap.clientWidth-2*p-(innerWidth<=900?24:40))};
 function setZoom(v,keep,cx,cy){v=Math.round(Math.max(ZMIN,Math.min(ZMAX,v)));
  const r=wrap.getBoundingClientRect();cx=cx??r.left+r.width/2;cy=cy??r.top+r.height/2;
  const px=cx-r.left,py=cy-r.top,fx=(wrap.scrollLeft+px)/Math.max(1,wrap.scrollWidth),fy=(wrap.scrollTop+py)/Math.max(1,wrap.scrollHeight);
@@ -196,7 +196,7 @@ function showCard(m,anchor){sel=m;if(anchor)cardAnchor=anchor;
  card.style.setProperty("--c",`var(--p${gOf(m)})`);
  card.innerHTML=`<div class="hd"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><div><b>${esc(m.n)}</b><span class="m">${GROUPS[gOf(m)][0]}</span></div><button class="x" aria-label="Zatvori">×</button></div>
  <dl><dt>Mesto</dt><dd>${seatTxt(m)}</dd>${pgName(m)?`<dt>Grupa</dt><dd>${esc(lat(pgName(m)))}</dd>`:`<dt>Grupa</dt><dd class="m">bez poslaničke grupe</dd>`}${roleTxt(m)?`<dt>Funkcija</dt><dd>${esc(lat(roleTxt(m)))}</dd>`:""}${m.lk?`<dt>Status</dt><dd>zaključan na mestu</dd>`:""}</dl>
- <div class="acts"><button data-act="lock" aria-pressed="${!!m.lk}" ${can||m.lk?"":"disabled title=\"Prvo ga stavi na mesto\""}>${m.lk?"🔒 Zaključan":"Zaključaj"}</button>${!isLead(m)&&m.s&&!m.lk?`<button data-act="unseat">Skloni sa mesta</button>`:""}</div>`;
+ <div class="acts"><button data-act="lock" aria-pressed="${!!m.lk}" ${can||m.lk?"":"disabled"}>${m.lk?"🔒 Zaključan":"Zaključaj"}</button>${!isLead(m)&&m.s&&!m.lk?`<button data-act="unseat">Skloni sa mesta</button>`:""}</div>`;
  card.hidden=false;placeCard();
  document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));
  document.querySelectorAll(`#list [data-id="${m.id}"]`).forEach(x=>x.classList.add("sel"));const sk=seatKeyOf(m);if(sk)document.querySelector(`[data-seat="${sk}"]`)?.classList.add("sel")}
@@ -225,20 +225,23 @@ const mpAt=t=>{const li=t.closest("#list [data-id]");if(li)return {m:MPS.find(x=
 document.addEventListener("pointerdown",e=>{if(e.button>0||pinch)return;const hit=mpAt(e.target);if(!hit)return;
  if(e.pointerType==="touch"&&hit.el.matches("#list li")&&!e.target.closest(".ph")){press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId,tapOnly:true};return}
  press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId};if(hit.m)e.preventDefault()});
-function target(x,y){const el=document.elementFromPoint(x,y);if(!el)return null;const st=el.closest("[data-seat]");if(st)return {seat:st};if(el.closest("#side"))return {list:$("#side")};return null}
+const LIFT=e=>e.pointerType==="touch"?56:0;
+function target(x,y){const el=document.elementFromPoint(x,y);if(!el)return null;const st=el.closest("[data-seat]");if(st)return {seat:st};if(el.closest("#side"))return {list:$("#side")};
+ if(!el.closest("#hallWrap"))return null;let best=null,bd=Math.max(18,parseFloat(getComputedStyle($("#hall")).getPropertyValue("--s"))||0);
+ document.querySelectorAll("#hall [data-seat]").forEach(b=>{const r=b.getBoundingClientRect(),d=Math.hypot(r.left+r.width/2-x,r.top+r.height/2-y);if(d<bd){bd=d;best=b}});return best?{seat:best}:null}
 function clearOver(){document.querySelectorAll(".over,.no").forEach(x=>x.classList.remove("over","no"))}
 document.addEventListener("pointermove",e=>{if(!press||e.pointerId!==press.id)return;
  if(!drag){if(press.tapOnly||!press.m||Math.hypot(e.clientX-press.x,e.clientY-press.y)<6)return;
-  if(press.m.lk){status(press.m.n+" je zaključan — otključaj ga u kartici",false);press=null;return}
+  if(press.m.lk){status(press.m.n+" je zaključan",false);press=null;return}
   drag={m:press.m,from:press.from};hideCard();ghost.style.setProperty("--c",`var(--p${gOf(drag.m)})`);ghost.style.backgroundImage=drag.m.ph?`url(/p/${drag.m.id})`:"";document.body.appendChild(ghost);document.body.classList.add("dragging")}
- ghost.style.left=e.clientX+"px";ghost.style.top=e.clientY+"px";clearOver();const t=target(e.clientX,e.clientY);
+ const gy=e.clientY-LIFT(e);ghost.style.left=e.clientX+"px";ghost.style.top=gy+"px";clearOver();const t=target(e.clientX,gy);
  if(t&&t.seat)t.seat.classList.add(canPlace(drag.m,t.seat.dataset.seat)?"over":"no");else if(t&&t.list&&drag.m.s&&!isLead(drag.m))t.list.classList.add("over");
  /* scroll the hall when dragging near its edges */
- const r=wrap.getBoundingClientRect(),E=40;if(e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom){
-  if(e.clientX<r.left+E)wrap.scrollLeft-=14;else if(e.clientX>r.right-E)wrap.scrollLeft+=14;if(e.clientY<r.top+E)wrap.scrollTop-=14;else if(e.clientY>r.bottom-E)wrap.scrollTop+=14}});
+ const r=wrap.getBoundingClientRect(),E=40;if(e.clientX>r.left&&e.clientX<r.right&&gy>r.top&&gy<r.bottom){
+  if(e.clientX<r.left+E)wrap.scrollLeft-=14;else if(e.clientX>r.right-E)wrap.scrollLeft+=14;if(gy<r.top+E)wrap.scrollTop-=14;else if(gy>r.bottom-E)wrap.scrollTop+=14}});
 function endPress(e,cancel){if(!press||e.pointerId!==press.id)return;const p=press;press=null;
  if(drag){const d=drag;drag=null;ghost.remove();document.body.classList.remove("dragging");clearOver();if(cancel)return;
-  const t=target(e.clientX,e.clientY);if(t&&t.seat)place(d.m,t.seat.dataset.seat);else if(t&&t.list&&!isLead(d.m))unseat(d.m);return}
+  const t=target(e.clientX,e.clientY-LIFT(e));if(t&&t.seat)place(d.m,t.seat.dataset.seat);else if(t&&t.list&&!isLead(d.m))unseat(d.m);return}
  if(cancel)return;
  if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>10)return;
  if(p.m){sel===p.m&&!card.hidden?hideCard():showCard(p.m,p.el)}else hideCard()}

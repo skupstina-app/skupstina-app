@@ -5,14 +5,15 @@ const seatOf=new Map(order.map((m,i)=>[m,i]));
 const maxT=Math.max(...mps.map(m=>m.t)),hall=$("#hall"),svg=$("#hallSvg"),tip=$("#tip"),board=$("#salaBoard");
 let view="groups",active=live,focusMp=live.m;const geo={};
 /* the presidium bench: 9 places, left to right as seen on the broadcast:
-   3 vice-presidents · deputy secretary general ("GSD", index 3) · the Speaker (index 4) · secretary general ("SG", index 5) · 3 vice-presidents.
+   4 vice-presidents · the Speaker (index 4) · secretary general ("SG", index 5) · deputy secretary general ("GSD", index 6) · 2 vice-presidents
+   (as in the hall: GS and ZGS on the Speaker's own left, which is the right on the broadcast).
    SG and GSD are not MPs: their places are fixed. Places set in the admin (seat "p-0".."p-8") win; anyone else takes their default place
    or the free place nearest the middle. Same function in src/admin/sala.html and src/page/js/30-hall.js. */
-const BENCH_FIX={3:"GSD",5:"SG"},BENCH_NEAR=[4,6,2,7,1,8,0];
+const BENCH_FIX={5:"SG",6:"GSD"},BENCH_NEAR=[3,7,2,8,1,0];
 function benchSlots(spk,vps,seatOf){
  const S=Array(9).fill(null),all=[spk,...vps].filter(Boolean);for(const j in BENCH_FIX)S[j]=BENCH_FIX[j];
  all.forEach(m=>{const x=/^p-([0-8])$/.exec(seatOf(m)||"");if(x&&!S[+x[1]])S[+x[1]]=m});
- const def=[[spk,4],[vps[0],6],[vps[1],7],[vps[2],8],[vps[3],0],[vps[4],1],[vps[5],2]].filter(d=>d[0]&&!S.includes(d[0]));
+ const def=[[spk,4],[vps[0],3],[vps[1],2],[vps[2],1],[vps[3],0],[vps[4],7],[vps[5],8]].filter(d=>d[0]&&!S.includes(d[0]));
  const late=[];def.forEach(([m,j])=>{if(!S[j])S[j]=m;else late.push(m)});vps.slice(6).forEach(m=>{if(!S.includes(m))late.push(m)});
  late.forEach(m=>{const k=BENCH_NEAR.find(i=>!S[i]);if(k!=null)S[k]=m});
  return S}
