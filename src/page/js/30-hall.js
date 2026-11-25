@@ -22,10 +22,11 @@ function drawMap(T=SALA){
  const W=hall.clientWidth,H=hall.clientHeight;if(!W)return;
  const SPK=V1?mps.find(m=>/^Председник Народне/.test(m.role||"")):null,VPS=V1?mps.filter(m=>/^Потпредседник/.test(m.role||"")).sort((a,b)=>(a.name.split(" ").pop()).localeCompare(b.name.split(" ").pop(),"sr")):[],LEADS=new Set([SPK,...VPS].filter(Boolean)),inHall=mps.filter(m=>!LEADS.has(m)),HN=inHall.length;
  /* the hall as built: 8 sections split by aisles; the two outer ones start with 5 seats in the front row, the six inner ones with 3,
-    and every row back adds one seat per section. 6 rows = 288 seats, enough for everyone in the hall; seats nobody needs stay drawn as empty outlines */
- const SEC=[5,3,3,3,3,3,3,5],rows=6,BH=Math.max(26,Math.round(H*.09)),R=Math.min(W/2-16,H-24-BH),cx=W/2,cy=12+BH,r0=R*.56,step=(R-r0)/(rows-1);
+    the outer ones gain one seat every row back (5-10), the inner ones go 3,4,5,5,6,6. 6 rows = 264 seats, enough for everyone in the hall;
+    seats nobody needs stay drawn as empty outlines. Same in src/admin/sala.html. */
+ const SEC=[5,3,3,3,3,3,3,5],INNER=[3,4,5,5,6,6],rows=6,BH=Math.max(26,Math.round(H*.09)),R=Math.min(W/2-16,H-24-BH),cx=W/2,cy=12+BH,r0=R*.56,step=(R-r0)/(rows-1);
  const N0=SEC.reduce((a,b)=>a+b,0),aw=(Math.PI-.04)*r0/(N0+7*1.3)*1.3,seats=[];let arc0=0;
- for(let i=0;i<rows;i++){const r=r0+i*step,ns=SEC.map(n=>n+i),N=ns.reduce((a,b)=>a+b,0),ga=aw/r,span=Math.PI-.04,per=(span-(SEC.length-1)*ga)/N;if(!i)arc0=per*r;
+ for(let i=0;i<rows;i++){const r=r0+i*step,ns=SEC.map(n=>n===3?INNER[i]:n+i),N=ns.reduce((a,b)=>a+b,0),ga=aw/r,span=Math.PI-.04,per=(span-(SEC.length-1)*ga)/N;if(!i)arc0=per*r;
   let a0=Math.PI-.02;ns.forEach((n,k)=>{for(let j=0;j<n;j++){const a=a0-(j+.5)*per;seats.push({a,i,k,key:i+"-"+k+"-"+j,z:1,x:cx-r*Math.cos(a),y:cy+r*Math.sin(a)})}a0-=n*per+ga})}
  /* drawn as the broadcast shows the hall: the presidium at the top, MPs facing it. Each group gets a wedge of the hall in proportion to its size
     and fills it from the front; group leaders take the front seats nearest the centre, everyone else follows alphabetically. */
