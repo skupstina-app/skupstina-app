@@ -8,7 +8,7 @@ let view="groups",active=live,focusMp=live.m;const geo={};
    4 vice-presidents · the Speaker (index 4) · secretary general ("SG", index 5) · deputy secretary general ("GSD", index 6) · 2 vice-presidents
    (as in the hall: GS and ZGS on the Speaker's own left, which is the right on the broadcast).
    SG and GSD are not MPs: their places are fixed. Places set in the admin (seat "p-0".."p-8") win; anyone else takes their default place
-   or the free place nearest the middle. Same function in src/admin/sala.html and src/page/js/30-hall.js. */
+   or the free place nearest the middle. The editor (src/admin/sala.html) shows only the saved places. */
 const BENCH_FIX={5:"SG",6:"GSD"},BENCH_NEAR=[3,7,2,8,1,0];
 function benchSlots(spk,vps,seatOf){
  const S=Array(9).fill(null),all=[spk,...vps].filter(Boolean);for(const j in BENCH_FIX)S[j]=BENCH_FIX[j];

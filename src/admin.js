@@ -97,12 +97,10 @@ export async function adminRoute(req, env, u, p) {
     const { set } = await req.json().catch(() => ({}));
     if (!Array.isArray(set) || !set.length || set.length > 20) return json({ ok: false, err: "bad" }, 400);
     const at = new Date().toISOString(), st = [];
-    // locked MPs stay where they are: a change may not move one, nor put someone else on a locked seat
-    const { results: locked } = await env.DB.prepare("SELECT id,seat FROM mps WHERE seat_lock=1 AND active=1").all();
+    // the lock (seat_lock) is only a guard in the editor against dragging someone by accident; swaps onto a locked seat are allowed
     for (const x of set) {
       const id = parseInt(x.id), seat = x.seat == null ? null : String(x.seat);
       if (!id || (seat !== null && !SEAT.test(seat))) return json({ ok: false, err: "bad" }, 400);
-      if (locked.some((l) => (l.id === id && l.seat !== seat) || (seat !== null && l.seat === seat && l.id !== id))) return json({ ok: false, err: "locked" }, 409);
       if (seat) st.push(env.DB.prepare("UPDATE mps SET seat=NULL,seat_at=? WHERE seat=? AND id<>?").bind(at, seat, id));
       st.push(env.DB.prepare("UPDATE mps SET seat=?,seat_at=? WHERE id=?").bind(seat, at, id));
     }

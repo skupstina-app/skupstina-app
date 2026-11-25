@@ -59,12 +59,13 @@ Map of this repo. Read this first, then open only the file you need.
   The Speaker and vice-presidents sit on the presidium bench instead: 9 places `p-0`..`p-8` (left to right as on the
   broadcast): 4 VPs, `p-4` the Speaker, `p-5` secretary general, `p-6` deputy secretary general, 2 VPs (GS and ZGS sit
   on the Speaker's own left, as in the hall). GS and GSD are
-  not MPs and their places are fixed. `benchSlots()` (same in `30-hall.js` and `admin/sala.html`) fills unsaved places.
+  not MPs and their places are fixed. `benchSlots()` in `30-hall.js` fills unsaved places on the site; the editor
+  shows only saved places (an unsaved lead is in its list).
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
   with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
-  then drag on. `mps.seat_lock` = 1 locks an MP on his seat (column added by `ensureLockCol` in
-  admin.js; `POST /admin/api/lock {id,lock}`); `POST /admin/api/seats` refuses (409 `locked`) any change that moves a locked
-  MP or puts someone on a locked seat. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch.
+  then drag on. `mps.seat_lock` = 1 locks an MP on his seat
+  (column added by `ensureLockCol` in admin.js; `POST /admin/api/lock {id,lock}`). The lock is only an editor guard: dropping
+  someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch.
 - The public Sala map uses hand-placed seats first and places everyone else automatically. The page's MP data is
   cached up to 5 minutes, so seat changes show on the site within 5 minutes.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.
