@@ -24,7 +24,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Head, fonts, first styles | `index.html` (shell) | | |
 | Top nav, menu sheet | `html/header.html` | `10-nav` | `10-nav` |
 | Uživo: player, speaker bar, chat, live stats | `html/live.html` | `20-live-window`, `60-uzivo`, `85-chat` | `15-live`, `20-chat`, `45-numbers`, `70-mini-fullscreen`, `72-mute-engine`, `76-player`, `78-live-status` |
-| Uživo panels: stats (podium button) and MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map, `tlDay()`: the stats say which day they are about — danas / juče / date — from `updated` of `/api/live/speakers`) |
+| Uživo panels: stats (podium button) and MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map, `tlDay()`: the stats say which day they are about — danas / juče / date — from `sitting` of `/api/live/speakers` (last time the stream was live; "" → "na poslednjoj sednici")) |
 | Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` |
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
 | Arhiva | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |

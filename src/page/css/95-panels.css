@@ -33,18 +33,20 @@ body[data-xv=stats] .side>:not(#p-stats),body[data-xv=prof] .side>:not(#p-prof){
 .phead{display:flex;align-items:center;gap:10px}
 .phead h3{font-size:19px;color:var(--ink)}
 .pph{width:40px;height:40px;border-radius:6px;background:var(--seat);flex:none}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.gchip,.pchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;box-shadow:0 0 0 1px var(--line) inset;font-size:13px}
-.gchip i{width:8px;height:8px;border-radius:4px}
-.pchip{color:var(--mute)}
+.phead h3{flex:1;min-width:0}
+.pact{display:flex;gap:6px;flex:none;margin-left:auto}
+.pib{width:44px;height:44px;border:0;border-radius:6px;display:grid;place-items:center;background:var(--card);color:var(--ink);box-shadow:var(--raise);cursor:pointer}
+.pib .mi{width:18px;height:18px}
+.pib[aria-pressed=true]{background:var(--btn);color:var(--btn-ink);box-shadow:none}
 .bio{margin:0;font-size:16px;line-height:1.45}
 .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .fact{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;box-shadow:0 0 0 1px var(--line) inset;min-width:0}
+.fact.wide{grid-column:1/-1}
 .fact small{font-size:12px;color:var(--mute)}
 .fact span{font-size:15px;overflow-wrap:anywhere}
-.pbtns{display:flex;gap:8px}
-.pbtns>*{flex:1;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.pbtns .mi{width:16px;height:16px}
+.pfull{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.pfull:disabled{opacity:.6;cursor:default}
+.pfull small{font-size:12px;color:var(--mute)}
 .src{margin:0;font-size:12px;color:var(--mute)}
 
 /* chat: pixel send button */

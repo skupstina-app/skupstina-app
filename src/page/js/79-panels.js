@@ -26,8 +26,9 @@ function talkTotals(){
  return by;
 }
 
-let xv="",profMp=null;
+let xv="",profMp=null,profFrom="";
 function xView(v,m){
+ if(v==="prof"&&xv!=="prof")profFrom=xv==="stats"?"stats":"";
  xv=v;if(v==="prof")profMp=m||profMp;
  document.body.dataset.xv=v;
  $("#p-stats").hidden=v!=="stats";$("#p-prof").hidden=v!=="prof";
@@ -59,21 +60,24 @@ function seatMap(by){
  /* bigger circles first, so a small one next to a big one stays visible on top */
  return `<svg class="smap" viewBox="0 0 300 168" role="img" aria-label="Sala: veći krug, duže govorio">${base}${top.sort((a,b)=>b[0]-a[0]).map(x=>x[1]).join("")}</svg>`;
 }
-/* which day the speaker timeline is about: "danas", "juče" or the date. The stats keep showing the last sitting until the next one starts,
-   so they must say which day it was. A sitting that runs past midnight still counts as the day it started (4 h back). */
+/* which day the speaker timeline is about: "danas", "juče", the date, or "" when not known. The stats keep showing the last sitting until
+   the next one starts, so they must say which day it was. tlAt is `sitting` from /api/live/speakers: the last moment the stream was
+   live (not `updated`, which the reader refreshes all day). A sitting that runs past midnight still counts as the day it started (4 h back). */
 const bgDay=ms=>new Date(ms).toLocaleDateString("en-CA",{timeZone:"Europe/Belgrade"});
 function tlDay(){
- if(!tlAt||!TL.length)return "danas";
+ if(apiLive)return "danas";
+ if(!tlAt)return "";
  const d=bgDay(tlAt-4*3600e3),now=Date.now();
  if(d===bgDay(now))return "danas";if(d===bgDay(now-864e5))return "juče";
  const [y,mo,da]=d.split("-").map(Number);return `${da}. ${MON[mo-1]}${y!==new Date(now).getFullYear()?" "+y+".":""}`;
 }
-const dayAsk=w=>w==="danas"||w==="juče"?`Ko je ${w} najviše govorio`:`Ko je najviše govorio ${w}`;
+const dayWhen=w=>w||"na poslednjoj sednici";
+const dayAsk=w=>w==="danas"||w==="juče"?`Ko je ${w} najviše govorio`:`Ko je najviše govorio ${dayWhen(w)}`;
 function renderStats(by){
  const list=[...by.entries()].filter(([,o])=>o.t>0).sort((a,b)=>b[1].t-a[1].t);
  const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><i style="background:${SH[m.g]}"></i><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])} · ${o.n} ${o.n===1?"put":"puta"}</small></span><span class="tm nt">${mss(o.t)}</span></button></li>`).join("");
  const w=tlDay();
- $("#p-stats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${w}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
+ $("#p-stats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${dayWhen(w)}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
  apply($("#p-stats"));
 }
 $("#p-stats").addEventListener("click",e=>{const b=e.target.closest("[data-pm]");if(b)xView("prof",mps[b.dataset.pm])});
@@ -86,18 +90,21 @@ function bio(m){
  if(gn)parts.push(`${gr?(gr[0].toUpperCase()+gr.slice(1))+" poslaničke grupe":(f?"Članica poslaničke grupe":"Član poslaničke grupe")} „${gn}”.`);
  return parts.join(" ");
 }
+const I_X=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="2" height="2"/><rect x="9" y="2" width="2" height="2"/><rect x="4" y="4" width="2" height="1"/><rect x="7" y="4" width="2" height="1"/><rect x="5" y="5" width="3" height="3"/><rect x="4" y="8" width="2" height="1"/><rect x="7" y="8" width="2" height="1"/><rect x="2" y="9" width="2" height="2"/><rect x="9" y="9" width="2" height="2"/></svg>`;
+/* profile: name with mute and × on the right; the party is the first fact; the talk-time fact only when he spoke, with that day */
 function renderProf(by){
  const m=profMp;if(!m){$("#p-prof").innerHTML="";return}
- const f=isF(m),o=by.get(m),on=muted.has(m),w=tlDay(),party=m.party?c2l(m.party):(f?"Nestranačka":"Nestranački");
- const fact=(k,v)=>v?`<div class="fact"><small>${k}</small><span>${esc(v)}</span></div>`:"";
+ const f=isF(m),o=by.get(m),on=muted.has(m),w=tlDay(),party=m.party?c2l(m.party):(f?"Nestranačka":"Nestranački"),g=f?"govorila":"govorio";
+ const fact=(k,v,c)=>v?`<div class="fact${c?" "+c:""}"><small>${k}</small><span>${esc(v)}</span></div>`:"";
+ const spoke=o&&o.t>0?fact(w==="danas"?"Danas "+g:w==="juče"?"Juče "+g:(f?"Govorila ":"Govorio ")+dayWhen(w),`${o.n} ${o.n===1?"put":"puta"} · ${mss(o.t)}`):"";
  $("#p-prof").innerHTML=`<div class="xin">
-<div class="phead">${m!==curSp?`<span class="pph"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`:""}<h3>${esc(m.name)}</h3></div>
-<div class="chips"><span class="gchip"><i style="background:${SH[m.g]}"></i>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][0])}</span><span class="pchip">${esc(party)}</span></div>
+<div class="phead">${m!==curSp?`<span class="pph"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`:""}<h3>${esc(m.name)}</h3><span class="pact"><button type="button" class="pib" id="profMute" aria-pressed="${on}" aria-label="${on?"Uključi zvuk za":"Utišaj kad god govori:"} ${esc(m.name)}" title="${on?"Utišan kad god govori. Klikni da ga ponovo čuješ.":"Utišaj kad god govori"}">${on?I_POFF:I_PON}</button><button type="button" class="pib" id="profX" aria-label="${profFrom==="stats"?"Nazad na statistiku":"Zatvori profil"}">${I_X}</button></span></div>
+<div class="facts">${fact("Stranka",party,"wide")}${fact("Godište",m.by?m.by+".":"")}${fact("Mesto",c2l(m.place))}${fact("Zanimanje",c2l(m.prof))}${spoke}</div>
 <p class="bio">${esc(bio(m))}</p>
-<div class="facts">${fact("Godište",m.by?m.by+".":"")}${fact("Mesto",c2l(m.place))}${fact("Zanimanje",c2l(m.prof))}${fact(w==="danas"||w==="juče"?(w==="danas"?"Danas":"Juče")+(f?" govorila":" govorio"):(f?"Govorila ":"Govorio ")+w,o&&o.t>0?`${o.n} ${o.n===1?"put":"puta"} · ${mss(o.t)}`:w==="danas"?"ne još":(f?"nije govorila":"nije govorio"))}</div>
-<div class="pbtns"><button type="button" class="b light" id="profMute" aria-pressed="${on}">${on?I_SOFF:I_SON}<span>${on?"Ponovo čuj":"Utišaj"}</span></button><a class="b light" href="https://www.parlament.gov.rs/_.${m.id}.245.html" target="_blank" rel="noopener">parlament.gov.rs ↗</a></div>
+<button type="button" class="b light pfull" disabled>Vidi ceo profil <small>uskoro</small></button>
 <p class="src">Izvor: Narodna skupština · vreme govora: skupština.app</p></div>`;
  $("#profMute").onclick=()=>{toggleMute(m);renderPanels(true)};
+ $("#profX").onclick=()=>xView(profFrom);
  apply($("#p-prof"));
 }
 
