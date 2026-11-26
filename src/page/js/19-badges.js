@@ -49,8 +49,9 @@ const modSvg=()=>roleSvg("mod"),crownSvg=()=>roleSvg("crown");
  l19=put(l19,[...Array(15).keys()].map(c=>[14,c]),"M");
  l19=put(l19,[[14,5],[14,6],[14,7],[14,8],[14,9]],"y");
  const ART=[l1,l2,l3,l4,l5,l6,l7,l8,l9,sub(l9,"Q","k"),sub(l9,"Q","y"),noFlag(sk),carpet(sk),gold(noFlag(sk)),carpet(gold(sk)),big,gold(big),l18,l19];
- /* one <symbol> per level; runs of the same colour in a row become one <rect>; small pictures sit centred on the ground line */
- const sym=(g,i)=>{const ox=Math.floor((15-g[0].length)/2),oy=15-g.length;let r="";
+ /* one <symbol> per level; runs of the same colour in a row become one <rect>; small pictures sit centred on the ground line
+    (the gavel and the crown, mid=1, are centred up and down too, so they sit level with the name) */
+ const sym=(g,i,mid)=>{const ox=Math.floor((15-g[0].length)/2),oy=mid?Math.floor((15-g.length)/2):15-g.length;let r="";
   g.forEach((row,y)=>{for(let x=0;x<row.length;){const c=row[x];let w=1;while(row[x+w]===c)w++;if(C[c])r+=`<rect x="${x+ox}" y="${y+oy}" width="${w}" height="1" fill="${C[c]}"/>`;x+=w}});
   return `<symbol id="bdg-${i+1}" viewBox="0 0 15 15">${r}</symbol>`};
  const sp=document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -59,5 +60,5 @@ const modSvg=()=>roleSvg("mod"),crownSvg=()=>roleSvg("crown");
  const gavel=["....Nh.....","...NnyL....","..Nnyynh...","...Yynnnh..","....NnnnnL.",".....Nnnyyh","....nNNyynN","...nN..YnN.","..nN....N..",".nN........","nN.........","N.........."];
  /* the super admin's crown (crownSvg): three points with light tips, a lit left side, red and blue gems on the band */
  const crown=["L....L....L","y....y....y","yy..yLy..yy","yLy.yLy.yyy","yLyyyyyyyyY","yLyyyyyyyyY","yyryybyyryY","YYYYYYYYYYY","ZZZZZZZZZZZ"];
- sp.innerHTML=ART.map(sym).join("")+sym(gavel,0).replace('id="bdg-1"','id="bdg-mod"')+sym(crown,0).replace('id="bdg-1"','id="bdg-crown"');document.body.prepend(sp);
+ sp.innerHTML=ART.map(sym).join("")+sym(gavel,0,1).replace('id="bdg-1"','id="bdg-mod"')+sym(crown,0,1).replace('id="bdg-1"','id="bdg-crown"');document.body.prepend(sp);
 }
