@@ -28,7 +28,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` |
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
 | Arhiva | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
-| Profil, mutes, rules dialog | `html/profil.html` | `70-profil` | `55-mutes` |
+| Podešavanja (gear tab, `#profil`): account card with avatar + Izmeni, Ć/Ћ and sun/moon switches, rows, Odjavi se; avatar picker `#avDlg`; mutes, rules dialog | `html/profil.html` | `70-profil` | `20-chat` (account card, avatar picker), `55-mutes` |
 | Kontakt | `html/kontakt.html` | `90-launch-kontakt` | |
 | Bottom tab bar (phones) | `html/tabbar.html` | `80-tabbar` | `50-tabs-rang` |
 | Footer | `html/footer.html` | | |
@@ -41,8 +41,14 @@ Map of this repo. Read this first, then open only the file you need.
   Session cookie `sk_s` signed with `SALT`, 180 days. Routes `/api/auth/me|google|login|register|profile|logout`.
 - One account per email; chat names are unique per account (unique indexes on `users.email`, `users.nk`, `users.sub`,
   created by `src/auth.js`). There are no other names: the old anonymous names (browser key + IP) are removed.
-- The name can be changed once every 15 days (`users.name_changed_at`, `NAME_DAYS` in auth.js; the first name at sign-up
-  doesn't count); colour any time. Name, colour and sign-out live in Profil, not under the chat box.
+- The name can be changed once every 30 days (`users.name_changed_at`, `NAME_DAYS` in auth.js; the first name at sign-up
+  doesn't count); colour any time. A new name is confirmed in the dialog first ("next change in 30 days"). Name, colour,
+  avatar and sign-out live in Podešavanja (the gear tab), not under the chat box.
+- Avatars: every PNG in `assets/avatars/64` (64 px, file name = id) can be picked; `assets/avatars/uskoro` holds the
+  "coming soon" tiles and the empty avatar (`prazno`), drawn by `scripts/avatar-placeholders.py`. `build.mjs` turns them
+  into `src/generated/avatars.js` (served by the Worker at `/a/<id>.png`, `/a/uskoro-<n>.png`) and fills
+  `/*@avatars*/[]` and `/*@soon*/[]` in `js/20-chat.js`. Saved in `users.avatar` (`POST /api/auth/avatar`, any time).
+  Add an avatar: drop its 64 px PNG in `assets/avatars/64` (and a label in `AVN` in 20-chat.js). Not shown in the chat yet.
 - Chat (`ChatRoom` in worker.js, page `js/20-chat.js`): anyone can read; there is no history (a viewer sees messages
   from when they open the page). Only signed-in users can post; the Worker passes the user id to the room as `x-user`,
   and the room reads name, colour and `banned_until` (ms) from D1 `users` on every message. Rate limits, reports

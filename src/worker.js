@@ -7,6 +7,7 @@ import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
 import { adminRoute } from "./admin.js";
 import { authRoute, currentUser } from "./auth.js";
+import { AVATAR_FILES } from "./generated/avatars.js";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
 var PG = "https://www.parlament.gov.rs";
 var LIST_URL = PG + "/" + encodeURI("\u043D\u0430\u0440\u043E\u0434\u043D\u0430-\u0441\u043A\u0443\u043F\u0448\u0442\u0438\u043D\u0430/\u0441\u0430\u0441\u0442\u0430\u0432/\u043D\u0430\u0440\u043E\u0434\u043D\u0438-\u043F\u043E\u0441\u043B\u0430\u043D\u0438\u0446\u0438/\u0430\u043A\u0442\u0443\u0435\u043B\u043D\u0438-\u0441\u0430\u0437\u0438\u0432.11.html");
@@ -467,6 +468,11 @@ var worker_default = {
     if (u.hostname.startsWith("www.")) return Response.redirect("https://" + u.hostname.slice(4) + p + u.search, 301);
     try {
       if (p.startsWith("/fonts/")) return fonts(req, ctx, p.slice(7));
+      if (p.startsWith("/a/")) {
+        const b64 = Object.hasOwn(AVATAR_FILES, p.slice(3, -4)) && p.endsWith(".png") ? AVATAR_FILES[p.slice(3, -4)] : null;
+        if (!b64) return new Response("not found", { status: 404 });
+        return new Response(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { headers: { "content-type": "image/png", "cache-control": "public, max-age=86400" } });
+      }
       if (p.startsWith("/p/")) {
         const id = parseInt(p.slice(3));
         const row = await env.DB.prepare("SELECT type,bytes FROM photos WHERE id=?").bind(id).first();
