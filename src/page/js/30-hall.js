@@ -149,7 +149,7 @@ function lens(list,onFocus){let raf=0,cur=null;
  return {run,center:i=>{const li=list.querySelector(`li[data-i="${i}"]`);if(li){list.scrollTop=li.offsetTop-list.clientHeight/2+li.offsetHeight/2;run()}}};
 }
 /* poslanici list */
-const fold=x=>tr(x).toLowerCase();
+const fold=sfold;
 const mpl=$("#mplist");
 let gFilter=null;
 const renderMps=q=>{const f=fold(q||"");const list=order.filter(m=>(gFilter===null||m.g===gFilter)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));
