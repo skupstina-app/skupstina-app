@@ -66,7 +66,7 @@ Map of this repo. Read this first, then open only the file you need.
 
 ## Admin
 
-- Admins (`src/admin.js`): the super admin is fixed in code (`SUPER` = mgrahovac@gmail.com: every menu, and the only one
+- Admins (`src/admin.js`): the super admin is fixed in code (`SUPER` = mgrahovac87@gmail.com: every menu, and the only one
   who manages admins). The others are in D1 `admins(email, perms, added_by, at)`; `perms` = the admin menus they see,
   `sala` and/or `mod`. `ADMIN_EMAILS` (wrangler.jsonc) only seeded that table once, with `sala` (row `#seeded` marks it).
 - An admin is known by his site account: signed in with Google and without a password (an email + password address is

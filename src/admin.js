@@ -16,7 +16,7 @@ const unb64u = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/
 const json = (o, s = 200, h = {}) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...h } });
 
 /** The super admin: always an admin with every menu, and the only one who manages the other admins. */
-export const SUPER = "mgrahovac@gmail.com";
+export const SUPER = "mgrahovac87@gmail.com";
 /** Admin menus an admin can be given (besides Admini, which is the super admin's alone). */
 export const PERMS = ["sala", "mod"];
 const EMAIL = /^[^\s@|]{1,64}@[^\s@|]{1,190}\.[^\s@|]{2,}$/;
