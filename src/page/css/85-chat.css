@@ -25,6 +25,7 @@ body.theater .vsticky .vbar[role=group]{margin:0;border-radius:0}
 /* watching badge (19-badges.js): a 15×15 pixel building in front of a name; 15 px keeps the pixels whole on any screen */
 .bdg{display:inline-block;width:15px;height:15px;flex:none;vertical-align:-2px;image-rendering:pixelated}
 #msgs .msg .bdg{margin-right:4px}
+#msgs .msg .bdg.mod{margin-right:2px}
 .uw .bdg{margin-left:2px}
 /* Podešavanja: badge in front of the account name, tap → bubble "137/175h" */
 .anrow{position:relative;display:flex;align-items:center;gap:7px;min-width:0}

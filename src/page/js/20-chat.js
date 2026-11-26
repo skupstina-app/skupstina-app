@@ -37,7 +37,7 @@ const empty=()=>{};
 const add=m=>{if(ids.has(m.id))return;ids.add(m.id);if(m.u!=null&&blocked.has(m.u))return;box.querySelector(".empty")?.remove();
  const stick=pane.scrollHeight-pane.scrollTop-pane.clientHeight<90,mine=!!me&&m.u!=null&&m.u===me.id;
  const d=document.createElement("div");d.className="msg"+(mine?" me":"");d.dataset.id=m.id;if(m.u!=null)d.dataset.u=m.u;
- d.innerHTML='<span class="tm nt"></span> '+badgeSvg(m.b)+'<b class="nt u'+(m.c!=null?m.c:ucol(m.n))+(m.u!=null?' un" role="button" tabindex="0" aria-haspopup="dialog':'')+'"></b><span class="nt">: </span><span class="x nt"></span>'+(mine?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
+ d.innerHTML='<span class="tm nt"></span> '+badgeSvg(m.b)+(m.cr?crownSvg():m.md?modSvg():"")+'<b class="nt u'+(m.c!=null?m.c:ucol(m.n))+(m.u!=null?' un" role="button" tabindex="0" aria-haspopup="dialog':'')+'"></b><span class="nt">: </span><span class="x nt"></span>'+(mine?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
  const t=d.querySelectorAll(".nt");t[0].textContent=hhmm(m.at);t[1].textContent=m.n;t[3].textContent=m.x;apply(d);box.append(d);
  while(box.children.length>200)box.firstElementChild.remove();
  if(stick)pane.scrollTop=pane.scrollHeight};

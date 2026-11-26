@@ -62,6 +62,10 @@ Map of this repo. Read this first, then open only the file you need.
   pictures once as SVG `<symbol>`s (`#bdg-1`…) and gives `badgeSvg(n)` (`<use>`). The levels have no names on screen.
   Also in the user card (next to the hours) and in Podešavanja in front of the account name (`#pLvl`, faint before the
   first hour); a tap there shows a bubble with watched/next hours, e.g. `137/175h` (`#pLvlB`).
+- Moderator gavel: a chat moderator (admin with the `mod` menu, `userAdmin` in admin.js, checked fresh on every message)
+  gets a 15×15 pixel gavel between his watching badge and his name. `ChatRoom` stores it on the message (`msgs.moder`, sent
+  as `m.md: 1`); `19-badges.js` draws it once as `#bdg-mod` and gives `modSvg()`. A super admin (the owner) gets a crown
+  instead of the gavel (`msgs.moder` = 2, `m.cr: 1`, `#bdg-crown`, `crownSvg()`), still after his watching badge.
 - Blocking: D1 `blocks(uid,bid)`, `POST /api/auth/block {id,on}`; the list comes with `/api/auth/me` (`blocks`). Only the
   blocker stops seeing the messages (hidden in the page). Podešavanja → Blokirani lists them (Odblokiraj).
 - Obriši nalog: `POST /api/auth/delete` removes the user row and his blocks (refused while banned).

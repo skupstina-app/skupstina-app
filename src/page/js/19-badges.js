@@ -11,8 +11,12 @@ const BADGE_MAX=19;
 const badgeOk=n=>Number.isInteger(n)&&n>=1&&n<=BADGE_MAX&&n<=BADGE_H.length;
 /** the badge as markup ("" for no badge); decorative, the name next to it is what is read out */
 const badgeSvg=(n,cls)=>badgeOk(n)?`<svg class="bdg${cls?" "+cls:""}" viewBox="0 0 15 15" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><use href="#bdg-${n}"/></svg>`:"";
+/** between the badge and the name: a judge's gavel for chat moderators (admins with the "mod" menu, m.md from the Worker),
+    a crown for super admins (the owner; m.cr) instead of the gavel */
+const roleSvg=id=>`<svg class="bdg mod" viewBox="0 0 15 15" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><use href="#bdg-${id}"/></svg>`;
+const modSvg=()=>roleSvg("mod"),crownSvg=()=>roleSvg("crown");
 {
- const C={n:"#b07a43",N:"#7a4c24",M:"#6e4320",B:"#b5603a",j:"#8a4527",R:"#c24e36",Q:"#963f2c",w:"#ece3cd",x:"#6fa8d6",d:"#7d6a4a",e:"#5f9a41",P:"#e86a9a",g:"#9aa0a8",G:"#737a83",k:"#3fa483",K:"#2e8266",y:"#f2b632",Y:"#cc8d14",L:"#ffe7a3",Z:"#a8700c",p:"#7a7a7a",r:"#d03a40",b:"#2f63c0",W:"#f6f6f6"};
+ const C={n:"#b07a43",N:"#7a4c24",M:"#6e4320",B:"#b5603a",j:"#8a4527",R:"#c24e36",Q:"#963f2c",w:"#ece3cd",x:"#6fa8d6",d:"#7d6a4a",e:"#5f9a41",P:"#e86a9a",g:"#9aa0a8",G:"#737a83",k:"#3fa483",K:"#2e8266",y:"#f2b632",Y:"#cc8d14",L:"#ffe7a3",Z:"#a8700c",p:"#7a7a7a",r:"#d03a40",b:"#2f63c0",W:"#f6f6f6",h:"#c99560"};
  const E=".............";
  const sub=(g,a,b)=>g.map(r=>r.split(a).join(b));
  const put=(g,pts,ch)=>{const m=g.map(r=>r.split(""));pts.forEach(([r,c])=>m[r][c]=ch);return m.map(r=>r.join(""))};
@@ -51,5 +55,9 @@ const badgeSvg=(n,cls)=>badgeOk(n)?`<svg class="bdg${cls?" "+cls:""}" viewBox="0
   return `<symbol id="bdg-${i+1}" viewBox="0 0 15 15">${r}</symbol>`};
  const sp=document.createElementNS("http://www.w3.org/2000/svg","svg");
  sp.setAttribute("aria-hidden","true");sp.setAttribute("width","0");sp.setAttribute("height","0");sp.style.cssText="position:absolute;width:0;height:0;overflow:hidden";
- sp.innerHTML=ART.map(sym).join("");document.body.prepend(sp);
+ /* the moderator's gavel (modSvg): head with gold rings, tilted, handle down to the left; h = the light side of the wood */
+ const gavel=["....Nh.....","...NnyL....","..Nnyynh...","...Yynnnh..","....NnnnnL.",".....Nnnyyh","....nNNyynN","...nN..YnN.","..nN....N..",".nN........","nN.........","N.........."];
+ /* the super admin's crown (crownSvg): three points with light tips, a lit left side, red and blue gems on the band */
+ const crown=["L....L....L","y....y....y","yy..yLy..yy","yLy.yLy.yyy","yLyyyyyyyyY","yLyyyyyyyyY","yyryybyyryY","YYYYYYYYYYY","ZZZZZZZZZZZ"];
+ sp.innerHTML=ART.map(sym).join("")+sym(gavel,0).replace('id="bdg-1"','id="bdg-mod"')+sym(crown,0).replace('id="bdg-1"','id="bdg-crown"');document.body.prepend(sp);
 }

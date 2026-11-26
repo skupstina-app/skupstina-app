@@ -5,7 +5,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
 import PAGE from "./generated/index.html";
 import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
-import { adminRoute } from "./admin.js";
+import { adminRoute, userAdmin } from "./admin.js";
 import { authRoute, currentUser } from "./auth.js";
 import { badgeLevel } from "./badges.mjs";
 import { AVATAR_FILES } from "./generated/avatars.js";
@@ -319,14 +319,16 @@ var ChatRoom = class {
     this.sql.exec("DROP TABLE IF EXISTS bans");
     try { if (!this.q("SELECT 1 FROM pragma_table_info('reports') WHERE name='rid'").length) this.sql.exec("DROP TABLE IF EXISTS reports"); } catch (e) { }
     this.sql.exec("CREATE TABLE IF NOT EXISTS reports(mid INTEGER, rid INTEGER, at INTEGER, PRIMARY KEY(mid, rid))");
-    for (const c of ["color INTEGER", "uid INTEGER", "badge INTEGER"]) try { this.sql.exec("ALTER TABLE msgs ADD COLUMN " + c); } catch (e) { }
+    for (const c of ["color INTEGER", "uid INTEGER", "badge INTEGER", "moder INTEGER"]) try { this.sql.exec("ALTER TABLE msgs ADD COLUMN " + c); } catch (e) { }
   }
   q(sql, ...a) {
     return [...this.sql.exec(sql, ...a)];
   }
   pub(m) {
     // b: the writer's watching badge level when he wrote it (src/badges.mjs); 0 or null = no badge
-    return { id: m.id, n: m.name, x: m.text, at: m.at, c: m.color ?? null, u: m.uid ?? null, b: m.badge || 0 };
+    // moder (the writer's role when he wrote it): 1 chat moderator (admin with the "mod" menu) → md: 1, the page adds a gavel;
+    // 2 super admin (owner) → cr: 1, a crown instead of the gavel
+    return { id: m.id, n: m.name, x: m.text, at: m.at, c: m.color ?? null, u: m.uid ?? null, b: m.badge || 0, ...m.moder === 2 ? { cr: 1 } : m.moder === 1 ? { md: 1 } : {} };
   }
   send(ws, o) {
     try {
@@ -341,9 +343,10 @@ var ChatRoom = class {
     } catch (e) {
     }
   }
-  /** The writer's account, read fresh from D1 on every message (so a rename, a ban or a new badge level applies at once). */
+  /** The writer's account, read fresh from D1 on every message (so a rename, a ban, a new badge level or moderator rights apply at once).
+   *  email, sub and pw are only read for userAdmin (moderator check); they never go into a message. */
   user(uid) {
-    return uid ? this.env.DB.prepare("SELECT id,name,color,banned_until,watch_s FROM users WHERE id=?").bind(uid).first() : null;
+    return uid ? this.env.DB.prepare("SELECT id,name,color,banned_until,watch_s,email,sub,pw FROM users WHERE id=?").bind(uid).first() : null;
   }
   async banUser(uid, ms) {
     await this.env.DB.prepare("UPDATE users SET banned_until=? WHERE id=?").bind(ms > 0 ? Date.now() + ms : 0, uid).run();
@@ -414,7 +417,8 @@ var ChatRoom = class {
       if (perMin >= 12) return this.send(ws, { t: "err", code: "fast" });
       const bad = checkText(x);
       if (bad) return this.send(ws, { t: "err", code: bad });
-      const row = this.q("INSERT INTO msgs(at,name,text,color,uid,badge) VALUES(?,?,?,?,?,?) RETURNING *", now2, me.name, x, me.color, me.id, badgeLevel(me.watch_s))[0];
+      const adm = await userAdmin(this.env, me).catch(() => null), mod = adm?.super ? 2 : adm?.perms.includes("mod") ? 1 : 0;
+      const row = this.q("INSERT INTO msgs(at,name,text,color,uid,badge,moder) VALUES(?,?,?,?,?,?,?) RETURNING *", now2, me.name, x, me.color, me.id, badgeLevel(me.watch_s), mod)[0];
       this.sql.exec("DELETE FROM msgs WHERE id<?", row.id - CHAT_KEEP);
       a.last = now2;
       a.lastText = x;
