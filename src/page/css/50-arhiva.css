@@ -35,6 +35,6 @@
 .tops .v{color:var(--mute);font-variant-numeric:tabular-nums}
 .dv-links{display:flex;flex-wrap:wrap;gap:8px}
 @media(max-width:900px){.arch{grid-template-columns:minmax(0,1fr)}.dv-g{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:760px){.dayview{position:fixed;inset:72px 0 calc(76px + env(safe-area-inset-bottom,0px));z-index:30;border-radius:0;overflow-y:auto;box-shadow:none}.dayview[hidden]{display:none}.dv-back{display:inline-flex}.dv-k{grid-template-columns:repeat(2,minmax(0,1fr))}.dv-k div:nth-child(3){border-left:0;padding-left:0}.dv-k div:nth-child(n+3){border-top:1px solid var(--line)}}
+@media(max-width:760px){.dayview{position:fixed;inset:72px 0 calc(68px + var(--tbb));z-index:30;border-radius:0;overflow-y:auto;box-shadow:none}.dayview[hidden]{display:none}.dv-back{display:inline-flex}.dv-k{grid-template-columns:repeat(2,minmax(0,1fr))}.dv-k div:nth-child(3){border-left:0;padding-left:0}.dv-k div:nth-child(n+3){border-top:1px solid var(--line)}}
 
 

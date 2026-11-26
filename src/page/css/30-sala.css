@@ -69,7 +69,7 @@
 .pop details summary::before{content:"+ "}
 .pop details[open] summary::before{content:"− "}
 .pop .b{width:100%;margin-top:4px}
-@media(max-width:760px){.pop{position:fixed;left:8px;right:8px;top:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:auto;max-height:62svh}}
+@media(max-width:760px){.pop{position:fixed;left:8px;right:8px;top:auto;bottom:calc(76px + var(--tbb));width:auto;max-height:62svh}}
 .spk{margin-top:auto;padding:12px;border-radius:6px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center}
 .spk .g{font-size:14px;color:var(--mute)}
 .spk b{font-weight:500}
