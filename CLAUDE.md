@@ -48,7 +48,7 @@ Map of this repo. Read this first, then open only the file you need.
   at `/*@ucolors*/` in `css/96-auth.css` and pastes the file's functions at `/*@colors*/` in `js/20-chat.js`). 28 colours, shown
   pastel set first, then darker (`COLOR_SHOW`, 14 + 14). Light blue, light green, light orange (0-2) are open for everyone;
   one more opens every 2 h of `watch_s`, in a random order per account (`colorOrder(uid)`, seeded, same on both sides).
-  Locked ones are a "?" tile. Picked in Podešavanja by tapping the account name (`#colDlg`), saved by `POST /api/auth/color`
+  Locked ones are a "?" tile. Picked in Podešavanja by tapping the account name (`#colDlg`: only the grid, × and tap outside to close, "Nova boja se otključava za …" at the bottom), saved by `POST /api/auth/color`
   (checks `colorsOpen`; the colour an account already has stays allowed). Not asked at sign-up. New colour: append to
   `COLORS` (never renumber) and place it in `COLOR_SHOW`.
 - Avatars: every PNG in `assets/avatars/64` (64 px, file name = id) can be picked; `assets/avatars/uskoro` holds the

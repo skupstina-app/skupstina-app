@@ -83,11 +83,13 @@
 
 /* Podešavanja: the account name is a button that opens the name colour picker (#colDlg, 20-chat.js) */
 .aname .nbtn{min-width:0;max-width:100%;padding:0;border:0;background:none;font-family:inherit;font-weight:500;font-size:19px;line-height:1.2;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;text-decoration:underline dotted 1.5px;text-underline-offset:4px}
-.cols{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin:4px 0 12px}
+.cols{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin:34px 0 14px}
 .cl{position:relative;aspect-ratio:1;min-height:34px;border:0;border-radius:50%;padding:0;background:currentColor;cursor:pointer}
 .cl[aria-checked=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
 .cl.lk{background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;color:var(--mute);cursor:default;display:grid;place-items:center}
 .cl.lk .px{font-size:15px;line-height:1}
 .cols .cl:nth-child(n+15):nth-child(-n+21){margin-top:8px}/* a little gap between the pastel set and the darker one */
-.colnext{margin:0 0 4px!important;font-size:13px}
-.coldlg .aerr{min-height:1.4em}
+.colnext{margin:0!important;font-size:14px;text-align:center}
+.colnext[hidden]{display:none}
+.coldlg .ax{top:6px;right:6px;width:36px;height:36px;border-radius:50%;background:var(--chip);color:var(--ink);font-size:22px}
+.coldlg .aerr{margin:6px 0 0!important;min-height:0;text-align:center}

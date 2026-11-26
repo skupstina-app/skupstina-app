@@ -178,16 +178,15 @@ function colPaint(){if(!me)return;const open=colOpen(),step=COLOR_STEP_H*3600,w=
  colGrid.innerHTML=COLOR_SHOW.map((c,i)=>open.has(c)
   ?`<button type="button" class="cl u${c}" role="radio" data-c="${c}" aria-checked="${c===me.color}" aria-label="Boja ${i+1}"></button>`
   :`<button type="button" class="cl lk" aria-disabled="true" aria-label="Zaključana boja"><span class="px">?</span></button>`).join("");
- $("#colPrev").textContent=me.name;$("#colPrev").className="nt u"+me.color;
- const left=COLOR_SHOW.length-open.size,rem=step-w%step;
- $("#colNext").textContent=left<=0?"Sve boje su otključane.":`Sledeća boja se otključava za ${rem>=3600?Math.ceil(rem/3600)+" h":Math.max(1,Math.ceil(rem/60))+" min"} gledanja prenosa. Zaključanih: ${left}.`;
+ const left=COLOR_SHOW.length-open.size,rem=step-w%step;$("#colNext").hidden=left<=0;
+ $("#colNext").textContent=`Nova boja se otključava za ${rem>=3600?Math.floor(rem/3600)+" h "+Math.floor(rem%3600/60)+" min":Math.max(1,Math.ceil(rem/60))+" min"}`;
  apply(cdl)}
 function openColors(){if(!me)return;wSend();say(colErr,"");colPaint();if(cdl.showModal)cdl.showModal();else cdl.setAttribute("open","");apply(cdl)}
 const colClose=()=>cdl.close?cdl.close():cdl.removeAttribute("open");
-$("#colX").onclick=$("#colOk").onclick=colClose;
+$("#colX").onclick=colClose;
 cdl.addEventListener("click",e=>{if(e.target===cdl)colClose()});
 colGrid.addEventListener("click",async e=>{const b=e.target.closest(".cl");if(!b||!me)return;
- if(b.classList.contains("lk")){say(colErr,`Ova boja se otključava gledanjem prenosa (jedna nova na svaka ${COLOR_STEP_H} sata).`);return}
+ if(b.classList.contains("lk"))return;
  const c=+b.dataset.c,prev=me.color;if(c===prev)return;
  me={...me,color:c};colPaint();say(colErr,"");
  const j=await post("/api/auth/color",{color:c});
