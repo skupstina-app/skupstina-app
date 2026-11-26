@@ -91,15 +91,15 @@ function bio(m){
  return parts.join(" ");
 }
 const I_X=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="2" height="2"/><rect x="9" y="2" width="2" height="2"/><rect x="4" y="4" width="2" height="1"/><rect x="7" y="4" width="2" height="1"/><rect x="5" y="5" width="3" height="3"/><rect x="4" y="8" width="2" height="1"/><rect x="7" y="8" width="2" height="1"/><rect x="2" y="9" width="2" height="2"/><rect x="9" y="9" width="2" height="2"/></svg>`;
-/* profile: name with mute and × on the right; the party is the first fact; the talk-time fact only when he spoke, with that day */
+/* profile: name (and, only if he spoke, the day and talk time under it) with mute and × on the right; the party is the first fact */
 function renderProf(by){
  const m=profMp;if(!m){$("#p-prof").innerHTML="";return}
  const f=isF(m),o=by.get(m),on=muted.has(m),w=tlDay(),party=m.party?c2l(m.party):(f?"Nestranačka":"Nestranački"),g=f?"govorila":"govorio";
  const fact=(k,v,c)=>v?`<div class="fact${c?" "+c:""}"><small>${k}</small><span>${esc(v)}</span></div>`:"";
- const spoke=o&&o.t>0?fact(w==="danas"?"Danas "+g:w==="juče"?"Juče "+g:(f?"Govorila ":"Govorio ")+dayWhen(w),`${o.n} ${o.n===1?"put":"puta"} · ${mss(o.t)}`):"";
+ const spoke=o&&o.t>0?`<small class="pspoke">${w==="danas"?"Danas "+g:w==="juče"?"Juče "+g:(f?"Govorila ":"Govorio ")+dayWhen(w)} · ${o.n} ${o.n===1?"put":"puta"} · <span class="nt">${mss(o.t)}</span></small>`:"";
  $("#p-prof").innerHTML=`<div class="xin">
-<div class="phead">${m!==curSp?`<span class="pph"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`:""}<h3>${esc(m.name)}</h3><span class="pact"><button type="button" class="pib" id="profMute" aria-pressed="${on}" aria-label="${on?"Uključi zvuk za":"Utišaj kad god govori:"} ${esc(m.name)}" title="${on?"Utišan kad god govori. Klikni da ga ponovo čuješ.":"Utišaj kad god govori"}">${on?I_POFF:I_PON}</button><button type="button" class="pib" id="profX" aria-label="${profFrom==="stats"?"Nazad na statistiku":"Zatvori profil"}">${I_X}</button></span></div>
-<div class="facts">${fact("Stranka",party,"wide")}${fact("Godište",m.by?m.by+".":"")}${fact("Mesto",c2l(m.place))}${fact("Zanimanje",c2l(m.prof))}${spoke}</div>
+<div class="phead">${m!==curSp?`<span class="pph"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`:""}<div class="pname"><h3>${esc(m.name)}</h3>${spoke}</div><span class="pact"><button type="button" class="pib" id="profMute" aria-pressed="${on}" aria-label="${on?"Uključi zvuk za":"Utišaj kad god govori:"} ${esc(m.name)}" title="${on?"Utišan kad god govori. Klikni da ga ponovo čuješ.":"Utišaj kad god govori"}">${on?I_POFF:I_PON}</button><button type="button" class="pib" id="profX" aria-label="${profFrom==="stats"?"Nazad na statistiku":"Zatvori profil"}">${I_X}</button></span></div>
+<div class="facts">${fact("Stranka",party,"w2")}${fact("Godište",m.by?m.by+".":"")}${fact("Mesto",c2l(m.place))}${fact("Zanimanje",c2l(m.prof),"w2")}</div>
 <p class="bio">${esc(bio(m))}</p>
 <button type="button" class="b light pfull" disabled>Vidi ceo profil <small>uskoro</small></button>
 <p class="src">Izvor: Narodna skupština · vreme govora: skupština.app</p></div>`;
