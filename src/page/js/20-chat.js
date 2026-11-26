@@ -65,7 +65,7 @@ const show=()=>{if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttri
 const close=()=>{dlg.close?dlg.close():dlg.removeAttribute("open");ticket=null;pendPw=null};
 $("#authX").onclick=close;
 dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
-function signedIn(u){me=u;close();ui();reconnect();fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(j.user)setBlocks(j.blocks||[]);admSet(j.admin,j.user&&j.user.email)}).catch(()=>{})}
+function signedIn(u){me=u;close();ui();reconnect();fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(j.user)setBlocks(j.blocks||[]);admSet(j.admin)}).catch(()=>{})}
 let amode="in";
 function setMode(m){amode=m;dlg.querySelectorAll(".aseg [data-am]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.am===m));$("#aPwGo").textContent=m==="in"?"Uloguj se":"Dalje";$("#aPw").autocomplete=m==="in"?"current-password":"new-password";say(aErr,"");apply(dlg)}
 dlg.querySelector(".aseg").addEventListener("click",e=>{const b=e.target.closest("[data-am]");if(b)setMode(b.dataset.am)});
@@ -172,5 +172,5 @@ avGrid.addEventListener("click",async e=>{const b=e.target.closest(".avt");if(!b
 
 const rd=$("#rulesDlg");$$('a[href="#pravila"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();if(rd.showModal)rd.showModal();else rd.setAttribute("open","")}));
 $("#rulesClose").onclick=()=>rd.close?rd.close():rd.removeAttribute("open");
-fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{me=j.user;clientId=j.clientId;setBlocks(j.blocks||[]);admSet(j.admin,me&&me.email)}).catch(()=>{}).finally(()=>{ui();connect()});
+fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{me=j.user;clientId=j.clientId;setBlocks(j.blocks||[]);admSet(j.admin)}).catch(()=>{}).finally(()=>{ui();connect()});
 }
