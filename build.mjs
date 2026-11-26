@@ -3,6 +3,7 @@
 // Runs automatically before `wrangler deploy` / `wrangler dev` (see "build" in wrangler.jsonc).
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { BADGE_H } from "./src/badges.mjs";
 
 const dir = new URL("./src/page/", import.meta.url);
 const read = (p) => readFileSync(new URL(p, dir), "utf8");
@@ -23,7 +24,10 @@ html = html.replace("/*@css*/", () => all("css"));
 html = html.replace(/<!--@html ([\w-]+)-->/g, (_, n) => read(`html/${n}.html`));
 html = html.replace("/*@js*/", () => all("js"));
 html = html.replace("/*@avatars*/[]", () => JSON.stringify(AV_IDS)).replace("/*@soon*/[]", () => JSON.stringify(AV_SOON));
-if (/\/\*@(css|js|avatars|soon)\*\/|<!--@html /.test(html)) throw new Error("unfilled include marker");
+// watching badges: the page gets the same hour thresholds the Worker uses (src/badges.mjs)
+if (!html.includes("/*@badgeh*/[]")) throw new Error("badge marker /*@badgeh*/[] is missing (js/19-badges.js)");
+html = html.replace("/*@badgeh*/[]", () => JSON.stringify(BADGE_H));
+if (/\/\*@(css|js|avatars|soon|badgeh)\*\/|<!--@html /.test(html)) throw new Error("unfilled include marker");
 if (!html.includes("/*MPS*/[]")) throw new Error("MP data placeholder /*MPS*/[] is missing");
 
 const out = new URL("./src/generated/", import.meta.url);

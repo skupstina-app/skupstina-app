@@ -48,7 +48,8 @@ export async function adminOf(env, email) {
 }
 /** Admin rights from a site account: only an account signed in with Google and without a password, so the email is
  *  surely his (an email + password account's address is never checked). */
-export const userAdmin = (env, user) => user && user.sub && !user.pw ? adminOf(env, user.email) : null;
+// async, so callers can always .catch() it (a plain null here made /api/auth/me fail for email + password accounts)
+export const userAdmin = async (env, user) => user && user.sub && !user.pw ? adminOf(env, user.email) : null;
 
 async function hmac(env, data) {
   const key = await crypto.subtle.importKey("raw", enc.encode("admin-session:" + (env.SALT || "")), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);

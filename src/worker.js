@@ -7,6 +7,7 @@ import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
 import { adminRoute } from "./admin.js";
 import { authRoute, currentUser } from "./auth.js";
+import { badgeLevel } from "./badges.mjs";
 import { AVATAR_FILES } from "./generated/avatars.js";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
 var PG = "https://www.parlament.gov.rs";
@@ -318,13 +319,14 @@ var ChatRoom = class {
     this.sql.exec("DROP TABLE IF EXISTS bans");
     try { if (!this.q("SELECT 1 FROM pragma_table_info('reports') WHERE name='rid'").length) this.sql.exec("DROP TABLE IF EXISTS reports"); } catch (e) { }
     this.sql.exec("CREATE TABLE IF NOT EXISTS reports(mid INTEGER, rid INTEGER, at INTEGER, PRIMARY KEY(mid, rid))");
-    for (const c of ["color INTEGER", "uid INTEGER"]) try { this.sql.exec("ALTER TABLE msgs ADD COLUMN " + c); } catch (e) { }
+    for (const c of ["color INTEGER", "uid INTEGER", "badge INTEGER"]) try { this.sql.exec("ALTER TABLE msgs ADD COLUMN " + c); } catch (e) { }
   }
   q(sql, ...a) {
     return [...this.sql.exec(sql, ...a)];
   }
   pub(m) {
-    return { id: m.id, n: m.name, x: m.text, at: m.at, c: m.color ?? null, u: m.uid ?? null };
+    // b: the writer's watching badge level when he wrote it (src/badges.mjs); 0 or null = no badge
+    return { id: m.id, n: m.name, x: m.text, at: m.at, c: m.color ?? null, u: m.uid ?? null, b: m.badge || 0 };
   }
   send(ws, o) {
     try {
@@ -339,9 +341,9 @@ var ChatRoom = class {
     } catch (e) {
     }
   }
-  /** The writer's account, read fresh from D1 on every message (so a rename or a ban applies at once). */
+  /** The writer's account, read fresh from D1 on every message (so a rename, a ban or a new badge level applies at once). */
   user(uid) {
-    return uid ? this.env.DB.prepare("SELECT id,name,color,banned_until FROM users WHERE id=?").bind(uid).first() : null;
+    return uid ? this.env.DB.prepare("SELECT id,name,color,banned_until,watch_s FROM users WHERE id=?").bind(uid).first() : null;
   }
   async banUser(uid, ms) {
     await this.env.DB.prepare("UPDATE users SET banned_until=? WHERE id=?").bind(ms > 0 ? Date.now() + ms : 0, uid).run();
@@ -412,7 +414,7 @@ var ChatRoom = class {
       if (perMin >= 12) return this.send(ws, { t: "err", code: "fast" });
       const bad = checkText(x);
       if (bad) return this.send(ws, { t: "err", code: bad });
-      const row = this.q("INSERT INTO msgs(at,name,text,color,uid) VALUES(?,?,?,?,?) RETURNING *", now2, me.name, x, me.color, me.id)[0];
+      const row = this.q("INSERT INTO msgs(at,name,text,color,uid,badge) VALUES(?,?,?,?,?,?) RETURNING *", now2, me.name, x, me.color, me.id, badgeLevel(me.watch_s))[0];
       this.sql.exec("DELETE FROM msgs WHERE id<?", row.id - CHAT_KEEP);
       a.last = now2;
       a.lastText = x;
