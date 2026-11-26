@@ -2,24 +2,19 @@
 .admdlg [data-v][hidden]{display:none}
 .admdlg .prows{display:grid;padding:0}
 .admdlg .rowlink{text-decoration:none}
-.admdlg .rowlink small{display:block;font-size:13px;line-height:1.2;margin-top:2px}
 .admdlg .rowlink[hidden]{display:none}
 .aback{border:0;background:none;color:var(--mute);font:inherit;font-size:14px;padding:4px 0;margin:-6px 0 6px;cursor:pointer}
 .admlist{list-style:none;margin:0 0 14px;padding:0;display:grid}
-.admlist li{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:10px 0;border-top:1px solid var(--line)}
+.admlist li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
 .admlist li:first-child{border-top:0}
-.admlist .av{width:36px;height:36px;grid-row:span 2}
-.admlist .who{min-width:0;display:grid;gap:1px}
-.admlist .who b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.admlist .who .m{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.admlist .rm{border:0;background:none;color:var(--mute);font:inherit;font-size:14px;padding:6px 4px;cursor:pointer}
-.admlist .rm.sure{color:#e5484d;font-weight:500}
-.admlist .admp{grid-column:2/4}
+.admlist .em{font-weight:500;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.admlist .rm{min-width:36px;height:32px;border:0;border-radius:6px;background:none;color:var(--mute);font:inherit;font-size:22px;line-height:1;padding:0 6px;cursor:pointer}
+.admlist .rm.sure{background:#e5484d;color:#fff;font-size:14px;font-weight:500;padding:0 10px}
+.admlist .admp{grid-column:1/3}
 .admp{display:flex;gap:6px;flex-wrap:wrap}
 .admp button{height:30px;padding:0 10px;border-radius:999px;border:0;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;color:var(--mute);font:inherit;font-size:13px;cursor:pointer}
 .admp button[aria-pressed=true]{background:var(--btn);color:var(--btn-ink);box-shadow:none}
 .admp button:disabled{cursor:default;opacity:.75}
-.admp .tag{height:30px;display:inline-flex;align-items:center;padding:0 10px;border-radius:999px;background:var(--live);color:var(--bg);font-size:13px}
 .admadd{padding-top:12px;border-top:1px solid var(--line)}
 .admadd .b{width:100%}
 #admErr:empty{display:none}
