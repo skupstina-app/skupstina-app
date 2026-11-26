@@ -4,53 +4,28 @@ const order=[...mps].sort((a,b)=>a.g-b.g||a.name.localeCompare(b.name,"sr"));
 const seatOf=new Map(order.map((m,i)=>[m,i]));
 const maxT=Math.max(...mps.map(m=>m.t)),hall=$("#hall"),svg=$("#hallSvg"),tip=$("#tip"),board=$("#salaBoard");
 let view="groups",active=live,focusMp=live.m;const geo={};
-/* the presidium bench: 9 places, left to right as seen on the broadcast:
-   4 vice-presidents · the Speaker (index 4) · secretary general ("SG", index 5) · deputy secretary general ("GSD", index 6) · 2 vice-presidents
-   (as in the hall: GS and ZGS on the Speaker's own left, which is the right on the broadcast).
-   SG and GSD are not MPs: their places are fixed. Places set in the admin (seat "p-0".."p-8") win; anyone else takes their default place
-   or the free place nearest the middle. The editor (src/admin/sala.html) shows only the saved places. */
-const BENCH_FIX={5:"SG",6:"GSD"},BENCH_NEAR=[3,7,2,8,1,0];
-function benchSlots(spk,vps,seatOf){
- const S=Array(9).fill(null),all=[spk,...vps].filter(Boolean);for(const j in BENCH_FIX)S[j]=BENCH_FIX[j];
- all.forEach(m=>{const x=/^p-([0-8])$/.exec(seatOf(m)||"");if(x&&!S[+x[1]])S[+x[1]]=m});
- const def=[[spk,4],[vps[0],3],[vps[1],2],[vps[2],1],[vps[3],0],[vps[4],7],[vps[5],8]].filter(d=>d[0]&&!S.includes(d[0]));
- const late=[];def.forEach(([m,j])=>{if(!S[j])S[j]=m;else late.push(m)});vps.slice(6).forEach(m=>{if(!S.includes(m))late.push(m)});
- late.forEach(m=>{const k=BENCH_NEAR.find(i=>!S[i]);if(k!=null)S[k]=m});
- return S}
+/* who sits where: seatPlan() and benchSlots() in 28-seatplan.js, worked out once per seat change and shared by every map on the page */
+let layoutSig="",layoutC=null;
+function seatLayout(){
+ const sig=mps.map(m=>m.seat||"").join(",");if(layoutC&&sig===layoutSig)return layoutC;layoutSig=sig;
+ const [SPK,VPS]=V1?splitLeads(mps,m=>m.role,m=>m.name):[null,[]],LEADS=new Set([SPK,...VPS].filter(Boolean)),inHall=mps.filter(m=>!LEADS.has(m));
+ const plan=seatPlan(inHall,{seat:m=>m.seat,grp:m=>V1?seatGroupKey(m.g,m.pg):m.g,rank:m=>seatRank(m.pg,m.role),name:m=>m.name,id:m=>m.id??m.i});
+ return layoutC={SPK,VPS,LEADS,inHall,plan,bench:benchSlots(SPK,VPS,m=>m.seat),sig}}
 function drawMap(T=SALA){
  const hall=T.el,svg=T.svg,tip=T.tip,geo=T.geo,LIVE=T.live,V=LIVE?"live":view;
  const W=hall.clientWidth,H=hall.clientHeight;if(!W)return;
- const SPK=V1?mps.find(m=>/^Председник Народне/.test(m.role||"")):null,VPS=V1?mps.filter(m=>/^Потпредседник/.test(m.role||"")).sort((a,b)=>(a.name.split(" ").pop()).localeCompare(b.name.split(" ").pop(),"sr")):[],LEADS=new Set([SPK,...VPS].filter(Boolean)),inHall=mps.filter(m=>!LEADS.has(m)),HN=inHall.length;
- /* the hall as built: 8 sections split by aisles; the two outer ones start with 5 seats in the front row, the six inner ones with 3,
-    the outer ones gain one seat every row back (5-10), the inner ones go 3,4,5,5,6,6. 6 rows = 264 seats, enough for everyone in the hall;
-    seats nobody needs stay drawn as empty outlines. Same in src/admin/sala.html. */
- const SEC=[5,3,3,3,3,3,3,5],INNER=[3,4,5,5,6,6],rows=6,BH=Math.max(26,Math.round(H*.09)),R=Math.min(W/2-16,H-24-BH),cx=W/2,cy=12+BH,r0=R*.56,step=(R-r0)/(rows-1);
- const N0=SEC.reduce((a,b)=>a+b,0),aw=(Math.PI-.04)*r0/(N0+7*1.3)*1.3,seats=[];let arc0=0;
- for(let i=0;i<rows;i++){const r=r0+i*step,ns=SEC.map(n=>n===3?INNER[i]:n+i),N=ns.reduce((a,b)=>a+b,0),ga=aw/r,span=Math.PI-.04,per=(span-(SEC.length-1)*ga)/N;if(!i)arc0=per*r;
-  let a0=Math.PI-.02;ns.forEach((n,k)=>{for(let j=0;j<n;j++){const a=a0-(j+.5)*per;seats.push({a,i,k,key:i+"-"+k+"-"+j,z:1,x:cx-r*Math.cos(a),y:cy+r*Math.sin(a)})}a0-=n*per+ga})}
- /* drawn as the broadcast shows the hall: the presidium at the top, MPs facing it. Each group gets a wedge of the hall in proportion to its size
-    and fills it from the front; group leaders take the front seats nearest the centre, everyone else follows alphabetically. */
- const gk=m=>V1&&m.g===6&&!m.pg?5.5:m.g;
- const keys=[...new Set(inHall.map(gk))].sort((a,b)=>a-b);
- /* seats placed by hand in the admin (/admin/sala) win; everyone else is placed automatically in the seats left */
- const seatBy=new Map(seats.map(p=>[p.key,p])),manual=inHall.filter(m=>m.seat&&seatBy.has(m.seat)),takenS=new Set(manual.map(m=>seatBy.get(m.seat)));
- const byA=[...seats].filter(p=>!takenS.has(p)).sort((p,q)=>q.a-p.a||p.i-q.i);
- const rank=m=>{const pg=m.pg||"";return /\(председник\)/.test(pg)?0:/\(заменик/.test(pg)?1:/^Потпредседник/.test(m.role||"")?2:3};
- const posOf=new Map();geo.pos=posOf;const blocks=groups.map(()=>[]),empty=[];let at=0,cum=0;
- const autoN=inHall.length-manual.length;
- keys.forEach((k,ki)=>{const mem=inHall.filter(m=>gk(m)===k&&!manual.includes(m)).sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name,"sr"));
-  cum+=mem.length;let end=ki===keys.length-1?byA.length:Math.round(byA.length*cum/Math.max(1,autoN));end=Math.max(end,at+mem.length);
-  const slice=byA.slice(at,end);at=end;
-  const front=[...slice].sort((p,q)=>p.i-q.i||Math.abs(p.a-Math.PI/2)-Math.abs(q.a-Math.PI/2)),used=new Set();
-  mem.filter(m=>rank(m)<3).forEach((m,j)=>{used.add(front[j]);posOf.set(m,front[j])});
-  const rest=slice.filter(p=>!used.has(p)).sort((p,q)=>p.i-q.i||q.a-p.a);mem.filter(m=>rank(m)===3).forEach((m,j)=>{const p=rest.shift();posOf.set(m,p)});
-  rest.forEach(p=>empty.push(p));mem.forEach(m=>blocks[m.g].push(posOf.get(m)))});
- manual.forEach(m=>{const p=seatBy.get(m.seat);posOf.set(m,p);blocks[m.g].push(p)});
- geo.blocks=blocks;geo.empty=empty;
+ const LY=seatLayout(),SPK=LY.SPK,VPS=LY.VPS,LEADS=LY.LEADS;
+ /* the hall as built (hallSeats in 28-seatplan.js): 8 sections split by aisles, 6 rows = 264 seats; seats nobody needs stay drawn as empty outlines.
+    Drawn as the broadcast shows the hall: the presidium at the top, MPs facing it. Same seats in src/admin/sala.html and the stats panel. */
+ const BH=Math.max(26,Math.round(H*.09)),R=Math.min(W/2-16,H-24-BH),cx=W/2,cy=12+BH,HS=hallSeats(R),step=HS.step,arc0=HS.arc0;
+ const seatBy=new Map(HS.seats.map(p=>[p.key,{...p,z:1,x:cx-p.r*Math.cos(p.a),y:cy+p.r*Math.sin(p.a)}]));
+ const posOf=new Map();geo.pos=posOf;const blocks=groups.map(()=>[]);
+ LY.inHall.forEach(m=>{const p=seatBy.get(LY.plan.at.get(m));if(p){posOf.set(m,p);blocks[m.g].push(p)}});
+ geo.blocks=blocks;geo.empty=LY.plan.empty.map(k=>seatBy.get(k));
  const s=Math.max(3,Math.floor(Math.min(step*.72,arc0*.74)));
  /* predsednistvo: one row at the top, 9 places (see benchSlots) */
  const bk=Math.max(4,Math.round(s*1.1)),gap=Math.min(bk*2.4,(W-24)/9.4),benW=gap*9.4,benH=Math.max(14,bk+10),benY=Math.max(4,cy-BH*.3-benH),benX=cx-benW/2,benC=benY+benH/2;
- const slotX=j=>benX+gap*.2+gap*j+gap/2,SLOTS=benchSlots(SPK,VPS,m=>m.seat);
+ const slotX=j=>benX+gap*.2+gap*j+gap/2,SLOTS=LY.bench;
  geo.bench={x:cx,y:benC,w:benW,h:benH};
  SLOTS.forEach((m,j)=>{if(m&&typeof m!=="string")posOf.set(m,{x:slotX(j),y:benC,z:1,a:Math.PI/2,i:-1})});
  let bench=(LIVE?`<g>`:`<g data-bench="1" style="cursor:pointer">`)+`<rect x="${Math.round(benX)}" y="${Math.round(benY)}" width="${Math.round(benW)}" height="${Math.round(benH)}" fill="var(--card)" stroke="var(--line)" rx="2"></rect>`;
@@ -58,8 +33,8 @@ function drawMap(T=SALA){
  for(const j in BENCH_FIX)bench+=`<rect x="${Math.round(slotX(+j)-bk/2)+.75}" y="${Math.round(benC-bk/2)+.75}" width="${bk-1.5}" height="${bk-1.5}" fill="none" stroke="var(--mute)" stroke-width="1.5"></rect>`;bench+=`<title>Predsedništvo</title></g>`;
  const sq=(p,z,fill,op=1,g="")=>{const k=Math.max(2,Math.round(z*(p.z||1)));return `<rect ${g!==""?`data-g="${g}" `:""}x="${Math.round(p.x-k/2)}" y="${Math.round(p.y-k/2)}" width="${k}" height="${k}" fill="${fill}" opacity="${op}"></rect>`};
  /* who spoke today: hollow = not yet, filled and bigger = spoke more; neighbours spread so big ones never overlap */
- const key=W+"x"+H;if(LIVE&&geo.key!==key){geo.key=key;const R=new Map();
-  mps.forEach(m=>{const p=posOf.get(m),f=m.t/maxT,sz=Math.round((m.t?s*(1+1.3*Math.sqrt(f)):s*.95)*(p.z||1));R.set(m,{x:p.x,y:p.y,ox:p.x,oy:p.y,sz,r:sz/2,fix:LEADS.has(m)})});
+ const key=W+"x"+H+LY.sig;if(LIVE&&geo.key!==key){geo.key=key;const R=new Map();
+  mps.forEach(m=>{const p=posOf.get(m);if(!p)return;const f=m.t/maxT,sz=Math.round((m.t?s*(1+1.3*Math.sqrt(f)):s*.95)*(p.z||1));R.set(m,{x:p.x,y:p.y,ox:p.x,oy:p.y,sz,r:sz/2,fix:LEADS.has(m)})});
   const A=[...R.values()];
   for(let it=0;it<40;it++){for(let i=0;i<A.length;i++){const a=A[i];for(let j=i+1;j<A.length;j++){const b=A[j],dx=b.x-a.x,dy=b.y-a.y,lim=a.r+b.r+1.5;if(Math.abs(dx)>lim||Math.abs(dy)>lim)continue;const d=Math.hypot(dx,dy)||.01;if(d<lim){const ov=(lim-d),wa=b.r/(a.r+b.r);a.x-=dx/d*ov*wa;a.y-=dy/d*ov*wa;b.x+=dx/d*ov*(1-wa);b.y+=dy/d*ov*(1-wa)}}}
    A.forEach(p=>{if(p.fix){p.x=p.ox;p.y=p.oy;return}p.x+=(p.ox-p.x)*.04;p.y+=(p.oy-p.y)*.04;p.y=Math.max(p.y,cy+4)})}
@@ -68,7 +43,7 @@ function drawMap(T=SALA){
  const seat=(m,col,op=1,g="")=>{const p=RP.get(m),k=p.sz,x=Math.round(p.x-k/2),y=Math.round(p.y-k/2),d=g!==""?`data-g="${g}" `:"";
   return m.t?`<rect ${d}x="${x}" y="${y}" width="${k}" height="${k}" fill="${col}" opacity="${op}"></rect>`:`<rect ${d}x="${x+.75}" y="${y+.75}" width="${k-1.5}" height="${k-1.5}" fill="var(--board)" stroke="${col}" stroke-width="1.5" opacity="${op}"></rect>`};
  const fm=V==="day"?active.m:V==="mps"?focusMp:live.m;let o=bench;geo.empty.forEach(p=>{const k=Math.max(2,Math.round(s*.8));o+=`<rect x="${Math.round(p.x-k/2)+.5}" y="${Math.round(p.y-k/2)+.5}" width="${k-1}" height="${k-1}" fill="none" stroke="var(--seat)" stroke-width="1"></rect>`});
- mps.forEach(m=>{const p=posOf.get(m);
+ mps.forEach(m=>{const p=posOf.get(m);if(!p)return;
   if(LIVE)o+=seat(m,SH[m.g],1);
   else if(V==="groups"){const any=selG!==null||popFor==="bench",lead=LEADS.has(m),hl=popFor==="bench"?lead:(!any||selG===m.g);o+=hl?sq(p,any?s*1.15:s,popFor==="bench"?"var(--ink)":SH[m.g],1,m.g):sq(p,s*.85,"var(--seat)",1,m.g)}
   else if(V==="mps")o+=m===fm?"":sq(p,s,SH[m.g],m.g===fm.g?.75:.25);
@@ -183,3 +158,11 @@ const renderMps=q=>{const f=fold(q||"");const list=order.filter(m=>(gFilter===nu
 const mpLens=lens(mpl,i=>{focusMp=mps[i];if(view==="mps")drawMap()});
 $("#q").addEventListener("input",e=>{renderMps(e.target.value);mpl.scrollTop=0});
 $("#fchip").addEventListener("click",()=>{gFilter=null;renderMps($("#q").value);mpl.scrollTop=0});renderMps("");
+/* seats saved in the admin reach open pages without a reload: /api/seats (saved seats only, cached 15 s) is checked a few seconds after
+   load (the page itself can be up to 5 minutes old) and then every minute while the page is visible; every map redraws from seatLayout() */
+async function pullSeats(){if(!V1||document.hidden)return;
+ try{const r=await fetch("/api/seats");if(!r.ok)return;const s=(await r.json()).s||{};let ch=false;
+  mps.forEach(m=>{const k=s[m.id]||null;if((m.seat||null)!==k){m.seat=k;ch=true}});
+  if(ch){drawMap();renderPanels(true)}}catch(e){}}
+setTimeout(pullSeats,4000);setInterval(pullSeats,60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)pullSeats()});

@@ -188,6 +188,20 @@ async function fonts(req, ctx, name) {
   return r;
 }
 __name(fonts, "fonts");
+// Saved seats only ({s:{id:seat}}), so open pages follow the admin's seat changes without reloading (30-hall.js polls it).
+// Cached 15 s per data centre; a save in the admin drops this data centre's copy (admin.js).
+async function seatsJson(req, env, ctx) {
+  const cache = caches.default, key = new Request(new URL(req.url).origin + "/__seats");
+  let r = await cache.match(key);
+  if (r) return r;
+  const { results } = await env.DB.prepare("SELECT id,seat FROM mps WHERE active=1 AND seat IS NOT NULL").all();
+  const s = {};
+  for (const x of results) s[x.id] = x.seat;
+  r = new Response(JSON.stringify({ s }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=15" } });
+  ctx.waitUntil(cache.put(key, r.clone()));
+  return r;
+}
+__name(seatsJson, "seatsJson");
 async function page(env, ctx, req) {
   // The page is built from src/page/ at deploy time (build.mjs); its content hash keys the cache,
   // so every deploy that changes the page is served at once.
@@ -460,6 +474,7 @@ var worker_default = {
         return new Response(new Uint8Array(row.bytes), { headers: { "content-type": row.type, "cache-control": "public, max-age=86400" } });
       }
       if (p === "/api/mps") return json(await mpsJson(env));
+      if (p === "/api/seats") return seatsJson(req, env, ctx);
       if (p === "/api/live/speakers") return json({ segments: [] });
       if (p === "/api/contact" && req.method === "POST") return contact(req, env);
       if (p === "/api/chat") {

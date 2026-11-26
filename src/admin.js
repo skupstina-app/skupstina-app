@@ -1,7 +1,8 @@
 // Admin: Google sign-in for the admin emails, and the seat map editor (/admin/sala).
 // Env: GOOGLE_CLIENT_ID (var), ADMIN_EMAILS (var, comma separated), SALT (secret, signs the session cookie).
 // The old ?key=ADMIN_KEY links still work for the other /admin pages.
-import SALA_HTML from "./admin/sala.html";
+import SALA_HTML from "./generated/sala.html";
+import PAGE_HASH from "./generated/version.js"; // src/admin/sala.html + the shared seat plan, joined by build.mjs
 
 const COOKIE = "sk_admin";
 const DAYS = 30;
@@ -63,6 +64,13 @@ async function ensureLockCol(env) {
   lockCol = true;
 }
 
+/** After a seat change: drop this data centre's cached copies of the page and of /api/seats, so the change shows at once here;
+ *  elsewhere the page catches up within 5 minutes, and open pages pick it up from /api/seats within a minute (30-hall.js). */
+async function purgeSeats(req) {
+  const o = new URL(req.url).origin, c = caches.default;
+  await Promise.all([c.delete(new Request(o + "/__seats")), c.delete(new Request(o + "/__page_h" + PAGE_HASH))]).catch(() => {});
+}
+
 /** Handles /admin/sala and /admin/api/*; returns null for anything else. */
 export async function adminRoute(req, env, u, p) {
   if (p === "/admin/sala") {
@@ -105,6 +113,7 @@ export async function adminRoute(req, env, u, p) {
       st.push(env.DB.prepare("UPDATE mps SET seat=?,seat_at=? WHERE id=?").bind(seat, at, id));
     }
     await env.DB.batch(st);
+    await purgeSeats(req);
     return json({ ok: true });
   }
   if (p === "/admin/api/lock" && req.method === "POST") {

@@ -5,7 +5,7 @@
    - in production the timeline comes from our Worker (/api/live/speakers, refreshed every few seconds);
      with no timeline nothing is auto-muted. */
 const CH="UCghngrfQwzJ4aaPZ-UgNIZQ",PAD_IN=.8,PAD_OUT=1.2;
-let yt=null,ytReady=false,userMuted=false,vol=100,TL=[],autoNow=null,onceUnmuted=null;
+let yt=null,ytReady=false,userMuted=false,vol=100,TL=[],tlAt=null,autoNow=null,onceUnmuted=null;
 const speakerAt=t=>{if(TL.length&&t!=null){for(let i=TL.length-1;i>=0;i--){const x=TL[i];if(t>=x.from-PAD_IN&&t<=(x.to==null?1e12:x.to)+PAD_OUT)return x.mp}return null}
  /* no playback position yet (not started): whoever is speaking live right now */
  const L=TL[TL.length-1];return t==null&&apiLive&&L&&L.to==null?L.mp:null};
@@ -23,7 +23,7 @@ $("#vmute").onclick=()=>setMuted(!userMuted);
 setInterval(applyAudio,250);
 /* live state: the reader says a broadcast is on, or our own player is on a live stream */
 let apiLive=false,plLive=false;const setLive=()=>document.body.classList.toggle("islive",apiLive||plLive);
-async function pullTimeline(){try{const r=await fetch("/api/live/speakers",{cache:"no-store"});if(r.ok){const j=await r.json();apiLive=!!j.live;setLive();liveGate();TL=(j.segments||[]).map(x=>({from:x.from,to:x.to,mp:mps.find(m=>m.id===x.mp)||null})).filter(x=>x.mp)}}catch(e){}}
+async function pullTimeline(){try{const r=await fetch("/api/live/speakers",{cache:"no-store"});if(r.ok){const j=await r.json();apiLive=!!j.live;setLive();liveGate();tlAt=j.updated||null;TL=(j.segments||[]).map(x=>({from:x.from,to:x.to,mp:mps.find(m=>m.id===x.mp)||null})).filter(x=>x.mp)}}catch(e){}}
 /* how often to ask: every 4 s while live (speaker data); otherwise every minute around session hours
    (9:45-20:00 Belgrade time) and every 10 minutes the rest of the day; at once when the viewer comes back */
 const bgMin=()=>{try{const p=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Belgrade",hour:"numeric",minute:"numeric",hourCycle:"h23"}).formatToParts(new Date());return +p.find(x=>x.type==="hour").value*60+ +p.find(x=>x.type==="minute").value}catch(e){return 600}};

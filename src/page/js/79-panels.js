@@ -34,28 +34,46 @@ function xView(v,m){
  $("#phw").classList.toggle("open",v==="prof");$("#phBtn").setAttribute("aria-expanded",v==="prof");
  $("#phBtn").setAttribute("aria-label",v==="prof"?"Zatvori profil":"Profil govornika");
  $("#podBtn").classList.toggle("open",v==="stats");$("#podBtn").setAttribute("aria-expanded",v==="stats");
- $("#podBtn").setAttribute("aria-label",v==="stats"?"Zatvori statistiku":"Ko je danas najviše govorio");
+ $("#podBtn").setAttribute("aria-label",v==="stats"?"Zatvori statistiku":dayAsk(tlDay()));
  renderPanels(true);
 }
+/* the podium button's label follows the day of the stats */
+setInterval(()=>{if(xv!=="stats")$("#podBtn").setAttribute("aria-label",dayAsk(tlDay()))},5000);
 $("#podBtn").onclick=()=>xView(xv==="stats"?"":"stats");
 $("#phBtn").onclick=()=>{if(xv==="prof")xView("");else if(curSp)xView("prof",curSp)};
 
-/* seat map: 250 seats in a half circle, groups side by side; whoever spoke today is coloured and bigger */
-const SEATS=(()=>{const rows=9,R0=46,R1=128,cx=150,cy=140,rad=[...Array(rows)].map((_,i)=>R0+(R1-R0)*i/(rows-1)),tot=rad.reduce((a,b)=>a+b,0);
- const cnt=rad.map(r=>Math.round(250*r/tot));cnt[rows-1]+=250-cnt.reduce((a,b)=>a+b,0);
- const s=[];rad.forEach((r,i)=>{for(let k=0;k<cnt[i];k++){const a=Math.PI*(1-(k+.5)/cnt[i]);s.push({a,x:cx+r*Math.cos(a),y:cy-r*Math.sin(a)})}});
- return s.sort((p,q)=>q.a-p.a);})();
+/* seat map: the hall as on the Sala tab, the same seats (seatLayout() in 30-hall.js): the presidium bench at the top, the 8 sections
+   below it with a slight aisle between them; whoever spoke is coloured and bigger, the longer the bigger */
 function seatMap(by){
- const order=[...mps].sort((a,b)=>a.g-b.g||a.i-b.i),mx=Math.max(1,...[...by.values()].map(o=>o.t));
- const dots=order.map((m,i)=>{const p=SEATS[i];if(!p)return"";const o=by.get(m);
-  return o&&o.t>0?{z:1,s:`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(3+6.5*Math.sqrt(o.t/mx)).toFixed(1)}" fill="${SH[m.g]}" stroke="var(--bg)" stroke-width="1"><title>${esc(m.name)} · ${mss(o.t)}</title></circle>`}
-  :{z:0,s:`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.3" fill="var(--seat)"/>`}});
- return `<svg class="smap" viewBox="0 0 300 146" role="img" aria-label="Sala: veći krug, duže govorio danas">${dots.filter(d=>!d.z).map(d=>d.s).join("")}${dots.filter(d=>d.z).map(d=>d.s).join("")}</svg>`;
+ const LY=seatLayout(),R=136,cx=150,cy=22,HS=hallSeats(R),at=new Map(HS.seats.map(p=>[p.key,{x:cx-p.r*Math.cos(p.a),y:cy+p.r*Math.sin(p.a)}])),mx=Math.max(1,...[...by.values()].map(o=>o.t));
+ const gap=12,bx=j=>cx+(j-4)*gap,by0=7,pos=new Map();
+ LY.inHall.forEach(m=>{const p=at.get(LY.plan.at.get(m));if(p)pos.set(m,p)});
+ LY.bench.forEach((m,j)=>{if(m&&typeof m!=="string")pos.set(m,{x:bx(j),y:by0})});
+ let base=`<rect x="${bx(0)-gap/2-2}" y="${by0-5}" width="${gap*9+4}" height="10" rx="2" fill="none" stroke="var(--line)"/>`;
+ for(const j in BENCH_FIX)base+=`<circle cx="${bx(+j)}" cy="${by0}" r="1.8" fill="none" stroke="var(--seat)" stroke-width="1"/>`;
+ LY.plan.empty.forEach(k=>{const p=at.get(k);base+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="1.7" fill="none" stroke="var(--seat)" stroke-width=".8"/>`});
+ const top=[];
+ mps.forEach(m=>{const p=pos.get(m);if(!p)return;const o=by.get(m);
+  if(o&&o.t>0)top.push([o.t,`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(3+6.5*Math.sqrt(o.t/mx)).toFixed(1)}" fill="${SH[m.g]}" stroke="var(--bg)" stroke-width="1"><title>${esc(m.name)} · ${mss(o.t)}</title></circle>`]);
+  else base+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.2" fill="var(--seat)"/>`});
+ /* bigger circles first, so a small one next to a big one stays visible on top */
+ return `<svg class="smap" viewBox="0 0 300 168" role="img" aria-label="Sala: veći krug, duže govorio">${base}${top.sort((a,b)=>b[0]-a[0]).map(x=>x[1]).join("")}</svg>`;
 }
+/* which day the speaker timeline is about: "danas", "juče" or the date. The stats keep showing the last sitting until the next one starts,
+   so they must say which day it was. A sitting that runs past midnight still counts as the day it started (4 h back). */
+const bgDay=ms=>new Date(ms).toLocaleDateString("en-CA",{timeZone:"Europe/Belgrade"});
+function tlDay(){
+ if(!tlAt||!TL.length)return "danas";
+ const d=bgDay(tlAt-4*3600e3),now=Date.now();
+ if(d===bgDay(now))return "danas";if(d===bgDay(now-864e5))return "juče";
+ const [y,mo,da]=d.split("-").map(Number);return `${da}. ${MON[mo-1]}${y!==new Date(now).getFullYear()?" "+y+".":""}`;
+}
+const dayAsk=w=>w==="danas"||w==="juče"?`Ko je ${w} najviše govorio`:`Ko je najviše govorio ${w}`;
 function renderStats(by){
  const list=[...by.entries()].filter(([,o])=>o.t>0).sort((a,b)=>b[1].t-a[1].t);
  const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><i style="background:${SH[m.g]}"></i><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])} · ${o.n} ${o.n===1?"put":"puta"}</small></span><span class="tm nt">${mss(o.t)}</span></button></li>`).join("");
- $("#p-stats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili danas</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">Još niko nije govorio danas.</p>`}</div>`;
+ const w=tlDay();
+ $("#p-stats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${w}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
  apply($("#p-stats"));
 }
 $("#p-stats").addEventListener("click",e=>{const b=e.target.closest("[data-pm]");if(b)xView("prof",mps[b.dataset.pm])});
@@ -70,13 +88,13 @@ function bio(m){
 }
 function renderProf(by){
  const m=profMp;if(!m){$("#p-prof").innerHTML="";return}
- const f=isF(m),o=by.get(m),on=muted.has(m),party=m.party?c2l(m.party):(f?"Nestranačka":"Nestranački");
+ const f=isF(m),o=by.get(m),on=muted.has(m),w=tlDay(),party=m.party?c2l(m.party):(f?"Nestranačka":"Nestranački");
  const fact=(k,v)=>v?`<div class="fact"><small>${k}</small><span>${esc(v)}</span></div>`:"";
  $("#p-prof").innerHTML=`<div class="xin">
 <div class="phead">${m!==curSp?`<span class="pph"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`:""}<h3>${esc(m.name)}</h3></div>
 <div class="chips"><span class="gchip"><i style="background:${SH[m.g]}"></i>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][0])}</span><span class="pchip">${esc(party)}</span></div>
 <p class="bio">${esc(bio(m))}</p>
-<div class="facts">${fact("Godište",m.by?m.by+".":"")}${fact("Mesto",c2l(m.place))}${fact("Zanimanje",c2l(m.prof))}${fact(f?"Danas govorila":"Danas govorio",o&&o.t>0?`${o.n} ${o.n===1?"put":"puta"} · ${mss(o.t)}`:"ne još")}</div>
+<div class="facts">${fact("Godište",m.by?m.by+".":"")}${fact("Mesto",c2l(m.place))}${fact("Zanimanje",c2l(m.prof))}${fact(w==="danas"||w==="juče"?(w==="danas"?"Danas":"Juče")+(f?" govorila":" govorio"):(f?"Govorila ":"Govorio ")+w,o&&o.t>0?`${o.n} ${o.n===1?"put":"puta"} · ${mss(o.t)}`:w==="danas"?"ne još":(f?"nije govorila":"nije govorio"))}</div>
 <div class="pbtns"><button type="button" class="b light" id="profMute" aria-pressed="${on}">${on?I_SOFF:I_SON}<span>${on?"Ponovo čuj":"Utišaj"}</span></button><a class="b light" href="https://www.parlament.gov.rs/_.${m.id}.245.html" target="_blank" rel="noopener">parlament.gov.rs ↗</a></div>
 <p class="src">Izvor: Narodna skupština · vreme govora: skupština.app</p></div>`;
  $("#profMute").onclick=()=>{toggleMute(m);renderPanels(true)};
@@ -89,7 +107,7 @@ function renderPanels(force){
  const by=talkTotals(),o=curSp&&by.get(curSp),b=$("#talkT");
  b.hidden=!(o&&o.t>0);if(o)b.textContent=mss(o.t);
  if(!xv)return;
- const sig=xv+"|"+(profMp&&profMp.i)+"|"+[...by.entries()].map(([m,x])=>m.i+":"+Math.floor(x.t)).join(",")+"|"+muted.size+"|"+(curSp&&curSp.i);
+ const sig=tlDay()+"|"+layoutSig+"|"+xv+"|"+(profMp&&profMp.i)+"|"+[...by.entries()].map(([m,x])=>m.i+":"+Math.floor(x.t)).join(",")+"|"+muted.size+"|"+(curSp&&curSp.i);
  if(!force&&sig===lastSig)return;lastSig=sig;
  xv==="stats"?renderStats(by):renderProf(by);
 }

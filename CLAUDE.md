@@ -24,8 +24,8 @@ Map of this repo. Read this first, then open only the file you need.
 | Head, fonts, first styles | `index.html` (shell) | | |
 | Top nav, menu sheet | `html/header.html` | `10-nav` | `10-nav` |
 | Uživo: player, speaker bar, chat, live stats | `html/live.html` | `20-live-window`, `60-uzivo`, `85-chat` | `15-live`, `20-chat`, `45-numbers`, `70-mini-fullscreen`, `72-mute-engine`, `76-player`, `78-live-status` |
-| Uživo panels: stats (podium button) and MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map) |
-| Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `30-hall` |
+| Uživo panels: stats (podium button) and MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map, `tlDay()`: the stats say which day they are about — danas / juče / date — from `updated` of `/api/live/speakers`) |
+| Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` |
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
 | Arhiva | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
 | Profil, mutes, rules dialog | `html/profil.html` | `70-profil` | `55-mutes` |
@@ -60,15 +60,19 @@ Map of this repo. Read this first, then open only the file you need.
   The Speaker and vice-presidents sit on the presidium bench instead: 9 places `p-0`..`p-8` (left to right as on the
   broadcast): 4 VPs, `p-4` the Speaker, `p-5` secretary general, `p-6` deputy secretary general, 2 VPs (GS and ZGS sit
   on the Speaker's own left, as in the hall). GS and GSD are
-  not MPs and their places are fixed. `benchSlots()` in `30-hall.js` fills unsaved places on the site; the editor
-  shows only saved places (an unsaved lead is in its list).
+  not MPs and their places are fixed.
+- One seat plan for every map: `src/page/js/28-seatplan.js` (`hallSeats`, `seatPlan`, `benchSlots`). The site uses it through
+  `seatLayout()` in `30-hall.js` (Sala and the stats panel map); `build.mjs` pastes the same file into the editor at `/*@seatplan*/`
+  → `src/generated/sala.html` (what admin.js serves). Saved seats win; everyone else gets an automatic seat in his group's wedge
+  (groups go round the hall in the order their saved seats show), and a save only pushes the person who sat there to the nearest
+  free seat of his own group. The editor draws the automatic places faded (dashed): drag one to save a seat, or tap → "Sačuvaj ovo mesto".
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
   with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
   then drag on. `mps.seat_lock` = 1 locks an MP on his seat
   (column added by `ensureLockCol` in admin.js; `POST /admin/api/lock {id,lock}`). The lock is only an editor guard: dropping
   someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch.
-- The public Sala map uses hand-placed seats first and places everyone else automatically. The page's MP data is
-  cached up to 5 minutes, so seat changes show on the site within 5 minutes.
+- Seat changes reach the site fast: a save drops the cached page and `/api/seats` in that data centre; open pages poll
+  `/api/seats` (saved seats only, edge cache 15 s) 4 s after load and every minute, and redraw every map.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.
 
 ## Style
