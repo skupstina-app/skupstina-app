@@ -81,12 +81,12 @@ Map of this repo. Read this first, then open only the file you need.
   `seatLayout()` in `30-hall.js` (Sala and the stats panel map); `build.mjs` pastes the same file into the editor at `/*@seatplan*/`
   → `src/generated/sala.html` (what admin.js serves). Saved seats win; everyone else gets an automatic seat in his group's wedge
   (groups go round the hall in the order their saved seats show), and a save only pushes the person who sat there to the nearest
-  free seat of his own group. The editor draws the automatic places faded (dashed): drag one to save a seat, or tap → "Sačuvaj ovo mesto".
+  free seat of his own group. The editor does not show the automatic places: it draws saved seats only (so an accidental tap saves nothing).
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
   with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
   then drag on. `mps.seat_lock` = 1 locks an MP on his seat
   (column added by `ensureLockCol` in admin.js; `POST /admin/api/lock {id,lock}`). The lock is only an editor guard: dropping
-  someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch.
+  someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch. On phones the map fills the screen and the list below keeps a fixed height of 3 rows; browser page zoom is off so the list stays sharp.
 - Seat changes reach the site fast: a save drops the cached page and `/api/seats` in that data centre; open pages poll
   `/api/seats` (saved seats only, edge cache 15 s) 4 s after load and every minute, and redraw every map.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.
