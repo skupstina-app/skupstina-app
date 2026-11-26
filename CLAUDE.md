@@ -92,7 +92,8 @@ Map of this repo. Read this first, then open only the file you need.
   → `src/generated/sala.html` (what admin.js serves). Saved seats win; everyone else gets an automatic seat in his group's wedge
   (groups go round the hall in the order their saved seats show), and a save only pushes the person who sat there to the nearest
   free seat of his own group. The editor does not show the automatic places: it draws saved seats only (so an accidental tap saves nothing).
-- Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
+- Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo, and on the hall a swipe
+  moves the hall, also over people: press and hold someone 250 ms to pick him up, then drag; the page itself never scrolls; the filters are remembered in the browser, localStorage `sala-f`); a tap opens a card
   with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
   then drag on. `mps.seat_lock` = 1 locks an MP on his seat
   (column added by `ensureLockCol` in admin.js; `POST /admin/api/lock {id,lock}`). The lock is only an editor guard: dropping

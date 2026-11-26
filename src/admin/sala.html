@@ -88,7 +88,7 @@ button:hover{border-color:rgba(255,255,255,.3)}
 #list .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #list .st{font-size:12px;color:var(--mute)}
 #status{font-size:12px;color:var(--mute)}
-@media(max-width:900px){html,body{touch-action:pan-x pan-y}#app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}#hallWrap{padding:6px;min-height:0}#list{flex:1;min-height:0;overscroll-behavior:contain}#list li{height:52px;padding:0 8px;transition:height .25s}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:0 8px 8px;gap:6px;border-bottom:0}#list .ph{width:36px;height:36px;transition:width .25s,height .25s}
+@media(max-width:900px){html,body{touch-action:pan-x pan-y;overflow:hidden;overscroll-behavior:none}body{position:fixed;inset:0;height:auto}#hallWrap{overscroll-behavior:contain}.seat.lifted{outline:2px solid var(--live);outline-offset:2px;transform:scale(1.15);z-index:2}#app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}#hallWrap{padding:6px;min-height:0}#list{flex:1;min-height:0;overscroll-behavior:contain}#list li{height:52px;padding:0 8px;transition:height .25s}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:0 8px 8px;gap:6px;border-bottom:0}#list .ph{width:36px;height:36px;transition:width .25s,height .25s}
 #fmenu{right:8px;max-height:calc(70dvh - 90px)}}
 /* phones: the list is a bottom sheet. Down (default): 3 rows. Up: 70% of the screen, bigger photos, more people. */
 @media(max-width:900px){
@@ -125,6 +125,9 @@ const $=s=>document.querySelector(s);
 const GROUPS=[["Studentska lista",/СТУДЕНТ/],["SVM",/МАЂАР|MAGYAR/],["Albanska koal.",/АЛБАН|SHQIP/],["Ljudski",/ЉАЈИЋ|ЉУДСКИ/],["SDA Sandžaka",/SDA|СДА|САНЏАК|SANDŽAK/],["Pokret za ujed.",/ПОКРЕТ ЗА УЈЕДИЊЕЊЕ|POKRET ZA UJEDINJENJE/],["Srbija pobeđuje",/УЈЕДИЊЕНА СРБИЈА|ВУЧИЋ/]];
 const gIdx=m=>{const x=(m.l||"").toUpperCase();return GROUPS.findIndex(g=>g[1].test(x))},gOf=m=>{const i=gIdx(m);return i<0?6:i};
 let MPS=[],sel=null,fg=-1,fs=0,fx="";const bySeat=new Map();
+/* filters are remembered in this browser (stranka, mesto, pol) */
+try{const f=JSON.parse(localStorage.getItem("sala-f")||"{}");if(Number.isInteger(f.g))fg=f.g;if(Number.isInteger(f.s))fs=f.s;if(typeof f.x==="string")fx=f.x}catch(e){}
+const saveF=()=>{try{localStorage.setItem("sala-f",JSON.stringify({g:fg,s:fs,x:fx}))}catch(e){}};
 const status=(t,ok=true)=>{const s=$("#status");s.textContent=t;s.style.color=ok?"":"#e07a6e"};
 async function api(path,body){const r=await fetch(path,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{});return r.json()}
 function index(){bySeat.clear();MPS.forEach(m=>{if(m.s)bySeat.set(m.s,m)})}
@@ -251,21 +254,30 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")hideCard()});
    On touch, list rows scroll; drag them by the photo. */
 let drag=null,press=null;const ghost=document.createElement("div");ghost.id="ghost";
 const mpAt=t=>{const li=t.closest("#list [data-id]");if(li)return {m:MPS.find(x=>x.id==li.dataset.id),el:li,from:null};const st=t.closest("[data-seat]");if(st){const k=st.dataset.seat,m=at(k);return {m:m||AUTO.get(k)||null,el:st,from:m?k:null}}return null};
-/* a locked MP doesn't move on a plain drag (so he isn't moved by accident); press and hold him to unlock, then drag */
-const HOLD=450;
+/* a locked MP doesn't move on a plain drag (so he isn't moved by accident); press and hold him to unlock, then drag.
+   Touch on the hall: a swipe moves the hall (also over people); press and hold someone (PICK ms) to pick him up, then drag. */
+const HOLD=450,PICK=250;
+function armPick(){const p=press;if(!p||!p.touchSeat||!p.m||p.m.lk)return;
+ p.pick=setTimeout(()=>{if(press!==p||p.pan)return;p.ready=true;p.el.classList.add("lifted");navigator.vibrate?.(10)},PICK)}
 function armHold(){const p=press;if(!p||!p.m||!p.m.lk)return;p.el.classList.add("holding");
  p.hold=setTimeout(async()=>{if(press!==p)return;p.el.classList.remove("holding");navigator.vibrate?.(15);p.unlocked=true;await setLock(p.m,false)},HOLD)}
-function disarm(p){if(p&&p.hold){clearTimeout(p.hold);p.hold=null}document.querySelectorAll(".holding").forEach(x=>x.classList.remove("holding"))}
+function disarm(p){if(p&&p.hold){clearTimeout(p.hold);p.hold=null}if(p&&p.pick){clearTimeout(p.pick);p.pick=null}document.querySelectorAll(".holding,.lifted").forEach(x=>x.classList.remove("holding","lifted"))}
 document.addEventListener("contextmenu",e=>{if(e.target.closest("[data-seat],#list [data-id]"))e.preventDefault()});
 document.addEventListener("pointerdown",e=>{if(e.button>0||pinch)return;const hit=mpAt(e.target);if(!hit)return;
  if(e.pointerType==="touch"&&hit.el.matches("#list li")&&!e.target.closest(".ph")){press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId,tapOnly:true};armHold();return}
- press={...hit,x:e.clientX,y:e.clientY,id:e.pointerId};if(hit.m)e.preventDefault();armHold()});
+ press={...hit,x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,id:e.pointerId,touchSeat:e.pointerType==="touch"&&!!hit.el.closest("#hall")};if(hit.m)e.preventDefault();armHold();armPick()});
 const LIFT=e=>e.pointerType==="touch"?56:0;
 function target(x,y){const el=document.elementFromPoint(x,y);if(!el)return null;const st=el.closest("[data-seat]");if(st)return {seat:st};if(el.closest("#side"))return {list:$("#side")};
  if(!el.closest("#hallWrap"))return null;let best=null,bd=Math.max(18,parseFloat(getComputedStyle($("#hall")).getPropertyValue("--s"))||0);
  document.querySelectorAll("#hall [data-seat]").forEach(b=>{const r=b.getBoundingClientRect(),d=Math.hypot(r.left+r.width/2-x,r.top+r.height/2-y);if(d<bd){bd=d;best=b}});return best?{seat:best}:null}
 function clearOver(){document.querySelectorAll(".over,.no").forEach(x=>x.classList.remove("over","no"))}
 document.addEventListener("pointermove",e=>{if(!press||e.pointerId!==press.id)return;
+ if(pinch){disarm(press);press=null;return}
+ /* touch on the hall, not picked up yet: the finger moves the hall */
+ if(!drag&&press.touchSeat&&!press.ready&&!press.unlocked){
+  if(!press.pan&&Math.hypot(e.clientX-press.x,e.clientY-press.y)<6)return;
+  if(!press.pan){press.pan=true;disarm(press)}
+  wrap.scrollLeft-=e.clientX-press.lx;wrap.scrollTop-=e.clientY-press.ly;press.lx=e.clientX;press.ly=e.clientY;return}
  if(!drag){if(press.tapOnly||!press.m||Math.hypot(e.clientX-press.x,e.clientY-press.y)<6)return;
   if(press.m.lk){if(!press.unlocked){disarm(press);status(press.m.n+" je zaključan · drži ga da otključaš",false);press=null}return}
   drag={m:press.m,from:press.from};hideCard();if(side.classList.contains("up"))setUp(false);ghost.style.setProperty("--c",`var(--p${gOf(drag.m)})`);ghost.style.backgroundImage=drag.m.ph?`url(/p/${drag.m.id})`:"";document.body.appendChild(ghost);document.body.classList.add("dragging")}
@@ -274,7 +286,7 @@ document.addEventListener("pointermove",e=>{if(!press||e.pointerId!==press.id)re
  /* scroll the hall when dragging near its edges */
  const r=wrap.getBoundingClientRect(),E=40;if(e.clientX>r.left&&e.clientX<r.right&&gy>r.top&&gy<r.bottom){
   if(e.clientX<r.left+E)wrap.scrollLeft-=14;else if(e.clientX>r.right-E)wrap.scrollLeft+=14;if(gy<r.top+E)wrap.scrollTop-=14;else if(gy>r.bottom-E)wrap.scrollTop+=14}});
-function endPress(e,cancel){if(!press||e.pointerId!==press.id)return;const p=press;press=null;disarm(p);if(p.unlocked&&!drag)return;
+function endPress(e,cancel){if(!press||e.pointerId!==press.id)return;const p=press;press=null;disarm(p);if(p.pan||(p.unlocked&&!drag))return;
  if(drag){const d=drag;drag=null;ghost.remove();document.body.classList.remove("dragging");clearOver();if(cancel)return;
   const t=target(e.clientX,e.clientY-LIFT(e));if(t&&t.seat)place(d.m,t.seat.dataset.seat);else if(t&&t.list)unseat(d.m);return}
  if(cancel)return;
@@ -295,7 +307,7 @@ function drawFilters(){
 const openF=on=>{fmenu.hidden=!on;fbtn.setAttribute("aria-expanded",on);if(on){drawFilters();if(mob.matches&&!side.classList.contains("up"))setUp(true)}};
 fbtn.onclick=e=>{e.stopPropagation();openF(fmenu.hidden)};
 fmenu.onclick=e=>{e.stopPropagation();const b=e.target.closest("[data-k]");if(!b)return;const k=b.dataset.k,v=b.dataset.v;
- if(k==="reset"){fg=-1;fs=0;fx=""}else if(k==="g")fg=+v;else if(k==="s")fs=+v;else fx=v;
+ if(k==="reset"){fg=-1;fs=0;fx=""}else if(k==="g")fg=+v;else if(k==="s")fs=+v;else fx=v;saveF();
  drawFilters();drawList();$("#list").scrollTop=0};
 document.addEventListener("pointerdown",e=>{if(!fmenu.hidden&&!e.target.closest("#fmenu,#fbtn"))openF(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!fmenu.hidden)openF(false)});
