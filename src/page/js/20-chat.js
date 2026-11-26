@@ -174,12 +174,12 @@ addEventListener("pagehide",()=>wSend(true));document.addEventListener("visibili
    is a "?" until then. The pastel set comes first, then the darker one. The colour the account has now is always open. */
 const cdl=$("#colDlg"),colErr=$("#colErr"),colGrid=$("#colGrid");
 const colOpen=()=>me?new Set([...colorsOpen(me.id,me.watch||0),me.color]):new Set(COLOR_FREE);
-function colPaint(){if(!me)return;const open=colOpen(),step=COLOR_STEP_H*3600,w=me.watch||0;
+function colPaint(){if(!me)return;const open=colOpen();
  colGrid.innerHTML=COLOR_SHOW.map((c,i)=>open.has(c)
   ?`<button type="button" class="cl u${c}" role="radio" data-c="${c}" aria-checked="${c===me.color}" aria-label="Boja ${i+1}"></button>`
   :`<button type="button" class="cl lk" aria-disabled="true" aria-label="Zaključana boja"><span class="px">?</span></button>`).join("");
- const left=COLOR_SHOW.length-open.size,rem=step-w%step;$("#colNext").hidden=left<=0;
- $("#colNext").textContent=`Nova boja se otključava za ${rem>=3600?Math.floor(rem/3600)+" h "+Math.floor(rem%3600/60)+" min":Math.max(1,Math.ceil(rem/60))+" min"}`;
+ const left=COLOR_SHOW.length-open.size;$("#colNext").hidden=left<=0;
+ $("#colNext").textContent="Gledaj skupštinu da otključaš još boja";
  apply(cdl)}
 function openColors(){if(!me)return;wSend();say(colErr,"");colPaint();if(cdl.showModal)cdl.showModal();else cdl.setAttribute("open","");apply(cdl)}
 const colClose=()=>cdl.close?cdl.close():cdl.removeAttribute("open");
