@@ -125,6 +125,9 @@ const $=s=>document.querySelector(s);
 const GROUPS=[["Studentska lista",/СТУДЕНТ/],["SVM",/МАЂАР|MAGYAR/],["Albanska koal.",/АЛБАН|SHQIP/],["Ljudski",/ЉАЈИЋ|ЉУДСКИ/],["SDA Sandžaka",/SDA|СДА|САНЏАК|SANDŽAK/],["Pokret za ujed.",/ПОКРЕТ ЗА УЈЕДИЊЕЊЕ|POKRET ZA UJEDINJENJE/],["Srbija pobeđuje",/УЈЕДИЊЕНА СРБИЈА|ВУЧИЋ/]];
 const gIdx=m=>{const x=(m.l||"").toUpperCase();return GROUPS.findIndex(g=>g[1].test(x))},gOf=m=>{const i=gIdx(m);return i<0?6:i};
 let MPS=[],sel=null,fg=-1,fs=0,fx="";const bySeat=new Map();
+/* filters are remembered in this browser (stranka, mesto, pol) */
+try{const f=JSON.parse(localStorage.getItem("sala-f")||"{}");if(Number.isInteger(f.g))fg=f.g;if(Number.isInteger(f.s))fs=f.s;if(typeof f.x==="string")fx=f.x}catch(e){}
+const saveF=()=>{try{localStorage.setItem("sala-f",JSON.stringify({g:fg,s:fs,x:fx}))}catch(e){}};
 const status=(t,ok=true)=>{const s=$("#status");s.textContent=t;s.style.color=ok?"":"#e07a6e"};
 async function api(path,body){const r=await fetch(path,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{});return r.json()}
 function index(){bySeat.clear();MPS.forEach(m=>{if(m.s)bySeat.set(m.s,m)})}
@@ -304,7 +307,7 @@ function drawFilters(){
 const openF=on=>{fmenu.hidden=!on;fbtn.setAttribute("aria-expanded",on);if(on){drawFilters();if(mob.matches&&!side.classList.contains("up"))setUp(true)}};
 fbtn.onclick=e=>{e.stopPropagation();openF(fmenu.hidden)};
 fmenu.onclick=e=>{e.stopPropagation();const b=e.target.closest("[data-k]");if(!b)return;const k=b.dataset.k,v=b.dataset.v;
- if(k==="reset"){fg=-1;fs=0;fx=""}else if(k==="g")fg=+v;else if(k==="s")fs=+v;else fx=v;
+ if(k==="reset"){fg=-1;fs=0;fx=""}else if(k==="g")fg=+v;else if(k==="s")fs=+v;else fx=v;saveF();
  drawFilters();drawList();$("#list").scrollTop=0};
 document.addEventListener("pointerdown",e=>{if(!fmenu.hidden&&!e.target.closest("#fmenu,#fbtn"))openF(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!fmenu.hidden)openF(false)});
