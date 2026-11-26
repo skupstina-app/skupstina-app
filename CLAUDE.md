@@ -37,13 +37,20 @@ Map of this repo. Read this first, then open only the file you need.
 ## Accounts and chat
 
 - Visitor accounts (`src/auth.js`, D1 `users`): Sign in with Google (same `GOOGLE_CLIENT_ID`) or email + password
-  (PBKDF2). A new account picks a chat name (the chat's name rules, unique) and a colour 0-7 (`.u0`-`.u7`).
+  (PBKDF2). A new account picks a chat name (the chat's name rules, unique); it gets a random free name colour.
   Session cookie `sk_s` signed with `SALT`, 180 days. Routes `/api/auth/me|google|login|register|profile|logout`.
 - One account per email; chat names are unique per account (unique indexes on `users.email`, `users.nk`, `users.sub`,
   created by `src/auth.js`). There are no other names: the old anonymous names (browser key + IP) are removed.
 - The name can be changed once every 30 days (`users.name_changed_at`, `NAME_DAYS` in auth.js; the first name at sign-up
-  doesn't count, and in the first 24 h after sign-up, `NAME_FREE_H`, changes are free); colour any time. A new name is confirmed in the dialog first ("next change in 30 days"). Name, colour,
+  doesn't count, and in the first 24 h after sign-up, `NAME_FREE_H`, changes are free); colour any time (see Name colours). A new name is confirmed in the dialog first ("next change in 30 days"). Name, colour,
   avatar and sign-out live in Podešavanja (the gear tab), not under the chat box.
+- Name colours (`src/colors.mjs`, the only list): `COLORS[n]` = [light, dark] text colour of `.u<n>` (build.mjs writes the CSS
+  at `/*@ucolors*/` in `css/96-auth.css` and pastes the file's functions at `/*@colors*/` in `js/20-chat.js`). 28 colours, shown
+  pastel set first, then darker (`COLOR_SHOW`, 14 + 14). Light blue, light green, light orange (0-2) are open for everyone;
+  one more opens every 2 h of `watch_s`, in a random order per account (`colorOrder(uid)`, seeded, same on both sides).
+  Locked ones are a "?" tile. Picked in Podešavanja by tapping the account name (`#colDlg`), saved by `POST /api/auth/color`
+  (checks `colorsOpen`; the colour an account already has stays allowed). Not asked at sign-up. New colour: append to
+  `COLORS` (never renumber) and place it in `COLOR_SHOW`.
 - Avatars: every PNG in `assets/avatars/64` (64 px, file name = id) can be picked; `assets/avatars/uskoro` holds the
   "coming soon" tiles and the empty avatar (`prazno`), drawn by `scripts/avatar-placeholders.py`. `build.mjs` turns them
   into `src/generated/avatars.js` (served by the Worker at `/a/<id>.png`, `/a/uskoro-<n>.png`) and fills

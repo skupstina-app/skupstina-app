@@ -15,13 +15,15 @@ const I_EDIT=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rende
 const AVS=/*@avatars*/[],AV_SOON=/*@soon*/[];
 const AVN={cupic:"Bradonja s naočarima",konj:"Konj",poslanik_brkovi:"Poslanik s brkovima",poslanik_mahanje:"Poslanik maše"};
 const I_CLOCK=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="4" y="1" width="5" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="6" y="6" width="4" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="2" y="9" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="4" y="11" width="5" height="1"/></svg>`,I_BLOCK=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="4" y="1" width="5" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="9" y="3" width="2" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="8" y="4" width="2" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="7" y="5" width="2" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="6" y="6" width="2" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="5" y="7" width="2" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="4" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="2" y="9" width="3" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="4" y="11" width="5" height="1"/></svg>`;
+/* name colours and which ones this account has opened: from src/colors.mjs (build.mjs pastes it here) */
+/*@colors*/
 const avSrc=a=>"/a/"+(a&&AVS.includes(a)?a:"uskoro-prazno")+".png";
 const post=async(url,body)=>{try{const r=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})});return await r.json()}catch(e){return{ok:false,err:"net"}}};
 
 /* the account line under the message box, and the Profil section */
 function ui(){
  $("#pacctBody").innerHTML=me
-  ?`<div class="acard"><button type="button" class="avbtn" id="pav" aria-label="Promeni avatar" title="Promeni avatar"><img class="av" src="${avSrc(me.avatar)}" alt="" width="64" height="64"><span class="avpen">${I_EDIT}</span></button><div class="aname"><span class="anrow"><button type="button" class="lvb" id="pLvl" aria-label="Sati gledanja" aria-expanded="false">${lvlIcon()}</button><b class="nt u${me.color}">${esc(me.name)}</b><span class="lvbub px" id="pLvlB" role="status" hidden></span></span><span class="m nt">${esc(me.email||"")}</span></div><button type="button" class="b light aedit" id="pedit">${I_EDIT}<span>Izmeni</span></button></div>`
+  ?`<div class="acard"><button type="button" class="avbtn" id="pav" aria-label="Promeni avatar" title="Promeni avatar"><img class="av" src="${avSrc(me.avatar)}" alt="" width="64" height="64"><span class="avpen">${I_EDIT}</span></button><div class="aname"><span class="anrow"><button type="button" class="lvb" id="pLvl" aria-label="Sati gledanja" aria-expanded="false">${lvlIcon()}</button><button type="button" class="nbtn nt u${me.color}" id="pcol" aria-label="Boja imena: ${esc(me.name)}" aria-haspopup="dialog">${esc(me.name)}</button><span class="lvbub px" id="pLvlB" role="status" hidden></span></span><span class="m nt">${esc(me.email||"")}</span></div><button type="button" class="b light aedit" id="pedit">${I_EDIT}<span>Izmeni</span></button></div>`
   :`<div class="acard"><img class="av" src="${avSrc()}" alt="" width="64" height="64"><div class="aname"><b>Gost</b><span class="m">Prijavi se da pišeš u razgovoru.</span></div></div><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button>`;
  $("#poutRow").hidden=!me;$("#pblkRow").hidden=!me;$("#pblkN").textContent=blocks.length||"";
  $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$(".cme").hidden=!me;
@@ -30,7 +32,7 @@ function ui(){
  box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&+m.dataset.u===me.id;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
 }
 document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
- if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="pedit")openProfile();else if(id==="pav")openAvatars();else if(id==="pblk")openBlocks();else if(id==="pdel")openDel();
+ if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="pedit")openProfile();else if(id==="pav")openAvatars();else if(id==="pcol")openColors();else if(id==="pblk")openBlocks();else if(id==="pdel")openDel();
  else if(id==="pout"){wSend();post("/api/auth/logout").then(()=>{me=null;setBlocks([]);admSet(null);ui();reconnect()})}});
 
 const empty=()=>{};
@@ -80,20 +82,19 @@ function loadGsi(){if(gsiReady||!clientId)return;gsiReady=true;const s=document.
    if(!j.ok){say(aErr,j.err||"google");return}if(j.user){signedIn(j.user);return}ticket=j.ticket;pendPw=null;openProfile(j.suggest||"")}})};
  document.head.appendChild(s)}
 $("#aGoogle").onclick=()=>{say(aErr,"");if(gClient)gClient.requestAccessToken({prompt:"select_account"});else{loadGsi();say(aErr,"wait")}};
-function setColor(c){color=c;dlg.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.c===c));$("#aPrev").className="nt u"+c}
+function setColor(c){color=c;$("#aPrev").className="nt u"+c}
 function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
  $("#aName").value=edit?me.name:(suggest||"");
- const lock=edit&&!!me.nameNext;$("#aName").disabled=lock;$("#aNameNote").hidden=edit&&!lock;$("#aNameNote").textContent=lock?`Ime možeš ponovo da promeniš ${dmy(me.nameNext)}`:"Prva 24 sata ime možeš slobodno da menjaš, posle toga jednom u 30 dana.";setColor(edit?me.color:Math.floor(Math.random()*8));$("#aPrev").textContent=$("#aName").value||"Ime";
- $("#authT2").textContent=edit?(lock?"Boja imena":"Ime i boja"):"Tvoje ime u razgovoru";$("#aSave").textContent=edit?"Sačuvaj":"Napravi nalog";
+ const lock=edit&&!!me.nameNext;$("#aName").disabled=lock;$("#aNameNote").hidden=edit&&!lock;$("#aNameNote").textContent=lock?`Ime možeš ponovo da promeniš ${dmy(me.nameNext)}`:"Prva 24 sata ime možeš slobodno da menjaš, posle toga jednom u 30 dana.";setColor(edit?me.color:COLOR_FREE[Math.floor(Math.random()*COLOR_FREE.length)]);$("#aPrev").textContent=$("#aName").value||"Ime";
+ $("#authT2").textContent=edit?"Ime":"Tvoje ime u razgovoru";$("#aSave").textContent=edit?"Sačuvaj":"Napravi nalog";
  step("profile");show();$("#aName").focus()}
-dlg.querySelector(".sws").addEventListener("click",e=>{const b=e.target.closest(".sw");if(b)setColor(+b.dataset.c)});
 $("#aName").addEventListener("input",()=>{$("#aPrev").textContent=$("#aName").value||"Ime"});
 $("#authPw").addEventListener("submit",async e=>{e.preventDefault();const act=amode==="up"?"signup":"login",email=$("#aEmail").value.trim(),password=$("#aPw").value;
  if(act==="signup"){if(password.length<8){say(aErr,"password");return}pendPw={email,password};ticket=null;openProfile(email.split("@")[0].slice(0,20));return}
  const j=await post("/api/auth/login",{email,password});if(j.ok)signedIn(j.user);else say(aErr,j.err)});
 /* a new name asks first: the next change is 30 days away */
 async function saveProfile(){const name=$("#aName").value.trim();
- const j=ticket?await post("/api/auth/register",{ticket,name,color}):pendPw?await post("/api/auth/register",{...pendPw,name,color}):await post("/api/auth/profile",{name,color});
+ const j=ticket?await post("/api/auth/register",{ticket,name,color}):pendPw?await post("/api/auth/register",{...pendPw,name,color}):await post("/api/auth/profile",{name});
  if(!j.ok){step(j.err==="email_taken"?"start":"profile");say(aErr,j.err);return}signedIn(j.user)}
 $("#authProf").addEventListener("submit",e=>{e.preventDefault();const name=$("#aName").value.trim();
  if(me&&!ticket&&!pendPw&&name!==me.name){$("#cNew").textContent=name;$("#cNew").className="nt u"+color;const free=me.nameFree>Date.now();$("#cNote").textContent=free?`Još ${Math.max(1,Math.ceil((me.nameFree-Date.now())/3600000))} h ime možeš slobodno da menjaš, posle toga jednom u 30 dana.`:`Sledeća promena biće moguća za 30 dana, tek ${dmy(Date.now()+30*86400000)}`;step("confirm");apply(dlg);$("#cOk").focus();return}
@@ -115,7 +116,7 @@ function upRender(c){const mine=!!me&&c.id===me.id,bl=blocked.has(c.id);
 function upPlace(){if(!upEl||!upEl.isConnected){upClose();return}const r=upEl.getBoundingClientRect(),w=up.offsetWidth,h=up.offsetHeight;
  let top=r.bottom+8;if(top+h>innerHeight-76)top=Math.max(8,r.top-h-8);up.style.top=top+"px";up.style.left=Math.round(Math.min(Math.max(8,r.left-14),innerWidth-w-8))+"px"}
 function upOpen(el){const msg=el.closest(".msg"),id=+msg.dataset.u;if(!id)return;if(upFor===id&&!up.hidden){upClose();return}
- upFor=id;upEl=el;const color=+((el.className.match(/\bu(\d)\b/)||[])[1]||0);
+ upFor=id;upEl=el;const color=+((el.className.match(/\bu(\d+)\b/)||[])[1]||0);
  upRender(ucache.get(id)||{id,name:el.textContent,color,avatar:null,watch:null});up.hidden=false;upPlace();
  if(!ucache.has(id))fetch("/api/auth/user?id="+id,{cache:"no-store"}).then(r=>r.ok?r.json():null).then(c=>{if(!c)return;ucache.set(id,c);setTimeout(()=>ucache.delete(id),60000);if(upFor===id&&!up.hidden){upRender(c);upPlace()}}).catch(()=>{})}
 function upClose(){up.hidden=true;upFor=null;upEl=null}
@@ -161,12 +162,36 @@ function wSend(beacon){if(!me||wAcc<10)return;const s=wAcc;wAcc=0;
 const wNow=()=>(me&&me.watch||0)+wAcc;
 function lvlIcon(){const n=badgeLvl(wNow());return n?badgeSvg(n):badgeSvg(1,"dim")}
 function lvlText(){const w=wNow(),n=badgeLvl(w),h=Math.floor(w/3600);return n<BADGE_H.length?h+"/"+BADGE_H[n]+"h":h.toLocaleString("sr-RS")+"h"}
-function setWatch(w){me={...me,watch:w};const b=$("#pLvl");if(b)b.innerHTML=lvlIcon();const t=$("#pLvlB");if(t&&!t.hidden)t.textContent=lvlText()}
+function setWatch(w){me={...me,watch:w};if(cdl.open)colPaint();const b=$("#pLvl");if(b)b.innerHTML=lvlIcon();const t=$("#pLvlB");if(t&&!t.hidden)t.textContent=lvlText()}
 function lvlBub(show){const b=$("#pLvl"),t=$("#pLvlB");if(!b||!t)return;if(show==null)show=t.hidden;t.hidden=!show;b.setAttribute("aria-expanded",show);if(show)t.textContent=lvlText()}
 document.addEventListener("click",e=>{if(e.target.closest("#pLvl"))lvlBub();else if(!e.target.closest("#pLvlB"))lvlBub(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")lvlBub(false)});
 setInterval(()=>{if(wAcc>=300)wSend()},60000);
 addEventListener("pagehide",()=>wSend(true));document.addEventListener("visibilitychange",()=>{if(document.hidden)wSend(true)});
+
+/* name colour picker (tap the name in Podešavanja): light blue, light green and light orange are open for everyone, every
+   2 h of watching the live stream opens one more, in an order of its own for each account (src/colors.mjs); a locked one
+   is a "?" until then. The pastel set comes first, then the darker one. The colour the account has now is always open. */
+const cdl=$("#colDlg"),colErr=$("#colErr"),colGrid=$("#colGrid");
+const colOpen=()=>me?new Set([...colorsOpen(me.id,me.watch||0),me.color]):new Set(COLOR_FREE);
+function colPaint(){if(!me)return;const open=colOpen(),step=COLOR_STEP_H*3600,w=me.watch||0;
+ colGrid.innerHTML=COLOR_SHOW.map((c,i)=>open.has(c)
+  ?`<button type="button" class="cl u${c}" role="radio" data-c="${c}" aria-checked="${c===me.color}" aria-label="Boja ${i+1}"></button>`
+  :`<button type="button" class="cl lk" aria-disabled="true" aria-label="Zaključana boja"><span class="px">?</span></button>`).join("");
+ $("#colPrev").textContent=me.name;$("#colPrev").className="nt u"+me.color;
+ const left=COLOR_SHOW.length-open.size,rem=step-w%step;
+ $("#colNext").textContent=left<=0?"Sve boje su otključane.":`Sledeća boja se otključava za ${rem>=3600?Math.ceil(rem/3600)+" h":Math.max(1,Math.ceil(rem/60))+" min"} gledanja prenosa. Zaključanih: ${left}.`;
+ apply(cdl)}
+function openColors(){if(!me)return;wSend();say(colErr,"");colPaint();if(cdl.showModal)cdl.showModal();else cdl.setAttribute("open","");apply(cdl)}
+const colClose=()=>cdl.close?cdl.close():cdl.removeAttribute("open");
+$("#colX").onclick=$("#colOk").onclick=colClose;
+cdl.addEventListener("click",e=>{if(e.target===cdl)colClose()});
+colGrid.addEventListener("click",async e=>{const b=e.target.closest(".cl");if(!b||!me)return;
+ if(b.classList.contains("lk")){say(colErr,`Ova boja se otključava gledanjem prenosa (jedna nova na svaka ${COLOR_STEP_H} sata).`);return}
+ const c=+b.dataset.c,prev=me.color;if(c===prev)return;
+ me={...me,color:c};colPaint();say(colErr,"");
+ const j=await post("/api/auth/color",{color:c});
+ if(j.ok&&j.user){me=j.user;ui();colPaint()}else{me={...me,color:prev};colPaint();say(colErr,j.err==="login"?"login":j.err==="color_locked"?"Ta boja još nije otključana.":"Nije sačuvano. Pokušaj ponovo.")}});
 
 /* avatar picker: tap a picture and it is saved; the ones still coming are shown, but can't be picked */
 const adl=$("#avDlg"),avErr=$("#avErr"),avGrid=$("#avGrid");

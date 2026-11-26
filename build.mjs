@@ -4,6 +4,7 @@
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { BADGE_H } from "./src/badges.mjs";
+import { COLORS } from "./src/colors.mjs";
 
 const dir = new URL("./src/page/", import.meta.url);
 const read = (p) => readFileSync(new URL(p, dir), "utf8");
@@ -27,7 +28,11 @@ html = html.replace("/*@avatars*/[]", () => JSON.stringify(AV_IDS)).replace("/*@
 // watching badges: the page gets the same hour thresholds the Worker uses (src/badges.mjs)
 if (!html.includes("/*@badgeh*/[]")) throw new Error("badge marker /*@badgeh*/[] is missing (js/19-badges.js)");
 html = html.replace("/*@badgeh*/[]", () => JSON.stringify(BADGE_H));
-if (/\/\*@(css|js|avatars|soon|badgeh)\*\/|<!--@html /.test(html)) throw new Error("unfilled include marker");
+// chat name colours: the CSS rules and the unlock functions come from src/colors.mjs (the same file auth.js checks with)
+if (!html.includes("/*@ucolors*/") || !html.includes("/*@colors*/")) throw new Error("colour markers /*@ucolors*/ (css/96-auth.css) or /*@colors*/ (js/20-chat.js) are missing");
+html = html.replace("/*@ucolors*/", () => COLORS.map(([l], n) => `.u${n},#msgs .u${n}{color:${l}}`).join("") + "\n" + COLORS.map(([, d], n) => `:root[data-mode=dark] .u${n},:root[data-mode=dark] #msgs .u${n}{color:${d}}`).join("") + "\n");
+html = html.replace("/*@colors*/", () => readFileSync(new URL("./src/colors.mjs", import.meta.url), "utf8").replace(/^\/\/.*\n/gm, "").replace(/\s*\/\/ .*$/gm, "").replace(/^export /gm, ""));
+if (/\/\*@(css|js|avatars|soon|badgeh|ucolors|colors)\*\/|<!--@html /.test(html)) throw new Error("unfilled include marker");
 if (!html.includes("/*MPS*/[]")) throw new Error("MP data placeholder /*MPS*/[] is missing");
 
 const out = new URL("./src/generated/", import.meta.url);

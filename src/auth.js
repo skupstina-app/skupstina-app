@@ -1,8 +1,9 @@
 // Visitor accounts: sign in with Google, or with email + password. Needed to write in the chat; reading needs none.
-// A new account picks a chat name and a name colour (0-7, the chat's palette).
+// A new account picks a chat name; its name colour is one of the free ones (src/colors.mjs), changed later in Podešavanja.
 // Session: cookie sk_s = "<user id>|<expiry ms>|<HMAC>" signed with the SALT secret, 180 days, HttpOnly.
 import { verifyGoogleToken, userAdmin } from "./admin.js";
 import { AVATAR_IDS } from "./generated/avatars.js";
+import { COLORS, COLOR_FREE, colorsOpen } from "./colors.mjs";
 
 const NAME_DAYS = 30; // a chat name can be changed once every 30 days (colour and avatar any time)
 const NAME_FREE_H = 24; // ...except in the first 24 hours after sign-up, when it can be changed freely
@@ -114,11 +115,12 @@ async function ensureIndexes(env) {
 /** A unique-index error from D1 → our error code. */
 const clash = (e) => /UNIQUE/i.test(String(e?.message)) ? (/email/.test(e.message) ? "email_taken" : "name_taken") : null;
 
-/** Name and colour from a request body; returns [error code, name, name key, colour]. */
+/** Name (and, for a new account, a colour) from a request body; returns [error code, name, name key, colour].
+    A new account only gets one of the free colours (the others open with watching time, /api/auth/color). */
 function profileOf(body, checkName) {
   const [err, name, nk] = checkName(body.name);
   if (err) return ["name_" + err];
-  const color = Number.isInteger(body.color) && body.color >= 0 && body.color <= 7 ? body.color : 0;
+  const color = COLOR_FREE.includes(body.color) ? body.color : COLOR_FREE[Math.floor(Math.random() * COLOR_FREE.length)];
   return [null, name, nk, color];
 }
 
@@ -209,17 +211,26 @@ export async function authRoute(req, env, u, p, checkName) {
 
   const user = await currentUser(req, env);
   if (!user) return json({ ok: false, err: "login" }, 401);
+  // Name colour: any time, one this account has opened (src/colors.mjs: the free ones + one per 2 h watched), or the one
+  // it already has (an older account may keep a colour it chose before the colours had to be opened).
+  if (p === "/api/auth/color") {
+    const c = body.color;
+    if (!Number.isInteger(c) || c < 0 || c >= COLORS.length) return json({ ok: false, err: "color" }, 400);
+    if (c !== user.color && !colorsOpen(user.id, user.watch_s).includes(c)) return json({ ok: false, err: "color_locked" }, 403);
+    const row = await env.DB.prepare("UPDATE users SET color=? WHERE id=? RETURNING *").bind(c, user.id).first();
+    return json({ ok: true, user: pub(row) });
+  }
+  // Name only (the colour has its own route above).
   if (p === "/api/auth/profile") {
-    const [err, name, nk, color] = profileOf(body, checkName);
+    const [err, name, nk] = profileOf(body, checkName);
     if (err) return json({ ok: false, err }, 400);
     const renamed = name !== user.name;
     if (renamed && nameNext(user)) return json({ ok: false, err: "name_wait", next: nameNext(user) }, 429);
     if (nk !== user.nk && await env.DB.prepare("SELECT 1 FROM users WHERE nk=? AND id<>?").bind(nk, user.id).first()) return json({ ok: false, err: "name_taken" }, 409);
+    if (!renamed) return json({ ok: true, user: pub(user) });
     let row;
     try {
-      row = renamed
-        ? await env.DB.prepare("UPDATE users SET name=?,nk=?,color=?,name_changed_at=? WHERE id=? RETURNING *").bind(name, nk, color, nameFree(user) ? null : now(), user.id).first()
-        : await env.DB.prepare("UPDATE users SET color=? WHERE id=? RETURNING *").bind(color, user.id).first();
+      row = await env.DB.prepare("UPDATE users SET name=?,nk=?,name_changed_at=? WHERE id=? RETURNING *").bind(name, nk, nameFree(user) ? null : now(), user.id).first();
     }
     catch (e) { if (clash(e)) return json({ ok: false, err: "name_taken" }, 409); throw e; }
     return json({ ok: true, user: pub(row) });
