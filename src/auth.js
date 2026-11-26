@@ -6,6 +6,9 @@ import { AVATAR_IDS } from "./generated/avatars.js";
 
 const NAME_DAYS = 30; // a chat name can be changed once every 30 days (colour and avatar any time)
 const NAME_FREE_H = 24; // ...except in the first 24 hours after sign-up, when it can be changed freely
+// watching time: at most this much a day counts (a tab left playing day and night can't farm badges), and one
+// report can't add more than 15 min or more than the time since the previous report (+30 s slack)
+const WATCH_DAY_S = 14 * 3600, WATCH_REPORT_S = 900;
 const COOKIE = "sk_s", DAYS = 180, TICKET_MIN = 15, PBKDF2_ITER = 100_000;
 const enc = new TextEncoder();
 const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -53,11 +56,17 @@ const nameNext = (u) => { const t = Date.parse(u?.name_changed_at || "") + NAME_
 /** Until when (ms) the name can still be changed freely after sign-up, or 0. */
 const nameFree = (u) => { const t = Date.parse(u?.created_at || "") + NAME_FREE_H * 3600_000; return t > Date.now() ? t : 0; };
 const avatarOf = (a) => AVATAR_IDS.includes(a) ? a : null;
-const pub = (u) => u && { id: u.id, name: u.name, color: u.color, avatar: avatarOf(u.avatar), email: u.email, google: !!u.sub, nameNext: nameFree(u) ? 0 : nameNext(u), nameFree: nameFree(u) };
+const pub = (u) => u && { id: u.id, name: u.name, color: u.color, avatar: avatarOf(u.avatar), email: u.email, google: !!u.sub, nameNext: nameFree(u) ? 0 : nameNext(u), nameFree: nameFree(u), watch: u.watch_s || 0 };
 /** What anyone may see about an account (the chat's user card): no email. */
 const card = (u) => ({ id: u.id, name: u.name, color: u.color, avatar: avatarOf(u.avatar), watch: u.watch_s || 0 });
 /** The accounts this user has blocked (their chat messages are hidden for him). */
 const blocksOf = async (env, uid) => (await env.DB.prepare("SELECT u.id,u.name,u.color,u.avatar FROM blocks b JOIN users u ON u.id=b.bid WHERE b.uid=? ORDER BY b.at DESC").bind(uid).all().catch(() => ({ results: [] }))).results.map((u) => ({ id: u.id, name: u.name, color: u.color, avatar: avatarOf(u.avatar) }));
+
+/** "2026-11-26" in Belgrade (the daily watching limit starts again at local midnight). */
+function belgradeDay(t) {
+  try { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Belgrade" }).format(t); }
+  catch (e) { return new Date(t).toISOString().slice(0, 10); }
+}
 
 /** The signed-in user (row from users), or null. */
 export async function currentUser(req, env) {
@@ -98,7 +107,7 @@ async function ensureIndexes(env) {
   }
   try { await env.DB.prepare("ALTER TABLE users ADD COLUMN name_changed_at TEXT").run(); } catch (e) { } // already there
   try { await env.DB.prepare("ALTER TABLE users ADD COLUMN avatar TEXT").run(); } catch (e) { } // already there
-  for (const c of ["watch_s INTEGER DEFAULT 0", "watch_at INTEGER DEFAULT 0"]) try { await env.DB.prepare("ALTER TABLE users ADD COLUMN " + c).run(); } catch (e) { }
+  for (const c of ["watch_s INTEGER DEFAULT 0", "watch_at INTEGER DEFAULT 0", "watch_day TEXT", "watch_day_s INTEGER DEFAULT 0"]) try { await env.DB.prepare("ALTER TABLE users ADD COLUMN " + c).run(); } catch (e) { }
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS blocks(uid INTEGER NOT NULL, bid INTEGER NOT NULL, at TEXT, PRIMARY KEY(uid, bid))").run();
   indexed = true;
 }
@@ -222,13 +231,18 @@ export async function authRoute(req, env, u, p, checkName) {
     const row = await env.DB.prepare("UPDATE users SET avatar=? WHERE id=? RETURNING *").bind(a, user.id).first();
     return json({ ok: true, user: pub(row) });
   }
-  // Watching time: the page sends the seconds the stream really played (every few minutes); never more than the time
-  // since the last report, so it can't be pumped up.
+  // Watching time: the page sends the seconds the live stream really played (every few minutes); never more than the
+  // time since the last report (so two tabs or two phones don't count twice) and never more than WATCH_DAY_S a day
+  // (Belgrade calendar day). Done in one UPDATE that reads the old row, so reports arriving together can't both pass.
+  // Returns the new total, so the page can show a new badge level right away.
   if (p === "/api/auth/watch") {
-    const s = Math.floor(Number(body.s) || 0), t = Date.now();
-    const ok = Math.min(s, 900, Math.floor((t - (user.watch_at || 0)) / 1000) + 30);
-    if (ok > 0) await env.DB.prepare("UPDATE users SET watch_s=COALESCE(watch_s,0)+?, watch_at=? WHERE id=?").bind(ok, t, user.id).run();
-    return json({ ok: true });
+    const s = Math.min(WATCH_REPORT_S, Math.max(0, Math.floor(Number(body.s) || 0))), t = Date.now(), day = belgradeDay(t);
+    if (s <= 0) return json({ ok: true, watch: user.watch_s || 0 });
+    const today = "(CASE WHEN watch_day=?3 THEN COALESCE(watch_day_s,0) ELSE 0 END)";
+    const add = `CAST(MAX(0, MIN(?1, (?2 - COALESCE(watch_at,0)) / 1000 + 30, ${WATCH_DAY_S} - ${today})) AS INTEGER)`;
+    const row = await env.DB.prepare(`UPDATE users SET watch_s=COALESCE(watch_s,0)+${add}, watch_day_s=${today}+${add}, watch_day=?3, watch_at=?2 WHERE id=?4 RETURNING watch_s`)
+      .bind(s, t, day, user.id).first();
+    return json({ ok: true, watch: row?.watch_s || 0 });
   }
   // Block / unblock an account: its messages are hidden for this user (only on his side; the other one isn't told).
   if (p === "/api/auth/block") {

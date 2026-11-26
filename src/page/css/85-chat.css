@@ -22,3 +22,16 @@ body.v1 .vbar[role=group] .who{display:flex!important}
 .vbar[role=group].auto{box-shadow:0 0 0 1.5px var(--ink) inset}
 body.theater .vsticky .vbar[role=group]{margin:0;border-radius:0}
 }
+/* watching badge (19-badges.js): a 15×15 pixel building in front of a name; 15 px keeps the pixels whole on any screen */
+.bdg{display:inline-block;width:15px;height:15px;flex:none;vertical-align:-2px;image-rendering:pixelated}
+#msgs .msg .bdg{margin-right:4px}
+.uw .bdg{margin-left:2px}
+/* Podešavanja: badge in front of the account name, tap → bubble "137/175h" */
+.anrow{position:relative;display:flex;align-items:center;gap:7px;min-width:0}
+.lvb{flex:none;display:inline-grid;place-items:center;width:28px;height:28px;margin:-6px -4px -6px -6px;padding:0;border:0;border-radius:6px;background:none;cursor:pointer}
+.lvb:hover,.lvb[aria-expanded=true]{background:var(--chip)}
+.lvb:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.bdg.dim{opacity:.3;filter:grayscale(1)}
+.lvbub{position:absolute;z-index:5;left:-6px;top:calc(100% + 8px);padding:5px 9px;border-radius:6px;background:var(--ink);color:var(--bg);font-size:14px;line-height:1.2;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.18);animation:upin .12s steps(2,end)}
+.lvbub::before{content:"";position:absolute;left:12px;top:-4px;width:8px;height:8px;background:inherit;transform:rotate(45deg)}
+.lvbub[hidden]{display:none}

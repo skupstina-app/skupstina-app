@@ -50,9 +50,18 @@ Map of this repo. Read this first, then open only the file you need.
   `/*@avatars*/[]` and `/*@soon*/[]` in `js/20-chat.js`. Saved in `users.avatar` (`POST /api/auth/avatar`, any time).
   Add an avatar: drop its 64 px PNG in `assets/avatars/64` (and a label in `AVN` in 20-chat.js).
 - Tap a name in the chat → a small card (`#upop`, 20-chat.js): avatar, name, watching time (clock + hours only, no
-  words; never the email) from `GET /api/auth/user?id=`, and Blokiraj/Odblokiraj. Watching time: the page counts the
-  seconds the stream really plays on screen and sends them to `POST /api/auth/watch` (every 5 min and on leaving);
-  `users.watch_s`, never more than the time since the last report (`watch_at`).
+  words; never the email) from `GET /api/auth/user?id=`, and Blokiraj/Odblokiraj. Watching time (`20-chat.js`): every 10 s
+  counts while the Assembly is on air (`apiLive || plLive`, also when the viewer is behind live or resumes later) and the
+  player plays in a visible tab; muted playback only counts within 30 min of a tap/key/scroll (the page autoplays muted).
+  No broadcast = nothing counts, not even a replay. Sent to `POST /api/auth/watch` every 5 min and on leaving (beacon as
+  `text/plain`); one atomic UPDATE in auth.js adds `users.watch_s`, never more than the time since the last report
+  (`watch_at`, so tabs/devices don't add up) and at most `WATCH_DAY_S` = 14 h per Belgrade day (`watch_day`, `watch_day_s`).
+- Watching badges: a 15×15 pixel building in front of the name in the chat, grown by `watch_s`. The hour thresholds live
+  only in `src/badges.mjs` (`BADGE_H`, 18 levels: 1, 2, 4, 7, 13, 25 … 750 h); `ChatRoom` stores the writer's level on
+  each message (`msgs.badge`, sent as `m.b`) and `build.mjs` fills `/*@badgeh*/[]` in `js/19-badges.js`, which draws the
+  18 pictures once as SVG `<symbol>`s (`#bdg-1`…) and gives `badgeSvg(n)` (`<use>`). The levels have no names on screen.
+  Also in the user card (next to the hours) and in Podešavanja in front of the account name (`#pLvl`, faint before the
+  first hour); a tap there shows a bubble with watched/next hours, e.g. `137/175h` (`#pLvlB`).
 - Blocking: D1 `blocks(uid,bid)`, `POST /api/auth/block {id,on}`; the list comes with `/api/auth/me` (`blocks`). Only the
   blocker stops seeing the messages (hidden in the page). Podešavanja → Blokirani lists them (Odblokiraj).
 - Obriši nalog: `POST /api/auth/delete` removes the user row and his blocks (refused while banned).

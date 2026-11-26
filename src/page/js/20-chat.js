@@ -21,7 +21,7 @@ const post=async(url,body)=>{try{const r=await fetch(url,{method:"POST",headers:
 /* the account line under the message box, and the Profil section */
 function ui(){
  $("#pacctBody").innerHTML=me
-  ?`<div class="acard"><button type="button" class="avbtn" id="pav" aria-label="Promeni avatar" title="Promeni avatar"><img class="av" src="${avSrc(me.avatar)}" alt="" width="64" height="64"><span class="avpen">${I_EDIT}</span></button><div class="aname"><b class="nt u${me.color}">${esc(me.name)}</b><span class="m nt">${esc(me.email||"")}</span></div><button type="button" class="b light aedit" id="pedit">${I_EDIT}<span>Izmeni</span></button></div>`
+  ?`<div class="acard"><button type="button" class="avbtn" id="pav" aria-label="Promeni avatar" title="Promeni avatar"><img class="av" src="${avSrc(me.avatar)}" alt="" width="64" height="64"><span class="avpen">${I_EDIT}</span></button><div class="aname"><span class="anrow"><button type="button" class="lvb" id="pLvl" aria-label="Sati gledanja" aria-expanded="false">${lvlIcon()}</button><b class="nt u${me.color}">${esc(me.name)}</b><span class="lvbub px" id="pLvlB" role="status" hidden></span></span><span class="m nt">${esc(me.email||"")}</span></div><button type="button" class="b light aedit" id="pedit">${I_EDIT}<span>Izmeni</span></button></div>`
   :`<div class="acard"><img class="av" src="${avSrc()}" alt="" width="64" height="64"><div class="aname"><b>Gost</b><span class="m">Prijavi se da pišeš u razgovoru.</span></div></div><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button>`;
  $("#poutRow").hidden=!me;$("#pblkRow").hidden=!me;$("#pblkN").textContent=blocks.length||"";
  $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$(".cme").hidden=!me;
@@ -37,7 +37,7 @@ const empty=()=>{};
 const add=m=>{if(ids.has(m.id))return;ids.add(m.id);if(m.u!=null&&blocked.has(m.u))return;box.querySelector(".empty")?.remove();
  const stick=pane.scrollHeight-pane.scrollTop-pane.clientHeight<90,mine=!!me&&m.u!=null&&m.u===me.id;
  const d=document.createElement("div");d.className="msg"+(mine?" me":"");d.dataset.id=m.id;if(m.u!=null)d.dataset.u=m.u;
- d.innerHTML='<span class="tm nt"></span> <b class="nt u'+(m.c!=null?m.c:ucol(m.n))+(m.u!=null?' un" role="button" tabindex="0" aria-haspopup="dialog':'')+'"></b><span class="nt">: </span><span class="x nt"></span>'+(mine?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
+ d.innerHTML='<span class="tm nt"></span> '+badgeSvg(m.b)+'<b class="nt u'+(m.c!=null?m.c:ucol(m.n))+(m.u!=null?' un" role="button" tabindex="0" aria-haspopup="dialog':'')+'"></b><span class="nt">: </span><span class="x nt"></span>'+(mine?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
  const t=d.querySelectorAll(".nt");t[0].textContent=hhmm(m.at);t[1].textContent=m.n;t[3].textContent=m.x;apply(d);box.append(d);
  while(box.children.length>200)box.firstElementChild.remove();
  if(stick)pane.scrollTop=pane.scrollHeight};
@@ -110,7 +110,7 @@ async function setBlock(id,on){const j=await post("/api/auth/block",{id,on});if(
 const up=$("#upop"),ucache=new Map();let upFor=null,upEl=null;
 const hrs=s=>s<3600?"<1h":Math.floor(s/3600).toLocaleString("sr-RS")+"h";
 function upRender(c){const mine=!!me&&c.id===me.id,bl=blocked.has(c.id);
- up.innerHTML=`<div class="uph"><img class="av" src="${avSrc(c.avatar)}" alt="" width="64" height="64"><div class="upn"><b class="nt u${c.color}">${esc(c.name)}</b>${c.watch!=null?`<span class="uw" aria-label="Gledanje prenosa: ${hrs(c.watch)}">${I_CLOCK}<span class="px nt">${hrs(c.watch)}</span></span>`:`<span class="uw ld" aria-hidden="true">${I_CLOCK}<span class="px">…</span></span>`}</div></div>`
+ up.innerHTML=`<div class="uph"><img class="av" src="${avSrc(c.avatar)}" alt="" width="64" height="64"><div class="upn"><b class="nt u${c.color}">${esc(c.name)}</b>${c.watch!=null?`<span class="uw" aria-label="Gledanje prenosa: ${hrs(c.watch)}">${I_CLOCK}<span class="px nt">${hrs(c.watch)}</span>${badgeSvg(badgeLvl(c.watch))}</span>`:`<span class="uw ld" aria-hidden="true">${I_CLOCK}<span class="px">…</span></span>`}</div></div>`
   +(mine?"":`<button type="button" class="b light ublk" id="ublk">${I_BLOCK}<span>${bl?"Odblokiraj":"Blokiraj"}</span></button>`);apply(up)}
 function upPlace(){if(!upEl||!upEl.isConnected){upClose();return}const r=upEl.getBoundingClientRect(),w=up.offsetWidth,h=up.offsetHeight;
  let top=r.bottom+8;if(top+h>innerHeight-76)top=Math.max(8,r.top-h-8);up.style.top=top+"px";up.style.left=Math.round(Math.min(Math.max(8,r.left-14),innerWidth-w-8))+"px"}
@@ -143,11 +143,28 @@ $("#delNo").onclick=dClose;ddl.addEventListener("click",e=>{if(e.target===ddl)dC
 $("#delYes").onclick=async()=>{const j=await post("/api/auth/delete");if(!j.ok){say($("#delErr"),j.err==="banned"?"Nalog ne može da se obriše dok traje zabrana pisanja.":(j.err||"net"));return}
  me=null;setBlocks([]);admSet(null);dClose();ui();reconnect()};
 
-/* watching time: every 10 s the stream really plays on screen counts; sent every 5 min and when the page is left */
-let wAcc=0;
-setInterval(()=>{try{if(me&&pState===1&&!document.hidden)wAcc+=10}catch(e){}},10000);
+/* watching time (it grows the badge in the chat): every 10 s counts while the Assembly is on air (apiLive from the reader,
+   or YouTube says the video is a live stream) and the player really plays on screen, also when the viewer is behind live
+   (a delay, a pause, back later where he left off). When there is no broadcast nothing counts, not even a replay, and a
+   hidden tab never counts. Muted counts only while someone is there: the page autoplays muted,
+   so a forgotten tab stops counting after 30 min without a tap, key or scroll; with sound on it always counts.
+   Sent every 5 min and when the page is left; the server also caps it (time since the last report, 14 h a day). */
+let wAcc=0,wAct=Date.now();
+["pointerdown","keydown","wheel","touchstart"].forEach(t=>addEventListener(t,()=>{wAct=Date.now()},{passive:true,capture:true}));
+setInterval(()=>{try{if(me&&(apiLive||plLive)&&pState===1&&!document.hidden&&(!userMuted||Date.now()-wAct<30*60000))wAcc+=10}catch(e){}},10000);
 function wSend(beacon){if(!me||wAcc<10)return;const s=wAcc;wAcc=0;
- if(beacon&&navigator.sendBeacon)navigator.sendBeacon("/api/auth/watch",new Blob([JSON.stringify({s})],{type:"application/json"}));else post("/api/auth/watch",{s})}
+ /* text/plain: a beacon with a JSON content type is refused by some browsers; the server reads the body as JSON anyway */
+ if(beacon&&navigator.sendBeacon&&navigator.sendBeacon("/api/auth/watch",new Blob([JSON.stringify({s})],{type:"text/plain"}))){me={...me,watch:(me.watch||0)+s};return}/* no answer from a beacon: count it here */
+ post("/api/auth/watch",{s}).then(j=>{if(j&&j.ok&&me&&Number.isFinite(j.watch))setWatch(j.watch)})}
+/* Podešavanja: the account's badge in front of its name (faint first house before the first hour); a tap shows a small
+   bubble with the hours watched and the hours the next badge needs, "137/175h" (no level names anywhere) */
+const wNow=()=>(me&&me.watch||0)+wAcc;
+function lvlIcon(){const n=badgeLvl(wNow());return n?badgeSvg(n):badgeSvg(1,"dim")}
+function lvlText(){const w=wNow(),n=badgeLvl(w),h=Math.floor(w/3600);return n<BADGE_H.length?h+"/"+BADGE_H[n]+"h":h.toLocaleString("sr-RS")+"h"}
+function setWatch(w){me={...me,watch:w};const b=$("#pLvl");if(b)b.innerHTML=lvlIcon();const t=$("#pLvlB");if(t&&!t.hidden)t.textContent=lvlText()}
+function lvlBub(show){const b=$("#pLvl"),t=$("#pLvlB");if(!b||!t)return;if(show==null)show=t.hidden;t.hidden=!show;b.setAttribute("aria-expanded",show);if(show)t.textContent=lvlText()}
+document.addEventListener("click",e=>{if(e.target.closest("#pLvl"))lvlBub();else if(!e.target.closest("#pLvlB"))lvlBub(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")lvlBub(false)});
 setInterval(()=>{if(wAcc>=300)wSend()},60000);
 addEventListener("pagehide",()=>wSend(true));document.addEventListener("visibilitychange",()=>{if(document.hidden)wSend(true)});
 
