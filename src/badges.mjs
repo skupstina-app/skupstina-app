@@ -3,10 +3,9 @@
 // build.mjs pastes the same list into the page (/*@badgeh*/[] in js/19-badges.js), which draws the pictures.
 //
 // BADGE_H[i] = hours needed for level i+1. Under the first threshold there is no badge (level 0).
-// New viewers level up fast (1, 2, 4, 7, 13, 25 h), then each step needs more hours than the one before, so that
-// watching 5 h a day every day reaches the last level in about 5 months (750 h).
-// Change a number here and both sides follow on the next deploy.
-export const BADGE_H = [1, 2, 4, 7, 13, 25, 45, 70, 105, 150, 200, 255, 320, 390, 470, 555, 650, 750];
+// New viewers level up fast (1, 2, 4, 7, 11, 16 h: steps of 1, 1, 2, 3, 4, 5 h), then every level is 7 h more,
+// up to the last one at 100 h. Change a number here and both sides follow on the next deploy.
+export const BADGE_H = [1, 2, 4, 7, 11, 16, 23, 30, 37, 44, 51, 58, 65, 72, 79, 86, 93, 100];
 
 /** Level 0..BADGE_H.length for a number of watched seconds. */
 export function badgeLevel(watchS) {
