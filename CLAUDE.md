@@ -57,9 +57,9 @@ Map of this repo. Read this first, then open only the file you need.
   `text/plain`); one atomic UPDATE in auth.js adds `users.watch_s`, never more than the time since the last report
   (`watch_at`, so tabs/devices don't add up) and at most `WATCH_DAY_S` = 14 h per Belgrade day (`watch_day`, `watch_day_s`).
 - Watching badges: a 15×15 pixel building in front of the name in the chat, grown by `watch_s`. The hour thresholds live
-  only in `src/badges.mjs` (`BADGE_H`, 18 levels: a quick ramp 1, 2, 4, 7, 11, 16 h, then every 7 h up to 100 h); `ChatRoom` stores the writer's level on
+  only in `src/badges.mjs` (`BADGE_H`, 19 levels: a quick ramp 1, 2, 4, 7, 11, 16 h, then every 7 h up to 100 h, and a gold trophy at 150 h); `ChatRoom` stores the writer's level on
   each message (`msgs.badge`, sent as `m.b`) and `build.mjs` fills `/*@badgeh*/[]` in `js/19-badges.js`, which draws the
-  18 pictures once as SVG `<symbol>`s (`#bdg-1`…) and gives `badgeSvg(n)` (`<use>`). The levels have no names on screen.
+  pictures once as SVG `<symbol>`s (`#bdg-1`…) and gives `badgeSvg(n)` (`<use>`). The levels have no names on screen.
   Also in the user card (next to the hours) and in Podešavanja in front of the account name (`#pLvl`, faint before the
   first hour); a tap there shows a bubble with watched/next hours, e.g. `137/175h` (`#pLvlB`).
 - Blocking: D1 `blocks(uid,bid)`, `POST /api/auth/block {id,on}`; the list comes with `/api/auth/me` (`blocks`). Only the
