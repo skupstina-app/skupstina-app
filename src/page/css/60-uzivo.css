@@ -106,7 +106,7 @@ body.theater .pane{max-height:none}
 .vrate .lk{display:none}.vrate.locked .lk{display:block}
 .a2hs{position:fixed;z-index:60;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:420px;margin:0 auto;background:var(--card);color:var(--ink);border-radius:10px;box-shadow:0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.18);padding:14px;transform:translateY(16px);opacity:0;transition:transform .25s,opacity .25s}
 .a2hs.show{transform:none;opacity:1}
-@media(max-width:760px){.a2hs{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+@media(max-width:760px){.a2hs{bottom:calc(76px + var(--tbb))}}
 .a2hs .hd{display:grid;grid-template-columns:44px minmax(0,1fr) 32px;gap:12px;align-items:start}
 .a2hs img{width:44px;height:44px;border-radius:10px;box-shadow:0 0 0 1px var(--line);display:block}
 .a2hs .hd b{display:block;font-weight:500;font-size:16px;line-height:1.3}
