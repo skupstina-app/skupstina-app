@@ -28,8 +28,11 @@ if (!html.includes("/*MPS*/[]")) throw new Error("MP data placeholder /*MPS*/[] 
 
 const out = new URL("./src/generated/", import.meta.url);
 mkdirSync(out, { recursive: true });
-writeFileSync(new URL("index.html", out), html);
+// the page knows its own version (98-update.js compares it with /api/version to pick up a new deploy)
+if (!html.includes('"/*@ver*/"')) throw new Error("version marker \"/*@ver*/\" is missing");
 const hash = createHash("sha1").update(html).digest("hex").slice(0, 10);
+html = html.replace('"/*@ver*/"', JSON.stringify(hash));
+writeFileSync(new URL("index.html", out), html);
 writeFileSync(new URL("version.js", out), `export default ${JSON.stringify(hash)};\n`);
 writeFileSync(new URL("avatars.js", out), `// built from assets/avatars by build.mjs\nexport const AVATAR_IDS = ${JSON.stringify(AV_IDS)};\nexport const AVATAR_FILES = ${JSON.stringify(avFiles)};\n`);
 // the admin seat editor shares the seat plan with the page (src/page/js/28-seatplan.js), so both show the same seats
