@@ -48,10 +48,14 @@ button:hover{border-color:rgba(255,255,255,.3)}
 #ghost{position:fixed;z-index:50;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:6px;border:2px solid var(--c);background:var(--seat) center 20%/cover;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.5)}
 #side.over{outline:2px dashed var(--live);outline-offset:-4px}
 #card{position:fixed;z-index:40;width:250px;background:var(--card);border:1px solid rgba(255,255,255,.18);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:12px;font-size:13px}
-#card .hd{display:flex;gap:10px;align-items:flex-start}
-#card .ph{width:48px;height:48px;border-radius:6px;background:var(--seat) center 20%/cover;flex:none;border:2px solid var(--c)}
-#card b{display:block;font-size:15px;line-height:1.25}
-#card .x{margin-left:auto;padding:0 7px;border:0;background:none;font-size:18px;line-height:1;color:var(--mute)}
+/* the card opens with the face big, so the person is easy to recognise */
+#card{width:min(280px,calc(100vw - 16px))}
+#card .hd{display:grid;gap:10px}
+#card .ph{width:100%;aspect-ratio:4/5;max-height:min(340px,50dvh);border-radius:8px;background:var(--seat) center 18%/cover;border:3px solid var(--c)}
+#card .ph.np{display:none}
+#card b{display:block;font-size:17px;line-height:1.25}
+#card .x{position:absolute;top:20px;right:20px;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:rgba(0,0,0,.55);color:#fff;font-size:20px;line-height:1}
+#card:has(.ph.np) .x{top:8px;right:8px;background:none;color:var(--mute)}
 #card dl{margin:10px 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px}
 #card dt{color:var(--mute)}
 #card dd{margin:0}
@@ -88,7 +92,7 @@ button:hover{border-color:rgba(255,255,255,.3)}
 #list .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #list .st{font-size:12px;color:var(--mute)}
 #status{font-size:12px;color:var(--mute)}
-@media(max-width:900px){html,body{touch-action:pan-x pan-y;overflow:hidden;overscroll-behavior:none}body{position:fixed;inset:0;height:auto}#hallWrap{overscroll-behavior:contain}.seat.lifted{outline:2px solid var(--live);outline-offset:2px;transform:scale(1.15);z-index:2}#app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}#hallWrap{padding:6px;min-height:0}#list{flex:1;min-height:0;overscroll-behavior:contain}#list li{height:52px;padding:0 8px;transition:height .25s}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:0 8px 8px;gap:6px;border-bottom:0}#list .ph{width:36px;height:36px;transition:width .25s,height .25s}
+@media(max-width:900px){html,body{touch-action:pan-x pan-y;overflow:hidden;overscroll-behavior:none}body{position:fixed;inset:0;height:auto}#hallWrap{overscroll-behavior:contain}.seat.lifted{outline:2px solid var(--live);outline-offset:2px;transform:scale(1.15);z-index:2}#app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}#hallWrap{padding:6px;min-height:0}#list{flex:1;min-height:0;overscroll-behavior:contain}#list li{height:52px;padding:0 8px;transition:height .25s}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(280px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:0 8px 8px;gap:6px;border-bottom:0}#list .ph{width:36px;height:36px;transition:width .25s,height .25s}
 #fmenu{right:8px;max-height:calc(70dvh - 90px)}}
 /* phones: the list is a bottom sheet. Down (default): 3 rows. Up: 70% of the screen, bigger photos, more people. */
 @media(max-width:900px){
@@ -226,7 +230,7 @@ const card=$("#card");let cardAnchor=null;
 function showCard(m,anchor){sel=m;if(anchor)cardAnchor=anchor;
  const can=!!m.s;
  card.style.setProperty("--c",`var(--p${gOf(m)})`);
- card.innerHTML=`<div class="hd"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><div><b>${esc(m.n)}</b><span class="m">${GROUPS[gOf(m)][0]}</span></div><button class="x" aria-label="Zatvori">×</button></div>
+ card.innerHTML=`<div class="hd"><span class="ph${m.ph?"":" np"}"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><div><b>${esc(m.n)}</b><span class="m">${GROUPS[gOf(m)][0]}</span></div><button class="x" aria-label="Zatvori">×</button></div>
  <dl><dt>Mesto</dt><dd>${seatTxt(m)}</dd>${pgName(m)?`<dt>Grupa</dt><dd>${esc(lat(pgName(m)))}</dd>`:`<dt>Grupa</dt><dd class="m">bez poslaničke grupe</dd>`}${roleTxt(m)?`<dt>Funkcija</dt><dd>${esc(lat(roleTxt(m)))}</dd>`:""}${m.lk?`<dt>Status</dt><dd>zaključan na mestu</dd>`:""}</dl>
  <div class="acts"><button data-act="lock" aria-pressed="${!!m.lk}" ${can||m.lk?"":"disabled"}>${m.lk?"🔒 Zaključan":"Zaključaj"}</button>${m.s?`<button data-act="unseat">Skloni sa mesta</button>`:""}</div>`;
  card.hidden=false;placeCard();

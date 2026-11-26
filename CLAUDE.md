@@ -94,7 +94,7 @@ Map of this repo. Read this first, then open only the file you need.
   free seat of his own group. The editor does not show the automatic places: it draws saved seats only (so an accidental tap saves nothing).
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo, and on the hall a swipe
   moves the hall, also over people: press and hold someone 250 ms to pick him up, then drag; the page itself never scrolls; the filters are remembered in the browser, localStorage `sala-f`); a tap opens a card
-  with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
+  with the photo big (to recognise the face), simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
   then drag on. `mps.seat_lock` = 1 locks an MP on his seat
   (column added by `ensureLockCol` in admin.js; `POST /admin/api/lock {id,lock}`). The lock is only an editor guard: dropping
   someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch. On phones the map fills the screen and the list below is a bottom sheet: down it shows 3 rows, tap or drag its handle to raise it to 70% of the screen (bigger photos, more rows); starting a drag from the list lowers it again; browser page zoom is off so the list stays sharp. Filters (stranka, mesto: neraspoređeni/raspoređeni, pol) sit in one button next to search; pol is guessed from the first name (`sexOf`, -a = female, with exception lists `MALE_A`/`FEM_X`), since the import has no gender field.
