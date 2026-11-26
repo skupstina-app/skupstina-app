@@ -10,3 +10,6 @@ const setMode=v=>{root.dataset.mode=v;press("[data-mode]",v,"mode");store.set("t
 $$("[data-script]").forEach(b=>b.onclick=()=>setScript(b.dataset.script));
 $$("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 
+/* a muted MP's photo is greyed out with a small muted-speaker badge in the corner: wrap it with phm(); renderMuteUI (55-mutes) keeps
+   .muted up to date. Sala (30-hall) renders before the mutes are loaded, so muted may not exist yet. */
+function phm(m,inner){let on=false;try{on=muted.has(m)}catch(e){}return `<span class="phm${on?" is-mt":""}" data-mph="${m.i}">${inner}<span class="mbadge" aria-hidden="true">${I_POFF}</span></span>`}

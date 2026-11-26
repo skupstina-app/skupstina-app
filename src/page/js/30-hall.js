@@ -154,7 +154,7 @@ const mpl=$("#mplist");
 let gFilter=null;
 const renderMps=q=>{const f=fold(q||"");const list=order.filter(m=>(gFilter===null||m.g===gFilter)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));
  const fc=$("#fchip");fc.hidden=gFilter===null;if(gFilter!==null){fc.innerHTML=`<button type="button" aria-label="Ukloni filter"><i style="background:${SH[gFilter]}"></i>${groups[gFilter][0]}<span aria-hidden="true">×</span></button>`;apply(fc)}
- mpl.innerHTML=list.length?list.map(m=>`<li data-i="${m.i}"><button type="button"><span class="ph" aria-hidden="true"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span><span><span class="nm">${m.name}</span><br><span class="g">${groups[m.g][1]}</span></span><span class="d">${m.t?dur(m.t):""}${m.w?`<span class="w">${m.w}</span>`:""}</span></button></li>`).join(""):`<li class="empty">Nema rezultata</li>`;apply(mpl);mpLens.run()};
+ mpl.innerHTML=list.length?list.map(m=>`<li data-i="${m.i}"><button type="button">${phm(m,`<span class="ph" aria-hidden="true"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`)}<span><span class="nm">${m.name}</span><br><span class="g">${groups[m.g][1]}</span></span><span class="d">${m.t?dur(m.t):""}${m.w?`<span class="w">${m.w}</span>`:""}</span></button></li>`).join(""):`<li class="empty">Nema rezultata</li>`;apply(mpl);mpLens.run()};
 const mpLens=lens(mpl,i=>{focusMp=mps[i];if(view==="mps")drawMap()});
 $("#q").addEventListener("input",e=>{renderMps(e.target.value);mpl.scrollTop=0});
 $("#fchip").addEventListener("click",()=>{gFilter=null;renderMps($("#q").value);mpl.scrollTop=0});renderMps("");

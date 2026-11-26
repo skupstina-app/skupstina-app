@@ -55,3 +55,14 @@ body[data-xv=stats] .side>:not(#p-stats),body[data-xv=prof] .side>:not(#p-prof){
 /* chat: pixel send button */
 .cbox .csend{width:46px;min-width:46px;padding:0;display:grid;place-items:center}
 .cbox .csend .mi{width:18px;height:18px}
+
+/* muted MP: photo greyed out, small muted-speaker badge in the top-right corner (speaker bar, profile, Sala list) */
+.phm{position:relative;display:block;flex:none;width:max-content;height:max-content}
+.phm .ph,.phm .pph,.phw .ph{transition:filter .2s,opacity .2s}
+.phm.is-mt .ph,.phm.is-mt .pph,.phw.is-mt .ph{filter:grayscale(1) contrast(.9);opacity:.7}
+.mbadge{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:5px;display:none;place-items:center;background:var(--ink);color:var(--bg);box-shadow:0 0 0 2px var(--card);pointer-events:none;z-index:1}
+.mbadge .mi{width:12px;height:12px}
+.phm.is-mt .mbadge,.phw.is-mt .mbadge{display:grid}
+.phw.open .mbadge{display:none!important}
+.phw.open .ph{filter:none;opacity:1}
+.phm>.ph,.phm>.pph{display:block}
