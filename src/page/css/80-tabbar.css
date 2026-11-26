@@ -27,7 +27,7 @@ body[data-tab=live] [data-screen~=live],body[data-tab=sala] [data-screen~=sala],
 section{padding-top:20px}
 .livewin{margin-top:12px}
 .head{margin-bottom:14px}
-.head h2{font-size:30px}
+.head h2{font-size:34px}
 .tabbar{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--bg);box-shadow:0 -1px 0 var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
 .tabbar button{border:0;background:none;display:grid;place-items:center;justify-self:center;width:60px;height:44px;padding:0;border-radius:12px;color:var(--mute2);box-shadow:0 0 0 1px var(--line) inset;transition:background-color .15s,color .15s,box-shadow .15s,transform .1s}
 .tabbar button:active{transform:scale(.94)}
