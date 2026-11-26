@@ -13,6 +13,7 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh}
 header{display:flex;align-items:center;gap:12px;padding:12px 16px;flex:none;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
 header h1{font-size:17px;margin:0;font-weight:600}
+header .back{color:var(--mute);text-decoration:none;font-size:24px;line-height:1;padding:0 4px}
 header .sp{flex:1}
 .m{color:var(--mute);font-size:13px}
 button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
@@ -77,12 +78,12 @@ button:hover{border-color:rgba(255,255,255,.3)}
 #list .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #list .st{font-size:12px;color:var(--mute)}
 #status{font-size:12px;color:var(--mute)}
-@media(max-width:900px){#app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}#hallWrap{padding:6px;max-height:62dvh}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:8px;gap:6px}.chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.chips button{flex:none}#list li{padding:8px}#list .ph{width:36px;height:36px}}
+@media(max-width:900px){html,body{touch-action:pan-x pan-y}#app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}#hallWrap{padding:6px;min-height:0}#side{flex:none}#list{flex:none;height:calc(3*52px + 12px);overscroll-behavior:contain}#list li{height:52px;padding:0 8px}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:8px;gap:6px}.chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.chips button{flex:none}#list .ph{width:36px;height:36px}}
 </style>
 </head>
 <body>
-<header><h1>Raspored sedenja</h1><span class="m" id="count"></span><span class="sp"></span><span class="zb"><button id="zout" aria-label="Umanji">−</button><input type="range" id="zoom" min="320" max="4000" step="20" aria-label="Zum"><button id="zin" aria-label="Uvećaj">+</button><button id="zfit">Uklopi</button></span><span id="status"></span><span class="m" id="who"></span><button id="out" hidden>Odjavi se</button></header>
-<div id="login" hidden><p>Prijavi se Google nalogom administratora.</p><div id="gbtn"></div><p class="m" id="lerr"></p></div>
+<header><a class="back" href="/#profil" aria-label="Nazad na sajt">‹</a><h1>Raspored sedenja</h1><span class="m" id="count"></span><span class="sp"></span><span class="zb"><button id="zout" aria-label="Umanji">−</button><input type="range" id="zoom" min="320" max="4000" step="20" aria-label="Zum"><button id="zin" aria-label="Uvećaj">+</button><button id="zfit">Uklopi</button></span><span id="status"></span><span class="m" id="who"></span><button id="out" hidden>Odjavi se</button></header>
+<div id="login" hidden><p>Prijavi se Google nalogom administratora.<br><span class="m">Ili se prijavi na sajt preko Google-a, pa otvori Podešavanja → Admin meni → Sala.</span></p><div id="gbtn"></div><p class="m" id="lerr"></p></div>
 <div id="card" hidden role="dialog" aria-label="Poslanik"></div>
 <div id="app" hidden>
  <div id="hallWrap"><div id="hall"></div></div>
@@ -103,14 +104,10 @@ let MPS=[],sel=null,fg=-1;const bySeat=new Map();
 const status=(t,ok=true)=>{const s=$("#status");s.textContent=t;s.style.color=ok?"":"#e07a6e"};
 async function api(path,body){const r=await fetch(path,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{});return r.json()}
 function index(){bySeat.clear();MPS.forEach(m=>{if(m.s)bySeat.set(m.s,m)})}
-/* where the site puts everyone without a saved seat (drawn faded): AUTO seat key -> MP, AUTOOF MP -> seat key.
-   Worked out the same way as on the site, so what you see here is what the site shows. */
-const AUTO=new Map(),AUTOOF=new Map();let planSig="";
-function plan(){const sig=MPS.map(m=>m.id+":"+(m.s||"")).join(",");if(sig===planSig)return;planSig=sig;AUTO.clear();AUTOOF.clear();
- const [spk,vps]=leads(),hall=MPS.filter(m=>!isLead(m)&&gIdx(m)>=0);
- const P=seatPlan(hall,{seat:m=>m.s,grp:m=>seatGroupKey(gIdx(m),m.pg),rank:m=>seatRank(m.pg,m.r),name:m=>m.n,id:m=>m.id});
- P.at.forEach((k,m)=>{if(!P.saved.has(m)){AUTO.set(k,m);AUTOOF.set(m,k)}});
- benchSlots(spk,vps,m=>m.s).forEach((m,j)=>{if(m&&typeof m!=="string"&&m.s!=="p-"+j){AUTO.set("p-"+j,m);AUTOOF.set(m,"p-"+j)}})}
+/* the site gives everyone without a saved seat an automatic place (seatPlan()); the editor doesn't show those:
+   here only saved seats are drawn, so nothing can be saved by an accidental tap. AUTO/AUTOOF stay empty. */
+const AUTO=new Map(),AUTOOF=new Map();
+function plan(){}
 /* same geometry as drawMap() in src/page/js/30-hall.js: the presidium at the top, rows as arcs fanning out below it,
    section 0 / index 0 on the right as seen on the broadcast */
 let HW=1000,SLOTS=[];
@@ -131,13 +128,13 @@ function drawHall(){
  SLOTS.forEach((m,j)=>{const x=slotX(j),key="p-"+j,st=`--s:${bk}px;left:${x}px;top:${benC}px;`;
   if(typeof m==="string")h+=`<div class="seat lead sg" style="${st}" title="${m==="SG"?"Generalni sekretar":"Zamenik generalnog sekretara"} (nije poslanik) · stalno mesto"></div>`;
   else{const a=!m&&AUTO.get(key),w=m||a;h+=`<button class="seat lead${m?" taken":a?" auto":""}${m&&m.lk?" lk":""}${w&&sel===w?" sel":""}" data-seat="${key}" style="${st}${w?`--c:var(--p${gOf(w)});${w.ph?`background-image:url(/p/${w.id})`:""}`:""}" title="${w?esc(w.n)+" · "+(w===SPK?"predsednik Skupštine":"potpredsednik")+(m&&m.lk?" (zaključan)":"")+(a?" (automatski, nije sačuvano)":"")+" · ":""}mesto ${j+1} u predsedništvu">${w&&!w.ph?`<span>${esc(ini(w.n))}</span>`:""}</button>`;if(a&&!m)SLOTS[j]=a}
-  const mm=SLOTS[j];h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${mm==="SG"?"GS":mm==="GSD"?"ZGS":mm===SPK?(gap<62?"Pred.":"Predsednik"):mm?"PP":""}</span>`});
+  const mm=SLOTS[j];h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${mm==="SG"?"GS":mm==="GSD"?"ZGS":mm&&mm===SPK?(gap<62?"Pred.":"Predsednik"):mm?"PP":""}</span>`});
  pts.forEach(p=>{const key=p.key,m=bySeat.get(key),a=!m&&AUTO.get(key),w=m||a,x=cx-p.r*Math.cos(p.a),y=cy+p.r*Math.sin(p.a);
   h+=`<button class="seat${m?" taken":a?" auto":""}${m&&m.lk?" lk":""}${w&&sel===w?" sel":""}" data-seat="${key}" title="${w?esc(w.n)+(m&&m.lk?" (zaključan)":"")+(a?" (automatski, nije sačuvano)":"")+" · ":""}red ${p.i+1}, sektor ${8-p.k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;${w?`--c:var(--p${gOf(w)});${w.ph?`background-image:url(/p/${w.id})`:""}`:""}">${w&&!w.ph?`<span>${esc(ini(w.n))}</span>`:""}</button>`});
  /* row numbers just above both ends of each outer row (the outer sections start one ring back) */
  for(let i=0;i<HALL_OUTER.length;i++){const r=r0+hallRing(i,0)*step;h+=`<span class="rlbl" style="left:${cx-r}px;top:${cy-s*.95}px">${i+1}</span><span class="rlbl" style="left:${cx+r}px;top:${cy-s*.95}px">${i+1}</span>`}
  const el=$("#hall");el.style.width=(W+2*pad)+"px";el.style.height=(cy+R+s/2+10)+"px";el.style.setProperty("--s",s+"px");el.innerHTML=h;
- const placed=MPS.filter(m=>m.s).length;$("#count").textContent=`sačuvano ${placed} / ${MPS.length}`+(AUTO.size?` · ${AUTO.size} automatski (providni)`:"");
+ const placed=MPS.filter(m=>m.s).length;$("#count").textContent=`sačuvano ${placed} / ${MPS.length}`;
 }
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const ini=n=>n.split(" ").map(w=>w[0]).join("").slice(0,3);
@@ -197,7 +194,7 @@ function showCard(m,anchor){sel=m;if(anchor)cardAnchor=anchor;
  card.style.setProperty("--c",`var(--p${gOf(m)})`);
  card.innerHTML=`<div class="hd"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><div><b>${esc(m.n)}</b><span class="m">${GROUPS[gOf(m)][0]}</span></div><button class="x" aria-label="Zatvori">×</button></div>
  <dl><dt>Mesto</dt><dd>${seatTxt(m)}</dd>${pgName(m)?`<dt>Grupa</dt><dd>${esc(lat(pgName(m)))}</dd>`:`<dt>Grupa</dt><dd class="m">bez poslaničke grupe</dd>`}${roleTxt(m)?`<dt>Funkcija</dt><dd>${esc(lat(roleTxt(m)))}</dd>`:""}${m.lk?`<dt>Status</dt><dd>zaključan na mestu</dd>`:""}</dl>
- <div class="acts"><button data-act="lock" aria-pressed="${!!m.lk}" ${can||m.lk?"":"disabled"}>${m.lk?"🔒 Zaključan":"Zaključaj"}</button>${m.s?`<button data-act="unseat">Skloni sa mesta</button>`:AUTOOF.has(m)?`<button data-act="keep">Sačuvaj ovo mesto</button>`:""}</div>`;
+ <div class="acts"><button data-act="lock" aria-pressed="${!!m.lk}" ${can||m.lk?"":"disabled"}>${m.lk?"🔒 Zaključan":"Zaključaj"}</button>${m.s?`<button data-act="unseat">Skloni sa mesta</button>`:""}</div>`;
  card.hidden=false;placeCard();
  document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));
  document.querySelectorAll(`#list [data-id="${m.id}"]`).forEach(x=>x.classList.add("sel"));const sk=seatKeyOf(m);if(sk)document.querySelector(`[data-seat="${sk}"]`)?.classList.add("sel")}
@@ -211,7 +208,6 @@ function hideCard(){card.hidden=true;sel=null;document.querySelectorAll(".sel").
 card.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b||!sel)return;const m=sel;
  if(b.classList.contains("x")){hideCard();return}
  if(b.dataset.act==="unseat"){unseat(m);return}
- if(b.dataset.act==="keep"){const k=AUTOOF.get(m);if(k)place(m,k);return}
  if(b.dataset.act==="lock"){const want=!m.lk;
   /* a lead on an automatic bench place: save that place first, so the lock keeps him there */
   setLock(m,want)}});
@@ -264,7 +260,7 @@ async function load(){const j=await api("/admin/api/seats");if(!j.ok){showLogin(
 function showLogin(){$("#app").hidden=true;$("#login").hidden=false;
  if(!CLIENT_ID){$("#lerr").textContent="Google prijava još nije podešena (nedostaje Client ID).";return}
  const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.onload=()=>{google.accounts.id.initialize({client_id:CLIENT_ID,callback:async r=>{const j=await api("/admin/api/login",{credential:r.credential});if(j.ok)location.reload();else $("#lerr").textContent=j.err==="not_admin"?`${j.email} nije administrator.`:"Prijava nije uspela."}});google.accounts.id.renderButton($("#gbtn"),{theme:"filled_black",size:"large",text:"signin_with",locale:"sr"})};document.head.appendChild(s)}
-(async()=>{const me=await api("/admin/api/me");if(!me.email){showLogin();return}$("#who").textContent=me.email;$("#out").hidden=false;$("#app").hidden=false;load()})();
+(async()=>{const me=await api("/admin/api/me");if(!me.email){showLogin();return}$("#who").textContent=me.email;$("#out").hidden=me.via==="site";$("#app").hidden=false;load()})();
 </script>
 </body>
 </html>

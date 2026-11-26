@@ -28,7 +28,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` |
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
 | Arhiva | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
-| Podešavanja (gear tab, `#profil`): account card with avatar + Izmeni, Ć/Ћ and sun/moon switches, rows, Odjavi se; avatar picker `#avDlg`; mutes, rules dialog | `html/profil.html` | `70-profil` | `20-chat` (account card, avatar picker), `55-mutes` |
+| Podešavanja (gear tab, `#profil`): account card with avatar + Izmeni, Ć/Ћ and sun/moon switches, rows, Odjavi se; avatar picker `#avDlg`; mutes, rules dialog; Admin meni `#admDlg` (admins only) | `html/profil.html` | `70-profil`, `71-admin` | `20-chat` (account card, avatar picker), `21-admin` (Admin meni), `55-mutes` |
 | Kontakt | `html/kontakt.html` | `90-launch-kontakt` | |
 | Bottom tab bar (phones) | `html/tabbar.html` | `80-tabbar` | `50-tabs-rang` |
 | Footer | `html/footer.html` | | |
@@ -66,9 +66,19 @@ Map of this repo. Read this first, then open only the file you need.
 
 ## Admin
 
-- `/admin/sala`: seat map editor (`src/admin/sala.html`, routes in `src/admin.js`). Sign in with Google: the ID token
-  is checked against `GOOGLE_CLIENT_ID`; only emails in `ADMIN_EMAILS` (both in wrangler.jsonc vars) get a session
-  cookie (signed with the `SALT` secret, 30 days). Seats are saved in `mps.seat` as `row-section-index`
+- Admins (`src/admin.js`): the super admin is fixed in code (`SUPER` = mgrahovac87@gmail.com: every menu, and the only one
+  who manages admins). The others are in D1 `admins(email, perms, added_by, at)`; `perms` = the admin menus they see,
+  `sala` and/or `mod`. `ADMIN_EMAILS` (wrangler.jsonc) only seeded that table once, with `sala` (row `#seeded` marks it).
+- An admin is known by his site account: signed in with Google and without a password (an email + password address is
+  never checked, so it can't make anyone admin). `/api/auth/me` returns `admin: {super, perms}` (or null).
+- Podešavanja → **Admin meni** (only for admins; `21-admin.js`, `71-admin.css`, `#admDlg` in `html/profil.html`):
+  **Admini** (super admin only: add by email, tick Sala/Moderator, remove; `GET/POST /admin/api/admins
+  {email, perms[] | remove}`), **Sala** (link to `/admin/sala`), **Moderator** (only the look for now: tiles and rows marked
+  "uskoro"; the real chat tools still live at `/admin/chat?key=`).
+- `/admin/sala`: seat map editor (`src/admin/sala.html`, routes in `src/admin.js`). Opens straight away for an admin with
+  `sala` who is signed in on the site (no second sign-in, no Odjavi button, ‹ goes back to the site). Otherwise it offers
+  its own Sign in with Google: the ID token is checked against `GOOGLE_CLIENT_ID` and the email must be an admin with
+  `sala`; that gives a session cookie `sk_admin` (signed with the `SALT` secret, 30 days). Seats are saved in `mps.seat` as `row-section-index`
   (row 0 nearest the presidium; section 0 and index 0 on the right as seen on the broadcast, same as `30-hall.js`).
   8 sections: the six inner ones have 7 rows, 3,4,5,5,6,7,8 (the 3-seat front row juts out one row nearer the presidium); the two
   outer ones start one row back, level with the inner second row, and have 6 rows, 6,7,7,7,8,8 (314 seats). The row in a key
@@ -81,12 +91,12 @@ Map of this repo. Read this first, then open only the file you need.
   `seatLayout()` in `30-hall.js` (Sala and the stats panel map); `build.mjs` pastes the same file into the editor at `/*@seatplan*/`
   → `src/generated/sala.html` (what admin.js serves). Saved seats win; everyone else gets an automatic seat in his group's wedge
   (groups go round the hall in the order their saved seats show), and a save only pushes the person who sat there to the nearest
-  free seat of his own group. The editor draws the automatic places faded (dashed): drag one to save a seat, or tap → "Sačuvaj ovo mesto".
+  free seat of his own group. The editor does not show the automatic places: it draws saved seats only (so an accidental tap saves nothing).
 - Editor: moves are drag only (pointer events, mouse and touch; on touch list rows drag by the photo); a tap opens a card
   with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
   then drag on. `mps.seat_lock` = 1 locks an MP on his seat
   (column added by `ensureLockCol` in admin.js; `POST /admin/api/lock {id,lock}`). The lock is only an editor guard: dropping
-  someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch.
+  someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch. On phones the map fills the screen and the list below keeps a fixed height of 3 rows; browser page zoom is off so the list stays sharp.
 - Seat changes reach the site fast: a save drops the cached page and `/api/seats` in that data centre; open pages poll
   `/api/seats` (saved seats only, edge cache 15 s) 4 s after load and every minute, and redraw every map.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.
