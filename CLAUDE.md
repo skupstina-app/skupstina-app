@@ -96,7 +96,7 @@ Map of this repo. Read this first, then open only the file you need.
   with simple info, lock and remove. A plain drag doesn't move a locked MP; press and hold him (450 ms) to unlock,
   then drag on. `mps.seat_lock` = 1 locks an MP on his seat
   (column added by `ensureLockCol` in admin.js; `POST /admin/api/lock {id,lock}`). The lock is only an editor guard: dropping
-  someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch. On phones the map fills the screen and the list below keeps a fixed height of 3 rows; browser page zoom is off so the list stays sharp.
+  someone on a locked MP swaps them, and "Skloni sa mesta" (card, or drag to the list) unlocks and removes. Zoom: buttons, Ctrl/⌘+wheel, double-click, two-finger pinch. On phones the map fills the screen and the list below is a bottom sheet: down it shows 3 rows, tap or drag its handle to raise it to 70% of the screen (bigger photos, more rows); starting a drag from the list lowers it again; browser page zoom is off so the list stays sharp. Filters (stranka, mesto: neraspoređeni/raspoređeni, pol) sit in one button next to search; pol is guessed from the first name (`sexOf`, -a = female, with exception lists `MALE_A`/`FEM_X`), since the import has no gender field.
 - Seat changes reach the site fast: a save drops the cached page and `/api/seats` in that data centre; open pages poll
   `/api/seats` (saved seats only, edge cache 15 s) 4 s after load and every minute, and redraw every map.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.

@@ -63,10 +63,20 @@ button:hover{border-color:rgba(255,255,255,.3)}
 .seat span,.lead span{position:absolute;inset:auto 0 -1px 0;font-size:max(8px,calc(var(--s,24px)*.3));line-height:1.25;text-align:center;background:rgba(0,0,0,.6);border-radius:0 0 3px 3px;overflow:hidden;white-space:nowrap}
 #side{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
 .tools{padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line)}
-.tools input[type=search]{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips button{padding:3px 9px;font-size:12px;border-radius:999px}
-.chips button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.tools{position:relative;flex-direction:row;align-items:center}
+.tools input[type=search]{flex:1;min-width:0;width:100%;height:40px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+#fbtn{position:relative;flex:none;width:40px;height:40px;padding:0;display:grid;place-items:center}
+#fbtn svg{width:20px;height:20px}
+#fbtn[aria-expanded=true]{background:var(--ink);color:var(--bg)}
+#fbtn .n{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--live);color:#111211;font-size:11px;font-weight:600;line-height:17px;text-align:center}
+#fmenu{position:absolute;z-index:30;right:12px;top:calc(100% - 4px);width:min(300px,calc(100vw - 24px));max-height:min(70vh,460px);overflow:auto;background:var(--card);border:1px solid rgba(255,255,255,.18);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:12px;display:grid;gap:12px}
+#fmenu .fh{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute);margin-bottom:6px}
+#fmenu .fh button{border:0;background:none;padding:0;font-size:12px;color:var(--live)}
+.fopts{display:flex;flex-wrap:wrap;gap:6px}
+.fopts button{padding:5px 10px;font-size:13px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+.fopts button i{width:8px;height:8px;border-radius:2px;background:var(--c)}
+.fopts button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#grab{display:none}
 #list{list-style:none;margin:0;padding:6px;overflow:auto;flex:1}
 #list li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:grab;user-select:none;touch-action:pan-y}
 #list li .ph{touch-action:none}
@@ -78,7 +88,19 @@ button:hover{border-color:rgba(255,255,255,.3)}
 #list .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #list .st{font-size:12px;color:var(--mute)}
 #status{font-size:12px;color:var(--mute)}
-@media(max-width:900px){html,body{touch-action:pan-x pan-y}#app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}#hallWrap{padding:6px;min-height:0}#side{flex:none}#list{flex:none;height:calc(3*52px + 12px);overscroll-behavior:contain}#list li{height:52px;padding:0 8px}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:8px;gap:6px}.chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.chips button{flex:none}#list .ph{width:36px;height:36px}}
+@media(max-width:900px){html,body{touch-action:pan-x pan-y}#app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}#hallWrap{padding:6px;min-height:0}#list{flex:1;min-height:0;overscroll-behavior:contain}#list li{height:52px;padding:0 8px;transition:height .25s}#who{display:none}#out{padding:4px 10px;font-size:13px}header{flex-wrap:wrap;gap:6px 8px;padding:8px 10px}header h1{font-size:15px}header .zb{order:9;width:100%}header .zb input{flex:1;min-width:0}.zb button{min-width:40px;padding:6px 10px}#card{width:min(250px,calc(100vw - 16px))}#side{border-left:0;border-top:1px solid var(--line)}.tools{padding:0 8px 8px;gap:6px;border-bottom:0}#list .ph{width:36px;height:36px;transition:width .25s,height .25s}
+#fmenu{right:8px;max-height:calc(70dvh - 90px)}}
+/* phones: the list is a bottom sheet. Down (default): 3 rows. Up: 70% of the screen, bigger photos, more people. */
+@media(max-width:900px){
+#side{flex:none;height:var(--sh,calc(22px + 48px + 3*52px + 12px));transition:height .28s cubic-bezier(.2,.7,.2,1);background:var(--bg);overflow:hidden}
+#side.moving{transition:none}
+#side.up{--sh:70vh;--sh:70dvh}
+#grab{display:grid;place-items:center;flex:none;height:22px;width:100%;padding:0;border:0;border-radius:0;background:none;touch-action:none;cursor:grab}
+#grab::before{content:"";width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}
+#side.up #list li{height:64px}
+#side.up #list .ph{width:48px;height:48px}
+#side.up #list .nm b{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -88,7 +110,9 @@ button:hover{border-color:rgba(255,255,255,.3)}
 <div id="app" hidden>
  <div id="hallWrap"><div id="hall"></div></div>
  <div id="side">
-  <div class="tools"><input type="search" id="q" placeholder="Traži"><div class="chips" id="chips"></div><label class="m"><input type="checkbox" id="only"> samo neraspoređeni</label></div>
+  <button id="grab" type="button" aria-label="Podigni listu" aria-expanded="false"></button>
+  <div class="tools"><input type="search" id="q" placeholder="Traži"><button id="fbtn" type="button" aria-label="Filteri" aria-expanded="false" aria-controls="fmenu"><svg viewBox="0 0 11 11" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="1" y="2" width="9" height="1"/><rect x="3" y="5" width="5" height="1"/><rect x="4" y="8" width="3" height="1"/></svg><span class="n" hidden></span></button>
+   <div id="fmenu" hidden role="dialog" aria-label="Filteri"></div></div>
   <ul id="list"></ul>
  </div>
 </div>
@@ -100,7 +124,7 @@ const $=s=>document.querySelector(s);
    hallSeats() = the seats, seatPlan() = saved seats + the site's automatic places for everyone else, benchSlots() = the presidium */
 const GROUPS=[["Studentska lista",/СТУДЕНТ/],["SVM",/МАЂАР|MAGYAR/],["Albanska koal.",/АЛБАН|SHQIP/],["Ljudski",/ЉАЈИЋ|ЉУДСКИ/],["SDA Sandžaka",/SDA|СДА|САНЏАК|SANDŽAK/],["Pokret za ujed.",/ПОКРЕТ ЗА УЈЕДИЊЕЊЕ|POKRET ZA UJEDINJENJE/],["Srbija pobeđuje",/УЈЕДИЊЕНА СРБИЈА|ВУЧИЋ/]];
 const gIdx=m=>{const x=(m.l||"").toUpperCase();return GROUPS.findIndex(g=>g[1].test(x))},gOf=m=>{const i=gIdx(m);return i<0?6:i};
-let MPS=[],sel=null,fg=-1;const bySeat=new Map();
+let MPS=[],sel=null,fg=-1,fs=0,fx="";const bySeat=new Map();
 const status=(t,ok=true)=>{const s=$("#status");s.textContent=t;s.style.color=ok?"":"#e07a6e"};
 async function api(path,body){const r=await fetch(path,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{});return r.json()}
 function index(){bySeat.clear();MPS.forEach(m=>{if(m.s)bySeat.set(m.s,m)})}
@@ -138,9 +162,12 @@ function drawHall(){
 }
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const ini=n=>n.split(" ").map(w=>w[0]).join("").slice(0,3);
+/* pol from the first name (the import has no gender field): Serbian women's names end in -a; these men's names do too */
+const MALE_A=/^(Nikola|Ilija|Milija|Uglješa|Nebojša|Saša|Mirza|Đoka|Feđa|Luka|Aleksa|Nemanja|Mikica|Andrija|Toma|Jovica|Perica|Mića|Miša|Siniša|Vojkica|Mirča|Pera|Ljubiša|Dragiša|Radiša|Miodraga?|Božica)$/,FEM_X=/^(Sarah|Ines|Agnes|Edit|Katalin|Ruth|Ivon|Nives|Dolores|Beatrix|Erzsébet|Ildikó|Anikó|Mirjam|Ester|Miriam)$/;
+const sexOf=m=>{const f=(m.n||"").split(" ")[0];return FEM_X.test(f)||(/a$/.test(f)&&!MALE_A.test(f))?"z":"m"};
 function drawList(){
- const q=$("#q").value.trim().toLowerCase(),only=$("#only").checked;
- const rows=MPS.filter(m=>(fg<0||gOf(m)===fg)&&(!only||!m.s)&&(!q||m.n.toLowerCase().includes(q)));
+ const q=$("#q").value.trim().toLowerCase();
+ const rows=MPS.filter(m=>(fg<0||gOf(m)===fg)&&(!fs||(fs===1?!m.s:!!m.s))&&(!fx||sexOf(m)===fx)&&(!q||m.n.toLowerCase().includes(q)));
  $("#list").innerHTML=rows.map(m=>`<li data-id="${m.id}" class="${sel===m?"sel ":""}${m.lk?"lk":""}" style="--c:var(--p${gOf(m)})"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><span class="nm"><b>${m.lk?"🔒 ":""}${esc(m.n)}</b><span class="st">${GROUPS[gOf(m)][0]} · ${m.s?placeTxt(m.s):AUTOOF.has(m)?"automatski: "+placeTxt(AUTOOF.get(m)):"bez mesta"}</span></span></li>`).join("");
 }
 const placeTxt=k=>k.startsWith("p-")?`predsedništvo, mesto ${+k.slice(2)+1}`:`red ${+k.split("-")[0]+1}, sektor ${8-k.split("-")[1]}`;
@@ -237,7 +264,7 @@ function clearOver(){document.querySelectorAll(".over,.no").forEach(x=>x.classLi
 document.addEventListener("pointermove",e=>{if(!press||e.pointerId!==press.id)return;
  if(!drag){if(press.tapOnly||!press.m||Math.hypot(e.clientX-press.x,e.clientY-press.y)<6)return;
   if(press.m.lk){if(!press.unlocked){disarm(press);status(press.m.n+" je zaključan · drži ga da otključaš",false);press=null}return}
-  drag={m:press.m,from:press.from};hideCard();ghost.style.setProperty("--c",`var(--p${gOf(drag.m)})`);ghost.style.backgroundImage=drag.m.ph?`url(/p/${drag.m.id})`:"";document.body.appendChild(ghost);document.body.classList.add("dragging")}
+  drag={m:press.m,from:press.from};hideCard();if(side.classList.contains("up"))setUp(false);ghost.style.setProperty("--c",`var(--p${gOf(drag.m)})`);ghost.style.backgroundImage=drag.m.ph?`url(/p/${drag.m.id})`:"";document.body.appendChild(ghost);document.body.classList.add("dragging")}
  const gy=e.clientY-LIFT(e);ghost.style.left=e.clientX+"px";ghost.style.top=gy+"px";clearOver();const t=target(e.clientX,gy);
  if(t&&t.seat)t.seat.classList.add(canPlace(drag.m,t.seat.dataset.seat)?"over":"no");else if(t&&t.list&&drag.m.s)t.list.classList.add("over");
  /* scroll the hall when dragging near its edges */
@@ -252,9 +279,37 @@ function endPress(e,cancel){if(!press||e.pointerId!==press.id)return;const p=pre
 document.addEventListener("pointerup",e=>endPress(e,false));
 document.addEventListener("pointercancel",e=>endPress(e,true));
 document.addEventListener("click",e=>{if(!card.hidden&&!e.target.closest("#card,[data-seat],#list [data-id]"))hideCard()});
-$("#q").oninput=drawList;$("#only").onchange=drawList;
-$("#chips").innerHTML=`<button data-g="-1" aria-pressed="true">Svi</button>`+GROUPS.map((g,i)=>`<button data-g="${i}" aria-pressed="false">${g[0]}</button>`).join("");
-$("#chips").onclick=e=>{const b=e.target.closest("[data-g]");if(!b)return;fg=+b.dataset.g;document.querySelectorAll("#chips button").forEach(x=>x.setAttribute("aria-pressed",x===b));drawList()};
+$("#q").oninput=drawList;
+/* filters: one button next to search opens a small menu: stranka, raspored, pol */
+const fmenu=$("#fmenu"),fbtn=$("#fbtn");
+const fopt=(k,v,cur,txt,c)=>`<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${v===cur}"${c?` style="--c:var(--p${v})"`:""}>${c?"<i></i>":""}${txt}</button>`;
+function drawFilters(){
+ const n=(fg>=0)+(fs>0)+(!!fx);const b=fbtn.querySelector(".n");b.hidden=!n;b.textContent=n;
+ fmenu.innerHTML=`<div><div class="fh"><span>Stranka</span>${n?`<button type="button" data-k="reset">Poništi sve</button>`:""}</div><div class="fopts">${fopt("g",-1,fg,"Sve")}${GROUPS.map((g,i)=>fopt("g",i,fg,g[0],1)).join("")}</div></div>
+ <div><div class="fh"><span>Mesto</span></div><div class="fopts">${fopt("s",0,fs,"Svi")}${fopt("s",1,fs,"Neraspoređeni")}${fopt("s",2,fs,"Raspoređeni")}</div></div>
+ <div><div class="fh"><span>Pol</span></div><div class="fopts">${fopt("x","",fx,"Svi")}${fopt("x","m",fx,"Muški")}${fopt("x","z",fx,"Ženski")}</div></div>`}
+const openF=on=>{fmenu.hidden=!on;fbtn.setAttribute("aria-expanded",on);if(on){drawFilters();if(mob.matches&&!side.classList.contains("up"))setUp(true)}};
+fbtn.onclick=e=>{e.stopPropagation();openF(fmenu.hidden)};
+fmenu.onclick=e=>{e.stopPropagation();const b=e.target.closest("[data-k]");if(!b)return;const k=b.dataset.k,v=b.dataset.v;
+ if(k==="reset"){fg=-1;fs=0;fx=""}else if(k==="g")fg=+v;else if(k==="s")fs=+v;else fx=v;
+ drawFilters();drawList();$("#list").scrollTop=0};
+document.addEventListener("pointerdown",e=>{if(!fmenu.hidden&&!e.target.closest("#fmenu,#fbtn"))openF(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!fmenu.hidden)openF(false)});
+drawFilters();
+/* phones: the list is a bottom sheet; tap or drag the handle (or the search row) to raise it to 70% of the screen, down again for 3 rows */
+const side=$("#side"),grab=$("#grab"),mob=matchMedia("(max-width:900px)");
+const setUp=on=>{side.classList.toggle("up",on);grab.setAttribute("aria-expanded",on);grab.setAttribute("aria-label",on?"Spusti listu":"Podigni listu");setTimeout(placeCard,300)};
+let sd=null;const LO=22+48+3*52+12,HI=()=>Math.round(innerHeight*.7);
+side.addEventListener("pointerdown",e=>{if(!mob.matches||!e.target.closest("#grab,.tools")||e.target.closest("input,#fbtn,#fmenu"))return;
+ sd={y:e.clientY,h:side.getBoundingClientRect().height,id:e.pointerId,t:Date.now(),moved:false,grab:!!e.target.closest("#grab")};if(sd.grab)grab.setPointerCapture(e.pointerId)});
+addEventListener("pointermove",e=>{if(!sd||e.pointerId!==sd.id)return;const dy=e.clientY-sd.y;if(!sd.moved&&Math.abs(dy)<6)return;
+ if(!sd.moved){sd.moved=true;side.classList.add("moving");openF(false)}
+ const h=Math.max(LO,Math.min(HI(),sd.h-dy));side.style.height=h+"px";side.classList.toggle("up",h>LO+60)});
+function endSheet(e){if(!sd||e.pointerId!==sd.id)return;const d=sd;sd=null;
+ if(!d.moved){if(d.grab)setUp(!side.classList.contains("up"));return}
+ const dy=e.clientY-d.y,v=dy/Math.max(1,Date.now()-d.t),h=d.h-dy;
+ side.style.height="";side.classList.remove("moving");setUp(v<-.4?true:v>.4?false:h>(LO+HI())/2)}
+addEventListener("pointerup",endSheet);addEventListener("pointercancel",endSheet);
 $("#out").onclick=async()=>{await api("/admin/api/logout",{});location.reload()};
 async function load(){const j=await api("/admin/api/seats");if(!j.ok){showLogin();return}MPS=j.mps;let z=null;try{z=+localStorage.getItem("sala-w")}catch(e){}if(z){zoomed=true;HW=z;$("#zoom").value=z}else HW=fit();draw()}
 function showLogin(){$("#app").hidden=true;$("#login").hidden=false;
