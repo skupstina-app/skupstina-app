@@ -6,7 +6,10 @@ let cyr=false;const orig=new WeakMap();
 const apply=el=>{const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const p=n.parentElement;if(!p||p.closest(".nt,script,style"))continue;if(!orig.has(n))orig.set(n,n.nodeValue);n.nodeValue=cyr?tr(orig.get(n)):orig.get(n)}};
 const press=(sel,v,attr)=>$$(sel).forEach(b=>b.setAttribute("aria-pressed",b.dataset[attr]===v));
 const setScript=v=>{cyr=v==="cyr";press("[data-script]",v,"script");root.lang=cyr?"sr-Cyrl":"sr-Latn";apply(document.body);store.set("pismo",v)};
-const setMode=v=>{root.dataset.mode=v;press("[data-mode]",v,"mode");store.set("tema",v)};
+/* theme: light, dark or auto (follows the phone/computer, also when it switches at night) */
+const sysDark=matchMedia("(prefers-color-scheme: dark)");let modePref="auto";
+const setMode=v=>{if(!["light","dark","auto"].includes(v))v="auto";modePref=v;root.dataset.mode=v==="auto"?(sysDark.matches?"dark":"light"):v;press("[data-mode]",v,"mode");store.set("tema",v)};
+sysDark.addEventListener?.("change",()=>{if(modePref==="auto")setMode("auto")});
 $$("[data-script]").forEach(b=>b.onclick=()=>setScript(b.dataset.script));
 $$("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 

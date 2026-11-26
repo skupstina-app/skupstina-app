@@ -42,13 +42,21 @@ Map of this repo. Read this first, then open only the file you need.
 - One account per email; chat names are unique per account (unique indexes on `users.email`, `users.nk`, `users.sub`,
   created by `src/auth.js`). There are no other names: the old anonymous names (browser key + IP) are removed.
 - The name can be changed once every 30 days (`users.name_changed_at`, `NAME_DAYS` in auth.js; the first name at sign-up
-  doesn't count); colour any time. A new name is confirmed in the dialog first ("next change in 30 days"). Name, colour,
+  doesn't count, and in the first 24 h after sign-up, `NAME_FREE_H`, changes are free); colour any time. A new name is confirmed in the dialog first ("next change in 30 days"). Name, colour,
   avatar and sign-out live in Podešavanja (the gear tab), not under the chat box.
 - Avatars: every PNG in `assets/avatars/64` (64 px, file name = id) can be picked; `assets/avatars/uskoro` holds the
   "coming soon" tiles and the empty avatar (`prazno`), drawn by `scripts/avatar-placeholders.py`. `build.mjs` turns them
   into `src/generated/avatars.js` (served by the Worker at `/a/<id>.png`, `/a/uskoro-<n>.png`) and fills
   `/*@avatars*/[]` and `/*@soon*/[]` in `js/20-chat.js`. Saved in `users.avatar` (`POST /api/auth/avatar`, any time).
-  Add an avatar: drop its 64 px PNG in `assets/avatars/64` (and a label in `AVN` in 20-chat.js). Not shown in the chat yet.
+  Add an avatar: drop its 64 px PNG in `assets/avatars/64` (and a label in `AVN` in 20-chat.js).
+- Tap a name in the chat → a small card (`#upop`, 20-chat.js): avatar, name, watching time (clock + hours only, no
+  words; never the email) from `GET /api/auth/user?id=`, and Blokiraj/Odblokiraj. Watching time: the page counts the
+  seconds the stream really plays on screen and sends them to `POST /api/auth/watch` (every 5 min and on leaving);
+  `users.watch_s`, never more than the time since the last report (`watch_at`).
+- Blocking: D1 `blocks(uid,bid)`, `POST /api/auth/block {id,on}`; the list comes with `/api/auth/me` (`blocks`). Only the
+  blocker stops seeing the messages (hidden in the page). Podešavanja → Blokirani lists them (Odblokiraj).
+- Obriši nalog: `POST /api/auth/delete` removes the user row and his blocks (refused while banned).
+- Theme: light / dark / auto (`tema` in localStorage; auto follows the device and its changes; the default).
 - Chat (`ChatRoom` in worker.js, page `js/20-chat.js`): anyone can read; there is no history (a viewer sees messages
   from when they open the page). Only signed-in users can post; the Worker passes the user id to the room as `x-user`,
   and the room reads name, colour and `banned_until` (ms) from D1 `users` on every message. Rate limits, reports

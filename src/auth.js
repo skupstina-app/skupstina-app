@@ -5,6 +5,7 @@ import { verifyGoogleToken } from "./admin.js";
 import { AVATAR_IDS } from "./generated/avatars.js";
 
 const NAME_DAYS = 30; // a chat name can be changed once every 30 days (colour and avatar any time)
+const NAME_FREE_H = 24; // ...except in the first 24 hours after sign-up, when it can be changed freely
 const COOKIE = "sk_s", DAYS = 180, TICKET_MIN = 15, PBKDF2_ITER = 100_000;
 const enc = new TextEncoder();
 const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -49,7 +50,14 @@ async function verifyAccessToken(token, env) {
 
 /** When the name can next be changed (ms), or 0 if it can be changed now. */
 const nameNext = (u) => { const t = Date.parse(u?.name_changed_at || "") + NAME_DAYS * 86400_000; return t > Date.now() ? t : 0; };
-const pub = (u) => u && { id: u.id, name: u.name, color: u.color, avatar: AVATAR_IDS.includes(u.avatar) ? u.avatar : null, email: u.email, google: !!u.sub, nameNext: nameNext(u) };
+/** Until when (ms) the name can still be changed freely after sign-up, or 0. */
+const nameFree = (u) => { const t = Date.parse(u?.created_at || "") + NAME_FREE_H * 3600_000; return t > Date.now() ? t : 0; };
+const avatarOf = (a) => AVATAR_IDS.includes(a) ? a : null;
+const pub = (u) => u && { id: u.id, name: u.name, color: u.color, avatar: avatarOf(u.avatar), email: u.email, google: !!u.sub, nameNext: nameFree(u) ? 0 : nameNext(u), nameFree: nameFree(u) };
+/** What anyone may see about an account (the chat's user card): no email. */
+const card = (u) => ({ id: u.id, name: u.name, color: u.color, avatar: avatarOf(u.avatar), watch: u.watch_s || 0 });
+/** The accounts this user has blocked (their chat messages are hidden for him). */
+const blocksOf = async (env, uid) => (await env.DB.prepare("SELECT u.id,u.name,u.color,u.avatar FROM blocks b JOIN users u ON u.id=b.bid WHERE b.uid=? ORDER BY b.at DESC").bind(uid).all().catch(() => ({ results: [] }))).results.map((u) => ({ id: u.id, name: u.name, color: u.color, avatar: avatarOf(u.avatar) }));
 
 /** The signed-in user (row from users), or null. */
 export async function currentUser(req, env) {
@@ -90,6 +98,8 @@ async function ensureIndexes(env) {
   }
   try { await env.DB.prepare("ALTER TABLE users ADD COLUMN name_changed_at TEXT").run(); } catch (e) { } // already there
   try { await env.DB.prepare("ALTER TABLE users ADD COLUMN avatar TEXT").run(); } catch (e) { } // already there
+  for (const c of ["watch_s INTEGER DEFAULT 0", "watch_at INTEGER DEFAULT 0"]) try { await env.DB.prepare("ALTER TABLE users ADD COLUMN " + c).run(); } catch (e) { }
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS blocks(uid INTEGER NOT NULL, bid INTEGER NOT NULL, at TEXT, PRIMARY KEY(uid, bid))").run();
   indexed = true;
 }
 /** A unique-index error from D1 → our error code. */
@@ -109,7 +119,17 @@ export async function authRoute(req, env, u, p, checkName) {
   if (req.method === "POST" && (req.headers.get("origin") || u.origin) !== u.origin) return json({ ok: false }, 403);
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
 
-  if (p === "/api/auth/me") return json({ user: pub(await currentUser(req, env)), clientId: env.GOOGLE_CLIENT_ID || null });
+  if (p === "/api/auth/me") {
+    await ensureIndexes(env);
+    const me = await currentUser(req, env);
+    return json({ user: pub(me), blocks: me ? await blocksOf(env, me.id) : [], clientId: env.GOOGLE_CLIENT_ID || null });
+  }
+  // the card shown when someone taps a name in the chat
+  if (p === "/api/auth/user") {
+    await ensureIndexes(env);
+    const row = await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(+u.searchParams.get("id") || 0).first();
+    return row ? json(card(row)) : json({ ok: false }, 404);
+  }
   if (p === "/api/auth/logout") return json({ ok: true }, 200, { "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
   if (req.method !== "POST") return json({ ok: false }, 405);
   const ip = await ipKey(req, env);
@@ -187,7 +207,7 @@ export async function authRoute(req, env, u, p, checkName) {
     let row;
     try {
       row = renamed
-        ? await env.DB.prepare("UPDATE users SET name=?,nk=?,color=?,name_changed_at=? WHERE id=? RETURNING *").bind(name, nk, color, now(), user.id).first()
+        ? await env.DB.prepare("UPDATE users SET name=?,nk=?,color=?,name_changed_at=? WHERE id=? RETURNING *").bind(name, nk, color, nameFree(user) ? null : now(), user.id).first()
         : await env.DB.prepare("UPDATE users SET color=? WHERE id=? RETURNING *").bind(color, user.id).first();
     }
     catch (e) { if (clash(e)) return json({ ok: false, err: "name_taken" }, 409); throw e; }
@@ -199,6 +219,36 @@ export async function authRoute(req, env, u, p, checkName) {
     if (a !== null && !AVATAR_IDS.includes(a)) return json({ ok: false, err: "avatar" }, 400);
     const row = await env.DB.prepare("UPDATE users SET avatar=? WHERE id=? RETURNING *").bind(a, user.id).first();
     return json({ ok: true, user: pub(row) });
+  }
+  // Watching time: the page sends the seconds the stream really played (every few minutes); never more than the time
+  // since the last report, so it can't be pumped up.
+  if (p === "/api/auth/watch") {
+    const s = Math.floor(Number(body.s) || 0), t = Date.now();
+    const ok = Math.min(s, 900, Math.floor((t - (user.watch_at || 0)) / 1000) + 30);
+    if (ok > 0) await env.DB.prepare("UPDATE users SET watch_s=COALESCE(watch_s,0)+?, watch_at=? WHERE id=?").bind(ok, t, user.id).run();
+    return json({ ok: true });
+  }
+  // Block / unblock an account: its messages are hidden for this user (only on his side; the other one isn't told).
+  if (p === "/api/auth/block") {
+    const id = Math.floor(Number(body.id) || 0);
+    if (!id || id === user.id) return json({ ok: false, err: "block" }, 400);
+    if (body.on === false) await env.DB.prepare("DELETE FROM blocks WHERE uid=? AND bid=?").bind(user.id, id).run();
+    else {
+      if (!(await env.DB.prepare("SELECT 1 FROM users WHERE id=?").bind(id).first())) return json({ ok: false, err: "block" }, 404);
+      const n = await env.DB.prepare("SELECT COUNT(*) n FROM blocks WHERE uid=?").bind(user.id).first();
+      if (n.n >= 500) return json({ ok: false, err: "block" }, 429);
+      await env.DB.prepare("INSERT OR IGNORE INTO blocks(uid,bid,at) VALUES(?,?,?)").bind(user.id, id, now()).run();
+    }
+    return json({ ok: true, blocks: await blocksOf(env, user.id) });
+  }
+  // Delete the account: the row and its blocks go; the name is free again. A banned account can't escape the ban this way.
+  if (p === "/api/auth/delete") {
+    if (Number(user.banned_until) > Date.now()) return json({ ok: false, err: "banned" }, 403);
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM blocks WHERE uid=? OR bid=?").bind(user.id, user.id),
+      env.DB.prepare("DELETE FROM users WHERE id=?").bind(user.id),
+    ]);
+    return json({ ok: true }, 200, { "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
   }
   return json({ ok: false }, 404);
 }

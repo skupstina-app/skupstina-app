@@ -2,7 +2,7 @@
    Accounts: Sign in with Google, or email + password; a new account picks a chat name and a name colour. */
 {
 const box=$("#msgs"),pane=$("#p-chat"),cin=$("#cin"),cst=$("#cst"),dlg=$("#authDlg"),aErr=$("#aErr");
-let ws=null,me=null,backoff=1000,last="",ids=new Set(),ping=0,ticket=null,pendPw=null,color=0,clientId=null,gsiReady=false;
+let ws=null,me=null,blocks=[],blocked=new Set(),backoff=1000,last="",ids=new Set(),ping=0,ticket=null,pendPw=null,color=0,clientId=null,gsiReady=false;
 const ERR={login:"Prijavi se da pišeš.",name_len:"Ime mora imati od 2 do 20 znakova.",name_chars:"Ime može imati slova, brojeve, razmak, tačku i crtice.",name_bad:"To ime nije dozvoljeno.",name_taken:"To ime je zauzeto. Izaberi drugo.",name_wait:"Ime možeš da menjaš jednom u 30 dana.",banned:"Privremeno ne možeš da pišeš.",long:"Poruka je duža od 300 znakova.",fast:"Polako, sačekaj par sekundi.",dup:"Ista poruka je već poslata.",bad:"Poruka ima uvredljive reči i nije poslata.",link:"Linkovi i imejlovi nisu dozvoljeni.",phone:"Brojevi telefona nisu dozvoljeni.",off:"Veza je prekinuta, povezujem ponovo…",wait:"Povezujem…",saved:"Sačuvano.",
  email:"Proveri email adresu.",password:"Lozinka mora imati bar 8 znakova.",wrong:"Pogrešan email ili lozinka.",use_google:"Ovaj nalog koristi prijavu preko Google-a.",email_taken:"Nalog sa tim emailom već postoji. Prijavi se.",slow:"Previše pokušaja. Probaj ponovo kasnije.",ticket:"Isteklo je vreme. Prijavi se ponovo.",google:"Google prijava nije uspela.",net:"Nema veze. Pokušaj ponovo."};
 const say=(el,k)=>{el.textContent=k?(ERR[k]||k):"";apply(el)};
@@ -14,6 +14,7 @@ const I_EDIT=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rende
 /* avatars: ids come from the files in assets/avatars/64 (build.mjs fills these in); no avatar = the empty tile */
 const AVS=/*@avatars*/[],AV_SOON=/*@soon*/[];
 const AVN={cupic:"Bradonja s naočarima",konj:"Konj",poslanik_brkovi:"Poslanik s brkovima",poslanik_mahanje:"Poslanik maše"};
+const I_CLOCK=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="4" y="1" width="5" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="6" y="6" width="4" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="2" y="9" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="4" y="11" width="5" height="1"/></svg>`,I_BLOCK=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="4" y="1" width="5" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="9" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="9" y="3" width="2" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="8" y="4" width="2" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="7" y="5" width="2" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="6" y="6" width="2" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="5" y="7" width="2" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="4" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="2" y="9" width="3" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="4" y="11" width="5" height="1"/></svg>`;
 const avSrc=a=>"/a/"+(a&&AVS.includes(a)?a:"uskoro-prazno")+".png";
 const post=async(url,body)=>{try{const r=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})});return await r.json()}catch(e){return{ok:false,err:"net"}}};
 
@@ -22,21 +23,21 @@ function ui(){
  $("#pacctBody").innerHTML=me
   ?`<div class="acard"><button type="button" class="avbtn" id="pav" aria-label="Promeni avatar" title="Promeni avatar"><img class="av" src="${avSrc(me.avatar)}" alt="" width="64" height="64"><span class="avpen">${I_EDIT}</span></button><div class="aname"><b class="nt u${me.color}">${esc(me.name)}</b><span class="m nt">${esc(me.email||"")}</span></div><button type="button" class="b light aedit" id="pedit">${I_EDIT}<span>Izmeni</span></button></div>`
   :`<div class="acard"><img class="av" src="${avSrc()}" alt="" width="64" height="64"><div class="aname"><b>Gost</b><span class="m">Prijavi se da pišeš u razgovoru.</span></div></div><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button>`;
- $("#poutRow").hidden=!me;
+ $("#poutRow").hidden=!me;$("#pblkRow").hidden=!me;$("#pblkN").textContent=blocks.length||"";
  $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$(".cme").hidden=!me;
  if(!me)preloadGsi();
  apply($("#pacctBody"));
  box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&+m.dataset.u===me.id;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
 }
 document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
- if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="pedit")openProfile();else if(id==="pav")openAvatars();
- else if(id==="pout")post("/api/auth/logout").then(()=>{me=null;ui();reconnect()})});
+ if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="pedit")openProfile();else if(id==="pav")openAvatars();else if(id==="pblk")openBlocks();else if(id==="pdel")openDel();
+ else if(id==="pout"){wSend();post("/api/auth/logout").then(()=>{me=null;setBlocks([]);ui();reconnect()})}});
 
 const empty=()=>{};
-const add=m=>{if(ids.has(m.id))return;ids.add(m.id);box.querySelector(".empty")?.remove();
+const add=m=>{if(ids.has(m.id))return;ids.add(m.id);if(m.u!=null&&blocked.has(m.u))return;box.querySelector(".empty")?.remove();
  const stick=pane.scrollHeight-pane.scrollTop-pane.clientHeight<90,mine=!!me&&m.u!=null&&m.u===me.id;
  const d=document.createElement("div");d.className="msg"+(mine?" me":"");d.dataset.id=m.id;if(m.u!=null)d.dataset.u=m.u;
- d.innerHTML='<span class="tm nt"></span> <b class="nt u'+(m.c!=null?m.c:ucol(m.n))+'"></b><span class="nt">: </span><span class="x nt"></span>'+(mine?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
+ d.innerHTML='<span class="tm nt"></span> <b class="nt u'+(m.c!=null?m.c:ucol(m.n))+(m.u!=null?' un" role="button" tabindex="0" aria-haspopup="dialog':'')+'"></b><span class="nt">: </span><span class="x nt"></span>'+(mine?"":'<button class="flag" type="button" aria-pressed="false">Prijavi</button>');
  const t=d.querySelectorAll(".nt");t[0].textContent=hhmm(m.at);t[1].textContent=m.n;t[3].textContent=m.x;apply(d);box.append(d);
  while(box.children.length>200)box.firstElementChild.remove();
  if(stick)pane.scrollTop=pane.scrollHeight};
@@ -64,7 +65,7 @@ const show=()=>{if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttri
 const close=()=>{dlg.close?dlg.close():dlg.removeAttribute("open");ticket=null;pendPw=null};
 $("#authX").onclick=close;
 dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
-function signedIn(u){me=u;close();ui();reconnect()}
+function signedIn(u){me=u;close();ui();reconnect();fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(j.user)setBlocks(j.blocks||[])}).catch(()=>{})}
 let amode="in";
 function setMode(m){amode=m;dlg.querySelectorAll(".aseg [data-am]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.am===m));$("#aPwGo").textContent=m==="in"?"Uloguj se":"Dalje";$("#aPw").autocomplete=m==="in"?"current-password":"new-password";say(aErr,"");apply(dlg)}
 dlg.querySelector(".aseg").addEventListener("click",e=>{const b=e.target.closest("[data-am]");if(b)setMode(b.dataset.am)});
@@ -82,7 +83,7 @@ $("#aGoogle").onclick=()=>{say(aErr,"");if(gClient)gClient.requestAccessToken({p
 function setColor(c){color=c;dlg.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.c===c));$("#aPrev").className="nt u"+c}
 function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
  $("#aName").value=edit?me.name:(suggest||"");
- const lock=edit&&!!me.nameNext;$("#aName").disabled=lock;$("#aNameNote").hidden=edit&&!lock;$("#aNameNote").textContent=lock?`Ime možeš ponovo da promeniš ${dmy(me.nameNext)}`:"Ime kasnije možeš da menjaš jednom u 30 dana.";setColor(edit?me.color:Math.floor(Math.random()*8));$("#aPrev").textContent=$("#aName").value||"Ime";
+ const lock=edit&&!!me.nameNext;$("#aName").disabled=lock;$("#aNameNote").hidden=edit&&!lock;$("#aNameNote").textContent=lock?`Ime možeš ponovo da promeniš ${dmy(me.nameNext)}`:"Prva 24 sata ime možeš slobodno da menjaš, posle toga jednom u 30 dana.";setColor(edit?me.color:Math.floor(Math.random()*8));$("#aPrev").textContent=$("#aName").value||"Ime";
  $("#authT2").textContent=edit?(lock?"Boja imena":"Ime i boja"):"Tvoje ime u razgovoru";$("#aSave").textContent=edit?"Sačuvaj":"Napravi nalog";
  step("profile");show();$("#aName").focus()}
 dlg.querySelector(".sws").addEventListener("click",e=>{const b=e.target.closest(".sw");if(b)setColor(+b.dataset.c)});
@@ -95,10 +96,60 @@ async function saveProfile(){const name=$("#aName").value.trim();
  const j=ticket?await post("/api/auth/register",{ticket,name,color}):pendPw?await post("/api/auth/register",{...pendPw,name,color}):await post("/api/auth/profile",{name,color});
  if(!j.ok){step(j.err==="email_taken"?"start":"profile");say(aErr,j.err);return}signedIn(j.user)}
 $("#authProf").addEventListener("submit",e=>{e.preventDefault();const name=$("#aName").value.trim();
- if(me&&!ticket&&!pendPw&&name!==me.name){$("#cNew").textContent=name;$("#cNew").className="nt u"+color;$("#cDate").textContent=dmy(Date.now()+30*86400000);step("confirm");apply(dlg);$("#cOk").focus();return}
+ if(me&&!ticket&&!pendPw&&name!==me.name){$("#cNew").textContent=name;$("#cNew").className="nt u"+color;const free=me.nameFree>Date.now();$("#cNote").textContent=free?`Još ${Math.max(1,Math.ceil((me.nameFree-Date.now())/3600000))} h ime možeš slobodno da menjaš, posle toga jednom u 30 dana.`:`Sledeća promena biće moguća za 30 dana, tek ${dmy(Date.now()+30*86400000)}`;step("confirm");apply(dlg);$("#cOk").focus();return}
  saveProfile()});
 $("#cBack").onclick=()=>{step("profile");$("#aName").focus()};
 $("#cOk").onclick=saveProfile;
+
+/* blocking: the list comes with /api/auth/me; a blocked account's messages are not shown (only for this viewer) */
+function setBlocks(list){blocks=list;blocked=new Set(list.map(b=>b.id));blocked.forEach(id=>box.querySelectorAll('.msg[data-u="'+id+'"]').forEach(e=>e.remove()));$("#pblkN").textContent=blocks.length||""}
+async function setBlock(id,on){const j=await post("/api/auth/block",{id,on});if(!j.ok)return false;setBlocks(j.blocks||[]);return true}
+
+/* tap a name in the chat: a small card with the avatar, the name, how long they have watched (only a clock and the
+   hours, no words) and Blokiraj / Odblokiraj; never the email */
+const up=$("#upop"),ucache=new Map();let upFor=null,upEl=null;
+const hrs=s=>s<3600?"<1h":Math.floor(s/3600).toLocaleString("sr-RS")+"h";
+function upRender(c){const mine=!!me&&c.id===me.id,bl=blocked.has(c.id);
+ up.innerHTML=`<div class="uph"><img class="av" src="${avSrc(c.avatar)}" alt="" width="64" height="64"><div class="upn"><b class="nt u${c.color}">${esc(c.name)}</b>${c.watch!=null?`<span class="uw" aria-label="Gledanje prenosa: ${hrs(c.watch)}">${I_CLOCK}<span class="px nt">${hrs(c.watch)}</span></span>`:`<span class="uw ld" aria-hidden="true">${I_CLOCK}<span class="px">…</span></span>`}</div></div>`
+  +(mine?"":`<button type="button" class="b light ublk" id="ublk">${I_BLOCK}<span>${bl?"Odblokiraj":"Blokiraj"}</span></button>`);apply(up)}
+function upPlace(){if(!upEl||!upEl.isConnected){upClose();return}const r=upEl.getBoundingClientRect(),w=up.offsetWidth,h=up.offsetHeight;
+ let top=r.bottom+8;if(top+h>innerHeight-76)top=Math.max(8,r.top-h-8);up.style.top=top+"px";up.style.left=Math.round(Math.min(Math.max(8,r.left-14),innerWidth-w-8))+"px"}
+function upOpen(el){const msg=el.closest(".msg"),id=+msg.dataset.u;if(!id)return;if(upFor===id&&!up.hidden){upClose();return}
+ upFor=id;upEl=el;const color=+((el.className.match(/\bu(\d)\b/)||[])[1]||0);
+ upRender(ucache.get(id)||{id,name:el.textContent,color,avatar:null,watch:null});up.hidden=false;upPlace();
+ if(!ucache.has(id))fetch("/api/auth/user?id="+id,{cache:"no-store"}).then(r=>r.ok?r.json():null).then(c=>{if(!c)return;ucache.set(id,c);setTimeout(()=>ucache.delete(id),60000);if(upFor===id&&!up.hidden){upRender(c);upPlace()}}).catch(()=>{})}
+function upClose(){up.hidden=true;upFor=null;upEl=null}
+box.addEventListener("click",e=>{const n=e.target.closest(".un");if(n)upOpen(n)});
+box.addEventListener("keydown",e=>{const n=e.target.closest(".un");if(n&&(e.key==="Enter"||e.key===" ")){e.preventDefault();upOpen(n)}});
+document.addEventListener("pointerdown",e=>{if(!up.hidden&&!up.contains(e.target)&&!e.target.closest(".un"))upClose()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!up.hidden)upClose()});
+pane.addEventListener("scroll",()=>{if(!up.hidden)upClose()},{passive:true});addEventListener("resize",()=>{if(!up.hidden)upClose()});
+up.addEventListener("click",async e=>{if(!e.target.closest("#ublk"))return;const id=upFor;if(!me){upClose();openAuth();return}
+ const on=!blocked.has(id);if(await setBlock(id,on)){upClose();say(cst,on?"Poruke ove osobe više ne vidiš.":"Ponovo vidiš poruke ove osobe.");setTimeout(()=>say(cst,""),4000)}else say(cst,"net")});
+
+/* Podešavanja → Blokirani */
+const bdl=$("#blkDlg");
+function blkRender(){$("#blkList").innerHTML=blocks.length?blocks.map(b=>`<li><img class="av" src="${avSrc(b.avatar)}" alt="" width="64" height="64"><b class="nt u${b.color}">${esc(b.name)}</b><button type="button" class="b light" data-unb="${b.id}">Odblokiraj</button></li>`).join(""):`<li class="m bempty">Lista je prazna.</li>`;apply(bdl)}
+function openBlocks(){if(!me)return;blkRender();say($("#blkErr"),"");if(bdl.showModal)bdl.showModal();else bdl.setAttribute("open","")}
+const bClose=()=>bdl.close?bdl.close():bdl.removeAttribute("open");
+$("#blkX").onclick=bClose;bdl.addEventListener("click",e=>{if(e.target===bdl)bClose()});
+$("#blkList").addEventListener("click",async e=>{const b=e.target.closest("[data-unb]");if(!b)return;b.disabled=true;if(await setBlock(+b.dataset.unb,false))blkRender();else{b.disabled=false;say($("#blkErr"),"net")}});
+
+/* Podešavanja → Obriši nalog: one clear question, then it's gone */
+const ddl=$("#delDlg");
+function openDel(){if(!me)return;say($("#delErr"),"");if(ddl.showModal)ddl.showModal();else ddl.setAttribute("open","");apply(ddl);$("#delNo").focus()}
+const dClose=()=>ddl.close?ddl.close():ddl.removeAttribute("open");
+$("#delNo").onclick=dClose;ddl.addEventListener("click",e=>{if(e.target===ddl)dClose()});
+$("#delYes").onclick=async()=>{const j=await post("/api/auth/delete");if(!j.ok){say($("#delErr"),j.err==="banned"?"Nalog ne može da se obriše dok traje zabrana pisanja.":(j.err||"net"));return}
+ me=null;setBlocks([]);dClose();ui();reconnect()};
+
+/* watching time: every 10 s the stream really plays on screen counts; sent every 5 min and when the page is left */
+let wAcc=0;
+setInterval(()=>{try{if(me&&pState===1&&!document.hidden)wAcc+=10}catch(e){}},10000);
+function wSend(beacon){if(!me||wAcc<10)return;const s=wAcc;wAcc=0;
+ if(beacon&&navigator.sendBeacon)navigator.sendBeacon("/api/auth/watch",new Blob([JSON.stringify({s})],{type:"application/json"}));else post("/api/auth/watch",{s})}
+setInterval(()=>{if(wAcc>=300)wSend()},60000);
+addEventListener("pagehide",()=>wSend(true));document.addEventListener("visibilitychange",()=>{if(document.hidden)wSend(true)});
 
 /* avatar picker: tap a picture and it is saved; the ones still coming are shown, but can't be picked */
 const adl=$("#avDlg"),avErr=$("#avErr"),avGrid=$("#avGrid");
@@ -121,5 +172,5 @@ avGrid.addEventListener("click",async e=>{const b=e.target.closest(".avt");if(!b
 
 const rd=$("#rulesDlg");$$('a[href="#pravila"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();if(rd.showModal)rd.showModal();else rd.setAttribute("open","")}));
 $("#rulesClose").onclick=()=>rd.close?rd.close():rd.removeAttribute("open");
-fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{me=j.user;clientId=j.clientId}).catch(()=>{}).finally(()=>{ui();connect()});
+fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{me=j.user;clientId=j.clientId;setBlocks(j.blocks||[])}).catch(()=>{}).finally(()=>{ui();connect()});
 }
