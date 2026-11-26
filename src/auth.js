@@ -1,7 +1,7 @@
 // Visitor accounts: sign in with Google, or with email + password. Needed to write in the chat; reading needs none.
 // A new account picks a chat name and a name colour (0-7, the chat's palette).
 // Session: cookie sk_s = "<user id>|<expiry ms>|<HMAC>" signed with the SALT secret, 180 days, HttpOnly.
-import { verifyGoogleToken } from "./admin.js";
+import { verifyGoogleToken, userAdmin } from "./admin.js";
 import { AVATAR_IDS } from "./generated/avatars.js";
 
 const NAME_DAYS = 30; // a chat name can be changed once every 30 days (colour and avatar any time)
@@ -122,7 +122,9 @@ export async function authRoute(req, env, u, p, checkName) {
   if (p === "/api/auth/me") {
     await ensureIndexes(env);
     const me = await currentUser(req, env);
-    return json({ user: pub(me), blocks: me ? await blocksOf(env, me.id) : [], clientId: env.GOOGLE_CLIENT_ID || null });
+    // admin: which admin menus this account sees in Podešavanja (null for everyone else)
+    const adm = me ? await userAdmin(env, me).catch(() => null) : null;
+    return json({ user: pub(me), blocks: me ? await blocksOf(env, me.id) : [], admin: adm && { super: adm.super, perms: adm.perms }, clientId: env.GOOGLE_CLIENT_ID || null });
   }
   // the card shown when someone taps a name in the chat
   if (p === "/api/auth/user") {
