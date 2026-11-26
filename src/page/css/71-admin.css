@@ -24,3 +24,4 @@
 .modt span{font-size:13px;color:var(--mute)}
 .modrows .rowlink{cursor:default;color:var(--mute)}
 .soon{padding:3px 5px 2px;border-radius:3px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;color:var(--mute);font-size:10px;line-height:1;letter-spacing:.04em;text-transform:uppercase}
+#pupdNew{background:var(--live);color:var(--bg);box-shadow:none}

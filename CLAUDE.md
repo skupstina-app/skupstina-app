@@ -115,3 +115,8 @@ Push to `main` → GitHub Actions builds, `wrangler deploy`, smoke-tests https:/
 Workers → skupstina → Deployments, or revert the commit.
 
 Check a change locally: `node build.mjs` then `npx wrangler deploy --dry-run --outdir /tmp/out`.
+
+Updates reach open pages and home-screen apps: the page HTML is sent with `cache-control: no-cache` (the edge still keeps
+it 5 min, keyed by the page hash). `build.mjs` writes that hash into the page (`"/*@ver*/"` in `js/98-update.js`);
+the page asks `/api/version`, reloads by itself when it comes back on screen after a minute away and a new version is
+out, and otherwise marks Podešavanja → Osveži aplikaciju with "novo" (that row always reloads fresh).

@@ -209,11 +209,15 @@ async function page(env, ctx, req) {
   const ver = "h" + PAGE_HASH;
   const cache = caches.default, key = new Request(new URL(req.url).origin + "/__page_" + ver);
   let r = await cache.match(key);
-  if (r) return r;
-  const html = PAGE;
-  const data = JSON.stringify(await mpsJson(env)).replace(/</g, "\\u003c");
-  r = H(html.replace("/*MPS*/[]", data), "text/html; charset=utf-8", { "cache-control": "public, max-age=300" });
-  ctx.waitUntil(cache.put(key, r.clone()));
+  if (!r) {
+    const html = PAGE;
+    const data = JSON.stringify(await mpsJson(env)).replace(/</g, "\\u003c");
+    r = H(html.replace("/*MPS*/[]", data), "text/html; charset=utf-8", { "cache-control": "public, max-age=300" });
+    ctx.waitUntil(cache.put(key, r.clone()));
+  }
+  // the edge keeps it 5 min; browsers and home-screen apps must ask every time, so a deploy shows on the next open
+  r = new Response(r.body, r);
+  r.headers.set("cache-control", "no-cache");
   return r;
 }
 __name(page, "page");
@@ -481,6 +485,7 @@ var worker_default = {
       }
       if (p === "/api/mps") return json(await mpsJson(env));
       if (p === "/api/seats") return seatsJson(req, env, ctx);
+      if (p === "/api/version") return json({ v: PAGE_HASH });
       if (p === "/api/live/speakers") return json({ segments: [] });
       if (p === "/api/contact" && req.method === "POST") return contact(req, env);
       if (p === "/api/chat") {
