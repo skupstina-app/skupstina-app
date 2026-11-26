@@ -162,12 +162,16 @@ function drawHall(){
 }
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const ini=n=>n.split(" ").map(w=>w[0]).join("").slice(0,3);
+/* search folding: Cyrillic → Latin, then č/ć→c, š→s, ž→z, đ/dj→d, dž→dz, other accents dropped (á, é…), lower case.
+   Both the query and the text go through it, so "cvetkovic", "Цветковић" and "Cvetković" all match. */
+const C2L_={"љ":"lj","њ":"nj","џ":"dž"};"абцчћдђефгхијклмнопрсштувзж".split("").forEach((c,i)=>C2L_[c]="abcčćdđefghijklmnoprsštuvzž"[i]);
+const sfold=s=>[...String(s||"").toLowerCase()].map(c=>C2L_[c]??c).join("").replace(/đ/g,"d").replace(/dj/g,"d").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
 /* pol from the first name (the import has no gender field): Serbian women's names end in -a; these men's names do too */
 const MALE_A=/^(Nikola|Ilija|Milija|Uglješa|Nebojša|Saša|Mirza|Đoka|Feđa|Luka|Aleksa|Nemanja|Mikica|Andrija|Toma|Jovica|Perica|Mića|Miša|Siniša|Vojkica|Mirča|Pera|Ljubiša|Dragiša|Radiša|Miodraga?|Božica)$/,FEM_X=/^(Sarah|Ines|Agnes|Edit|Katalin|Ruth|Ivon|Nives|Dolores|Beatrix|Erzsébet|Ildikó|Anikó|Mirjam|Ester|Miriam)$/;
 const sexOf=m=>{const f=(m.n||"").split(" ")[0];return FEM_X.test(f)||(/a$/.test(f)&&!MALE_A.test(f))?"z":"m"};
 function drawList(){
- const q=$("#q").value.trim().toLowerCase();
- const rows=MPS.filter(m=>(fg<0||gOf(m)===fg)&&(!fs||(fs===1?!m.s:!!m.s))&&(!fx||sexOf(m)===fx)&&(!q||m.n.toLowerCase().includes(q)));
+ const q=sfold($("#q").value);
+ const rows=MPS.filter(m=>(fg<0||gOf(m)===fg)&&(!fs||(fs===1?!m.s:!!m.s))&&(!fx||sexOf(m)===fx)&&(!q||sfold(m.n+" "+GROUPS[gOf(m)][0]).includes(q)));
  $("#list").innerHTML=rows.map(m=>`<li data-id="${m.id}" class="${sel===m?"sel ":""}${m.lk?"lk":""}" style="--c:var(--p${gOf(m)})"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><span class="nm"><b>${m.lk?"🔒 ":""}${esc(m.n)}</b><span class="st">${GROUPS[gOf(m)][0]} · ${m.s?placeTxt(m.s):AUTOOF.has(m)?"automatski: "+placeTxt(AUTOOF.get(m)):"bez mesta"}</span></span></li>`).join("");
 }
 const placeTxt=k=>k.startsWith("p-")?`predsedništvo, mesto ${+k.slice(2)+1}`:`red ${+k.split("-")[0]+1}, sektor ${8-k.split("-")[1]}`;

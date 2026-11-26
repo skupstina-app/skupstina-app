@@ -1,6 +1,10 @@
 /* script */
 const MAP={"Dž":"Џ","DŽ":"Џ","dž":"џ","Lj":"Љ","LJ":"Љ","lj":"љ","Nj":"Њ","NJ":"Њ","nj":"њ"};
 "abcčćdđefghijklmnoprsštuvzž".split("").forEach((c,i)=>{const y="абцчћдђефгхијклмнопрсштувзж"[i];MAP[c]=y;MAP[c.toUpperCase()]=y.toUpperCase()});
+/* search folding: Cyrillic → Latin, then č/ć→c, š→s, ž→z, đ/dj→d, dž→dz, other accents dropped (á, é…), lower case.
+   Both the query and the text go through it, so "cvetkovic", "Цветковић" and "Cvetković" all match. */
+const C2L_={"љ":"lj","њ":"nj","џ":"dž"};"абцчћдђефгхијклмнопрсштувзж".split("").forEach((c,i)=>C2L_[c]="abcčćdđefghijklmnoprsštuvzž"[i]);
+const sfold=s=>[...String(s||"").toLowerCase()].map(c=>C2L_[c]??c).join("").replace(/đ/g,"d").replace(/dj/g,"d").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
 const tr=s=>s.replace(/D[žŽ]|dž|L[jJ]|lj|N[jJ]|nj|./g,c=>MAP[c]??c);
 let cyr=false;const orig=new WeakMap();
 const apply=el=>{const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const p=n.parentElement;if(!p||p.closest(".nt,script,style"))continue;if(!orig.has(n))orig.set(n,n.nodeValue);n.nodeValue=cyr?tr(orig.get(n)):orig.get(n)}};

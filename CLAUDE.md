@@ -101,6 +101,12 @@ Map of this repo. Read this first, then open only the file you need.
   `/api/seats` (saved seats only, edge cache 15 s) 4 s after load and every minute, and redraw every map.
 - Other `/admin/*` pages still use `?key=ADMIN_KEY`.
 
+## Search
+
+Every search box ignores Serbian diacritics and script: `sfold()` (in `js/05-core.js`, copied into `src/admin/sala.html`) turns
+Cyrillic into Latin, č/ć→c, š→s, ž→z, đ/dj→d, drops other accents and lower-cases. Run both the query and the text through it.
+A new search must use `sfold` too.
+
 ## Style
 
 Dark/light via `:root[data-mode=dark]` CSS variables (`--bg`, `--card`, `--ink`, `--mute`, `--line`, `--live` teal…).
