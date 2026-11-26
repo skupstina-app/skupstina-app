@@ -54,7 +54,7 @@ export async function verifyGoogleToken(token, env) {
   return { email: String(body.email).toLowerCase(), sub: String(body.sub), name: body.given_name || body.name || "" };
 }
 
-const SEAT = /^([0-5]-[0-7]-\d{1,2}|p-[0-8])$/; // hall seat row-section-index, or presidium place p-0..p-8
+const SEAT = /^([0-6]-[0-7]-\d{1,2}|p-[0-8])$/; // hall seat row-section-index, or presidium place p-0..p-8
 
 /** mps.seat_lock (1 = the seat editor can't move this MP); added once per isolate. */
 let lockCol = false;

@@ -134,8 +134,8 @@ function drawHall(){
   const mm=SLOTS[j];h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${mm==="SG"?"GS":mm==="GSD"?"ZGS":mm===SPK?(gap<62?"Pred.":"Predsednik"):mm?"PP":""}</span>`});
  pts.forEach(p=>{const key=p.key,m=bySeat.get(key),a=!m&&AUTO.get(key),w=m||a,x=cx-p.r*Math.cos(p.a),y=cy+p.r*Math.sin(p.a);
   h+=`<button class="seat${m?" taken":a?" auto":""}${m&&m.lk?" lk":""}${w&&sel===w?" sel":""}" data-seat="${key}" title="${w?esc(w.n)+(m&&m.lk?" (zaključan)":"")+(a?" (automatski, nije sačuvano)":"")+" · ":""}red ${p.i+1}, sektor ${8-p.k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;${w?`--c:var(--p${gOf(w)});${w.ph?`background-image:url(/p/${w.id})`:""}`:""}">${w&&!w.ph?`<span>${esc(ini(w.n))}</span>`:""}</button>`});
- /* row numbers just above both ends of each row */
- for(let i=0;i<HALL_ROWS;i++){const r=r0+i*step;h+=`<span class="rlbl" style="left:${cx-r}px;top:${cy-s*.95}px">${i+1}</span><span class="rlbl" style="left:${cx+r}px;top:${cy-s*.95}px">${i+1}</span>`}
+ /* row numbers just above both ends of each outer row (the outer sections start one ring back) */
+ for(let i=0;i<HALL_OUTER.length;i++){const r=r0+hallRing(i,0)*step;h+=`<span class="rlbl" style="left:${cx-r}px;top:${cy-s*.95}px">${i+1}</span><span class="rlbl" style="left:${cx+r}px;top:${cy-s*.95}px">${i+1}</span>`}
  const el=$("#hall");el.style.width=(W+2*pad)+"px";el.style.height=(cy+R+s/2+10)+"px";el.style.setProperty("--s",s+"px");el.innerHTML=h;
  const placed=MPS.filter(m=>m.s).length;$("#count").textContent=`sačuvano ${placed} / ${MPS.length}`+(AUTO.size?` · ${AUTO.size} automatski (providni)`:"");
 }

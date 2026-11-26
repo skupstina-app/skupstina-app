@@ -15,7 +15,7 @@ function drawMap(T=SALA){
  const hall=T.el,svg=T.svg,tip=T.tip,geo=T.geo,LIVE=T.live,V=LIVE?"live":view;
  const W=hall.clientWidth,H=hall.clientHeight;if(!W)return;
  const LY=seatLayout(),SPK=LY.SPK,VPS=LY.VPS,LEADS=LY.LEADS;
- /* the hall as built (hallSeats in 28-seatplan.js): 8 sections split by aisles, 6 rows = 264 seats; seats nobody needs stay drawn as empty outlines.
+ /* the hall as built (hallSeats in 28-seatplan.js): 8 sections split by aisles, 314 seats (the inner sections' front row juts out); seats nobody needs stay drawn as empty outlines.
     Drawn as the broadcast shows the hall: the presidium at the top, MPs facing it. Same seats in src/admin/sala.html and the stats panel. */
  const BH=Math.max(26,Math.round(H*.09)),R=Math.min(W/2-16,H-24-BH),cx=W/2,cy=12+BH,HS=hallSeats(R),step=HS.step,arc0=HS.arc0;
  const seatBy=new Map(HS.seats.map(p=>[p.key,{...p,z:1,x:cx-p.r*Math.cos(p.a),y:cy+p.r*Math.sin(p.a)}]));
