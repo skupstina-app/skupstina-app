@@ -303,7 +303,7 @@ export async function beleskeCron(env, force = false) {
     const sigOf = (h) => (h.headers.get("last-modified") || "") + "/" + (h.headers.get("content-length") || "");
     const heads = await Promise.all(urls.map((u) => fetch(u, { method: "HEAD", headers: UA }).catch(() => null)));
     if (heads.every((h) => h && h.ok) && heads.map(sigOf).join("|") === d.sig) continue;
-    if (done.length >= 3) break;
+    if (done.length >= 3) { await env.DB.prepare("UPDATE ar_beleske SET checked_at=0").run(); break; } // the rest on the next run
     let paras = [], sigs = [];
     for (const u of urls) {
       const r = await fetch(u, { headers: UA });
