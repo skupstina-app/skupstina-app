@@ -171,7 +171,7 @@ export async function authRoute(req, env, u, p, checkName) {
     const user = email && await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first();
     if (!user || !user.pw || !(await checkPw(String(body.password || ""), user.pw))) {
       await fail(env, ip);
-      return json({ ok: false, err: user && !user.pw ? "use_google" : "wrong" }, 400);
+      return json({ ok: false, err: !user ? "no_account" : !user.pw ? "use_google" : "wrong" }, 400);
     }
     await env.DB.prepare("UPDATE users SET seen_at=? WHERE id=?").bind(now(), user.id).run();
     return json({ ok: true, user: pub(user) }, 200, { "set-cookie": await sessionCookie(env, user.id) });

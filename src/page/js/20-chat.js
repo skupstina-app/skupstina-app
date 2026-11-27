@@ -4,7 +4,7 @@
 const box=$("#msgs"),pane=$("#p-chat"),cin=$("#cin"),cst=$("#cst"),dlg=$("#authDlg"),aErr=$("#aErr");
 let ws=null,me=null,blocks=[],blocked=new Set(),backoff=1000,last="",ids=new Set(),ping=0,ticket=null,pendPw=null,color=0,clientId=null,gsiReady=false;
 const ERR={login:"Prijavi se da pišeš.",name_len:"Ime mora imati od 2 do 20 znakova.",name_chars:"Ime može imati slova, brojeve, razmak, tačku i crtice.",name_bad:"To ime nije dozvoljeno.",name_taken:"To ime je zauzeto. Izaberi drugo.",name_wait:"Ime možeš da menjaš jednom u 30 dana.",banned:"Privremeno ne možeš da pišeš.",long:"Poruka je duža od 300 znakova.",fast:"Polako, sačekaj par sekundi.",dup:"Ista poruka je već poslata.",bad:"Poruka ima uvredljive reči i nije poslata.",link:"Linkovi i imejlovi nisu dozvoljeni.",phone:"Brojevi telefona nisu dozvoljeni.",off:"Veza je prekinuta, povezujem ponovo…",wait:"Povezujem…",saved:"Sačuvano.",
- email:"Proveri email adresu.",password:"Lozinka mora imati bar 8 znakova.",wrong:"Pogrešan email ili lozinka.",use_google:"Ovaj nalog koristi prijavu preko Google-a.",email_taken:"Nalog sa tim emailom već postoji. Prijavi se.",slow:"Previše pokušaja. Probaj ponovo kasnije.",ticket:"Isteklo je vreme. Prijavi se ponovo.",google:"Google prijava nije uspela.",net:"Nema veze. Pokušaj ponovo."};
+ email:"Proveri email adresu.",password:"Lozinka mora imati bar 8 znakova.",wrong:"Pogrešna lozinka.",no_account:"Nema naloga sa tom adresom. Registruj se.",use_google:"Ovaj nalog koristi prijavu preko Google-a.",email_taken:"Nalog sa tim emailom već postoji. Prijavi se.",slow:"Previše pokušaja. Probaj ponovo kasnije.",ticket:"Isteklo je vreme. Prijavi se ponovo.",google:"Google prijava nije uspela.",net:"Nema veze. Pokušaj ponovo."};
 const say=(el,k)=>{el.textContent=k?(ERR[k]||k):"";apply(el)};
 const ucol=n=>{let h=5381;for(const c of n.toLocaleLowerCase("sr"))h=(h*33+c.codePointAt(0))>>>0;return h%8};
 const dmy=t=>{const d=new Date(t);return d.getDate()+". "+(d.getMonth()+1)+". "+d.getFullYear()+"."};
@@ -32,7 +32,7 @@ function ui(){
  box.querySelectorAll(".msg").forEach(m=>{const mine=!!me&&+m.dataset.u===me.id;m.classList.toggle("me",mine);if(mine)m.querySelector(".flag")?.remove()});
 }
 document.addEventListener("click",e=>{const id=e.target.closest("button")?.id;
- if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="aEmailT"){$("#authPw").hidden=false;e.target.hidden=true;$("#aEmail").focus()}else if(id==="pedit")openProfile();else if(id==="pav")openAvatars();else if(id==="pcol")openColors();else if(id==="pblk")openBlocks();else if(id==="pdel")openDel();
+ if(id==="cjoin"||id==="plogin")openAuth("in");else if(id==="pedit")openProfile();else if(id==="pav")openAvatars();else if(id==="pcol")openColors();else if(id==="pblk")openBlocks();else if(id==="pdel")openDel();
  else if(id==="pout"){wSend();post("/api/auth/logout").then(()=>{me=null;setBlocks([]);admSet(null);ui();reconnect()})}});
 
 const empty=()=>{};
@@ -69,9 +69,10 @@ $("#authX").onclick=close;
 dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
 function signedIn(u){me=u;close();ui();reconnect();fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(j.user)setBlocks(j.blocks||[]);admSet(j.admin)}).catch(()=>{})}
 let amode="in";
-function setMode(m){amode=m;dlg.querySelectorAll(".aseg [data-am]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.am===m));$("#aPwGo").textContent=m==="in"?"Uloguj se":"Dalje";$("#aPw").autocomplete=m==="in"?"current-password":"new-password";say(aErr,"");apply(dlg)}
-dlg.querySelector(".aseg").addEventListener("click",e=>{const b=e.target.closest("[data-am]");if(b)setMode(b.dataset.am)});
-function openAuth(mode){if(me)return;setMode(mode||"in");step("start");$("#authPw").hidden=true;$("#aEmailT").hidden=false;show();loadGsi()}
+function setMode(m){amode=m;const up=m==="up";$("#authT").textContent=up?"Registruj se":"Uloguj se";$("#aPwGo").textContent=up?"Dalje":"Uloguj se";
+ $("#aPw").autocomplete=up?"new-password":"current-password";$("#aSwT").textContent=up?"Već imaš nalog?":"Nemaš nalog?";$("#aSwap").textContent=up?"Uloguj se":"Registruj se";say(aErr,"");apply(dlg)}
+$("#aSwap").onclick=()=>setMode(amode==="up"?"in":"up");
+function openAuth(mode){if(me)return;setMode(mode||"in");step("start");show();loadGsi()}
 /* the Google button should be ready the moment someone taps "Napravi nalog": load Google's script once the chat is on screen */
 let pre=false;function preloadGsi(){if(pre)return;pre=true;new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();loadGsi()}}).observe($("#compose"))}
 /* Google: our own button opens Google's sign-in popup; the server checks the token with Google */
@@ -111,7 +112,8 @@ function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
 $("#aName").addEventListener("input",()=>{$("#aPrev").textContent=$("#aName").value||"Ime"});
 $("#authPw").addEventListener("submit",async e=>{e.preventDefault();const act=amode==="up"?"signup":"login",email=$("#aEmail").value.trim(),password=$("#aPw").value;
  if(act==="signup"){if(password.length<8){say(aErr,"password");return}pendPw={email,password};ticket=null;openProfile(email.split("@")[0].slice(0,20));return}
- const j=await post("/api/auth/login",{email,password});if(j.ok)signedIn(j.user);else say(aErr,j.err)});
+ const j=await post("/api/auth/login",{email,password});if(j.ok){signedIn(j.user);return}
+ if(j.err==="no_account"){setMode("up");say(aErr,"no_account");return}say(aErr,j.err)});
 /* a new name asks first: the next change is 30 days away */
 async function saveProfile(){const name=$("#aName").value.trim();
  const j=ticket?await post("/api/auth/register",{ticket,name,color}):pendPw?await post("/api/auth/register",{...pendPw,name,color}):await post("/api/auth/profile",{name});
