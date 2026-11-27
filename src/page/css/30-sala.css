@@ -130,3 +130,60 @@
 #sala .v-mps,#sala .v-day{flex:1;height:auto}}
 
 
+/* group / person page: takes the whole space under the hall (the side panel on wide screens) */
+.side2{position:relative}
+.sdet{position:absolute;inset:0;z-index:6;overflow-y:auto;overscroll-behavior:contain;background:var(--card);padding:0 16px 28px;display:flex;flex-direction:column;gap:18px}
+.sdet[hidden]{display:none}
+.sdet>*{flex:none}
+.sdet.in{animation:sdin .2s steps(4) both}
+@keyframes sdin{from{transform:translateY(24px);opacity:0}}
+.dhd{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:14px 0 12px;margin-bottom:-6px;background:var(--card);box-shadow:0 1px 0 var(--line)}
+.dsw{display:inline-block;width:12px;height:12px;flex:none}
+.dtt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.dtt h3{margin:0;font:500 19px/1.2 "Wix Madefor Display",sans-serif;letter-spacing:-.01em}
+.dtt small{font-size:13px;color:var(--mute);line-height:1.3;display:flex;align-items:center;gap:7px}
+.dtt small .dsw{width:9px;height:9px}
+.dact{display:flex;gap:6px;flex:none}
+.dph{width:56px;height:56px;flex:none;background:var(--seat) center 20%/cover;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--c)}
+.mph{width:32px;height:32px;flex:none;background:var(--seat) center 20%/cover;box-shadow:0 0 0 1.5px var(--c,transparent)}
+.dk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dk>div{padding:10px 0 10px 12px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
+.dk>div:first-child{border-left:0;padding-left:0}
+.dk b{font-size:24px;line-height:1.2;font-weight:400;white-space:nowrap}
+.dk small{font-size:12px;color:var(--mute)}
+.dseat{position:relative;height:8px;background:var(--line);margin-top:-6px}
+.dseat i{position:absolute;inset:0 auto 0 0}
+.dseat .maj{position:absolute;top:-4px;bottom:-4px;border-left:1.5px dashed var(--ink)}
+.dsec{display:flex;flex-direction:column;gap:8px}
+.dsec h4{margin:0;font-size:13px;font-weight:500;color:var(--mute)}
+.dpg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:10px 12px;border-radius:6px;box-shadow:0 0 0 1px var(--line) inset}
+.dpg>b{font-weight:500;font-size:15px}
+.dpg>.px{font-size:16px;color:var(--mute)}
+.dpg button{grid-column:1/3;display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;font-size:15px}
+.dpg button small{font-size:13px;color:var(--mute)}
+.dsex{display:flex;height:8px;background:var(--seat)}
+.dsex i{height:100%;background:var(--live)}
+.dsl{display:flex;justify-content:space-between;font-size:14px;color:var(--mute)}
+.dsl span{display:inline-flex;align-items:center;gap:7px}
+.dsl span:first-child::before{content:"";width:9px;height:9px;background:var(--live)}
+.dsl span:last-child::before{content:"";width:9px;height:9px;background:var(--seat)}
+.dsl b{color:var(--ink);font-weight:400;font-size:15px}
+.dk2{margin-top:4px}
+.dbar{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) 2.2em;gap:10px;align-items:center;font-size:14px}
+.dbar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dbar i{height:6px;background:linear-gradient(var(--c),var(--c)) 0 0/var(--w) 100% no-repeat,var(--line)}
+.dbar b{font-weight:400;text-align:right;font-size:15px}
+.dmem,.ddays{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.dmem button,.ddays button{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left;display:grid;align-items:center;gap:12px;padding:6px 6px;border-radius:4px;cursor:pointer}
+.dmem button{grid-template-columns:32px minmax(0,1fr) auto;font-size:15px}
+.dmem button:hover,.ddays button:hover{background:var(--chip)}
+.dmem button:disabled{cursor:default;background:none}
+.dmem .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dmem .rl{font-size:13px;color:var(--mute)}
+.ddays button{grid-template-columns:2.2em minmax(0,1fr) 12px;gap:2px 12px;padding:8px 6px}
+.ddays b{grid-row:1/3;font-size:22px;font-weight:400}
+.ddays small{grid-column:2;font-size:13px;color:var(--mute)}
+.ddays .chev{grid-row:1/3;grid-column:3;color:var(--mute2)}
+.sdet .facts .w3{grid-column:1/-1}
+.sdet .bio{color:var(--mute)}
+@media(prefers-reduced-motion:reduce){.sdet.in{animation:none}}
