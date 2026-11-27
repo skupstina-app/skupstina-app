@@ -130,7 +130,7 @@ up.addEventListener("click",async e=>{if(!e.target.closest("#ublk"))return;const
 
 /* Podešavanja → Blokirani */
 const bdl=$("#blkDlg");
-function blkRender(){$("#blkList").innerHTML=blocks.length?blocks.map(b=>`<li><img class="av" src="${avSrc(b.avatar)}" alt="" width="64" height="64"><b class="nt u${b.color}">${esc(b.name)}</b><button type="button" class="b light" data-unb="${b.id}">Odblokiraj</button></li>`).join(""):`<li class="m bempty">Lista je prazna.</li>`;apply(bdl)}
+function blkRender(){$("#blkList").innerHTML=blocks.length?blocks.map(b=>`<li><img class="av" src="${avSrc(b.avatar)}" alt="" width="64" height="64"><b class="nt u${b.color}">${esc(b.name)}</b><button type="button" class="b light" data-unb="${b.id}">Odblokiraj</button></li>`).join(""):`<li class="m bempty">Nemaš blokiranih korisnika.</li>`;apply(bdl)}
 function openBlocks(){if(!me)return;blkRender();say($("#blkErr"),"");if(bdl.showModal)bdl.showModal();else bdl.setAttribute("open","")}
 const bClose=()=>bdl.close?bdl.close():bdl.removeAttribute("open");
 $("#blkX").onclick=bClose;bdl.addEventListener("click",e=>{if(e.target===bdl)bClose()});

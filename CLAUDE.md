@@ -74,7 +74,7 @@ Map of this repo. Read this first, then open only the file you need.
   as `m.md: 1`); `19-badges.js` draws it once as `#bdg-mod` and gives `modSvg()`. A super admin (the owner) gets a crown
   instead of the gavel (`msgs.moder` = 2, `m.cr: 1`, `#bdg-crown`, `crownSvg()`), still after his watching badge.
 - Blocking: D1 `blocks(uid,bid)`, `POST /api/auth/block {id,on}`; the list comes with `/api/auth/me` (`blocks`). Only the
-  blocker stops seeing the messages (hidden in the page). Podešavanja → Blokirani lists them (Odblokiraj).
+  blocker stops seeing the messages (hidden in the page). Podešavanja → Blokirani korisnici lists them (Odblokiraj; empty: "Nemaš blokiranih korisnika.").
 - Obriši nalog: `POST /api/auth/delete` removes the user row and his blocks (refused while banned).
 - Theme: light / dark / auto (`tema` in localStorage; auto follows the device and its changes; the default).
 - Chat (`ChatRoom` in worker.js, page `js/20-chat.js`): anyone can read; there is no history (a viewer sees messages
@@ -127,6 +127,13 @@ Map of this repo. Read this first, then open only the file you need.
 Every search box ignores Serbian diacritics and script: `sfold()` (in `js/05-core.js`, copied into `src/admin/sala.html`) turns
 Cyrillic into Latin, č/ć→c, š→s, ž→z, đ/dj→d, drops other accents and lower-cases. Run both the query and the text through it.
 A new search must use `sfold` too.
+
+## UX rule: no explanations
+
+The UI must explain itself. Don't add helper text, subtitles or hints that say what a screen or button does: a clear
+label is enough (tap "Blokirani korisnici" → you know what is there). A screen shows its content, an empty state in a few
+words ("Nemaš blokiranih korisnika."), and one obvious action per item. If something seems to need an explanation, fix
+the label or the layout instead. Keep only text the user can't do without (e.g. "this can't be undone" before deleting).
 
 ## Style
 
