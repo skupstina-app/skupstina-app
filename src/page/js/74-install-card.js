@@ -22,7 +22,7 @@ const steps=()=>ios?(safari&&iosv>=26
   :[['<svg class="si" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/></svg>','Otvori meni <b>⋮</b> gore desno'],['<svg class="si" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M12 8v8M8 12h8"/></svg>','Izaberi <b>Dodaj na početni ekran</b><span class="en">Add to Home screen</span> ili <b>Instaliraj aplikaciju</b><span class="en">Install app</span>']];
 function render(){
  const one=android&&bip;
- card.innerHTML=`<div class="hd"><img src="/icons/apple-touch-icon.png" alt="" width="44" height="44"><div><b>Dodaj na početni ekran</b><p>Prenos uživo jednim dodirom, kao aplikacija. Bez preuzimanja.</p></div><button type="button" class="x" aria-label="Zatvori">×</button></div>`+
+ card.innerHTML=`<div class="hd"><img src="/apple-touch-icon.png?v=2" alt="" width="44" height="44"><div><b>Dodaj na početni ekran</b><p>Prenos uživo jednim dodirom, kao aplikacija. Bez preuzimanja.</p></div><button type="button" class="x" aria-label="Zatvori">×</button></div>`+
   (open?`<ol>${steps().map(([i,t],k)=>`<li><span class="n">${k+1}</span><span class="key">${i}</span><span>${t}</span></li>`).join("")}</ol>`:"")+
   `<div class="row">${open?`<button type="button" class="pri" data-a="got">Razumem</button>`:`<button type="button" class="sec" data-a="later">Ne sada</button><button type="button" class="pri" data-a="${one?"install":"how"}">${one?"Dodaj":"Kako?"}</button>`}</div>`;
  apply(card)}

@@ -478,14 +478,14 @@ async function chatRoute(req, env, u) {
 __name(chatRoute, "chatRoute");
 // home-screen app (Android/Chrome install; iOS uses the apple-touch-icon and meta tags in index.html)
 var MANIFEST = JSON.stringify({
-  name: "skupština.app", short_name: "Skupština", lang: "sr-Latn", start_url: "/", scope: "/", display: "standalone",
+  id: "/", name: "skupština.app", short_name: "Skupština", lang: "sr-Latn", start_url: "/", scope: "/", display: "standalone",
   background_color: "#f5f5f2", theme_color: "#f5f5f2",
   description: "Narodna skupština uživo: prenos sednica, poslanici i statistika.",
   icons: [
-    { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-    { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-    { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-    { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" }
+    { src: "/icons/icon-192.png?v=2", sizes: "192x192", type: "image/png", purpose: "any" },
+    { src: "/icons/icon-512.png?v=2", sizes: "512x512", type: "image/png", purpose: "any" },
+    { src: "/icons/icon-maskable-512.png?v=2", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    { src: "/favicon.svg?v=2", sizes: "any", type: "image/svg+xml" }
   ]
 });
 var worker_default = {
@@ -499,9 +499,10 @@ var worker_default = {
         if (!b64) return new Response("not found", { status: 404 });
         return new Response(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { headers: { "content-type": "image/png", "cache-control": "public, max-age=86400" } });
       }
-      if (p === "/manifest.webmanifest") return H(MANIFEST, "application/manifest+json", { "cache-control": "public, max-age=3600" });
-      if (p === "/favicon.ico" || p === "/favicon.svg" || p === "/og.png" || p.startsWith("/icons/")) {
-        const f = p === "/favicon.ico" ? "favicon-32.png" : p.slice(p.lastIndexOf("/") + 1);
+      if (p === "/manifest.webmanifest") return H(MANIFEST, "application/manifest+json", { "cache-control": "no-cache" });
+      // /apple-touch-icon*.png at the root too: iOS asks there no matter what the page links
+      if (p === "/favicon.ico" || p === "/favicon.svg" || p === "/og.png" || p.startsWith("/icons/") || p.startsWith("/apple-touch-icon")) {
+        const f = p === "/favicon.ico" ? "favicon-32.png" : p.startsWith("/apple-touch-icon") ? "apple-touch-icon.png" : p.slice(p.lastIndexOf("/") + 1);
         if (!Object.hasOwn(ICON_FILES, f)) return new Response("not found", { status: 404 });
         const bytes = Uint8Array.from(atob(ICON_FILES[f]), (c) => c.charCodeAt(0));
         return new Response(bytes, { headers: { "content-type": f.endsWith(".svg") ? "image/svg+xml" : "image/png", "cache-control": "public, max-age=86400" } });
