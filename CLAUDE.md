@@ -142,6 +142,14 @@ The logo is the pixel building from "Dolazi uskoro" (23×21). Change it in `scri
     signed-in visitors confirm in the recording (a bubble while it plays; `GET/POST /api/arhiva/potvrde`, D1
     `ar_potvrda`): settled by an admin's answer, or by ≥3 answers with one side ≥3× the other. "izrekao sam opomenu X …
     povlačim" takes X's opomena back. `PARSER` (in arhiva.js) is part of `src_updated`: bump it and every day is read again.
+  - **Stenografske beleške** (`src/beleske.js`, cron, hourly; every 30 min while a day has none): the Assembly's own
+    transcript (.docx) is the last word on opomene. Found through the Redovna/Vanredna zasedanja pages → the sitting's
+    page → its `stenografske_beleske/*.docx` links (date from the file name); read again when size/date change. The docx is
+    unzipped in the Worker (`docxParas`), `parseSten` finds who got one (name in the sentence; "i vama" → the last two who
+    shouted from the seats; else the last one who shouted; else the MP cut off; "povlačim" takes it back) and the vote
+    counts. `applySten` puts them on the timeline (our find at that time, then a crowd question, then the chair's turn),
+    drops ours the notes don't have, clears the crowd questions, marks matching votes `ok`. D1 `ar_beleske(date, url, sig,
+    st, log)`; also applied after every re-import, so the notes always win.
   - **Roles change over time** (a temporary chair at the first sittings, new groups): each doc keeps that day's
     `who` {mp: [role, list]} and `chairs`; speeches by the chair carry the chair flag and are left out of "Najviše govorili".
   - **Our own days** (`arhivaCron`): the reader's `speech_segments` (one stream = one day) → `arhiva_dani` (title,
@@ -166,8 +174,8 @@ The logo is the pixel building from "Dolazi uskoro" (23×21). Change it in `scri
   It fills `start_ms` (actualStartTime) and `dan` (rank of the date in its sitting) of our own days. `GET /api/kanal`:
   days with their stream and parts in order, the live and the next scheduled sitting.
 - Next (not built yet): the reader run over a day's parts, so our speech times hold after the live stream is deleted
-  (the channel deletes it some days after uploading the parts; then a day must play from the parts); the stenographic
-  notes from parlament.gov.rs for opomene and glasanja; the same title rule in the reader, so only sittings are live.
+  (the channel deletes it some days after uploading the parts; then a day must play from the parts); the same title rule
+  in the reader, so only sittings are live.
 
 ## Search
 

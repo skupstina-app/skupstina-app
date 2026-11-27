@@ -9,6 +9,7 @@ import { adminRoute, userAdmin } from "./admin.js";
 import { authRoute, currentUser } from "./auth.js";
 import { arhivaRoute, arhivaCron, arhivaImport } from "./arhiva.js";
 import { kanalCron, kanalRoute } from "./kanal.js";
+import { beleskeCron } from "./beleske.js";
 import { badgeLevel } from "./badges.mjs";
 import { AVATAR_FILES } from "./generated/avatars.js";
 import { ICON_FILES } from "./generated/icons.js";
@@ -600,6 +601,12 @@ var worker_default = {
       if (n) await log(env, "arhiva", "imported " + n + " day(s) from skupstina.live");
     } catch (e) {
       await log(env, "arhiva", "import failed: " + e.message);
+    }
+    try {
+      const b = await beleskeCron(env);
+      if (b) await log(env, "beleske", b);
+    } catch (e) {
+      await log(env, "beleske", "failed: " + e.message);
     }
     const q = await getState(env, "mps_queue");
     const last = await getState(env, "mps_list_at");

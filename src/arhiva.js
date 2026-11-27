@@ -1,5 +1,6 @@
 import { currentUser } from "./auth.js";
 import { userAdmin } from "./admin.js";
+import { applySten, stFor } from "./beleske.js";
 // Arhiva: one row per sitting day (one YouTube stream of @ParlamentSrbija), made from the speech timeline the reader keeps
 // in D1 speech_segments(video, start_s, end_s, mp, talk_s). The cron (every 10 min) fills arhiva_dani for every stream:
 // - from the stream's YouTube page: title ("наставак Прве седнице ... 24.11.2026."), start_ms (liveBroadcastDetails
@@ -294,7 +295,11 @@ export async function arhivaImport(env) {
     const t = await tr.json();
     const dm = /-d(\d+)$/.exec(s.id);
     if (!allMps) allMps = (await env.DB.prepare("SELECT id, name_lat name FROM mps WHERE active=1").all()).results;
-    const { doc, row } = buildDoc(t, s.id, dm ? +dm[1] : null, allMps);
+    const built = buildDoc(t, s.id, dm ? +dm[1] : null, allMps), row = built.row;
+    // the stenographic notes, when we have them, decide the opomene (see beleske.js)
+    const bel = await stFor(env, s.date);
+    const doc = bel ? applySten(built.doc, bel.st, bel.url).doc : built.doc;
+    if (bel) row.op = doc.ev.filter((e) => e.k === "opomena").length;
     await env.DB.prepare("INSERT OR REPLACE INTO ar_dan(date,sid,ses,dan,total_s,first_clock,last_clock,n,speakers,op,gl,hay,lines,doc,tekst,source,src_updated,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
       .bind(s.date, s.id, doc.ses, doc.dan, doc.total, row.first_clock, row.last_clock, row.n, row.speakers, row.op, row.gl, row.hay, row.lines, JSON.stringify(doc), row.tekst, "skupstina.live", s.updated + PARSER, Date.now()).run();
     done++;
