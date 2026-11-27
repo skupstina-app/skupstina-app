@@ -145,11 +145,16 @@ Map of this repo. Read this first, then open only the file you need.
   chair turns under 45 s. Filters: Sve / Opomene / Glasanja / one MP. Search uses `sfold` and drops the last letter of
   long words; the line that matched shows under the day.
 - Who sees it: `body.arh` (admins while V1, via a wrapper around `admSet`); everyone else keeps "Dolazi uskoro".
-- Next (not built yet): our own pipeline so we don't depend on the import — YouTube Data API (`YT_API_KEY`) to list the
-  channel's videos, a title rule to tell plenary sittings from committees and press conferences (Latin look-alike
-  letters folded, "Prva sednica" / "nastavak Prve sednice" as one sitting, parts "(I)…(VI)"), the reader run over the
-  parts, the stenographic notes from parlament.gov.rs for opomene and glasanja. The channel deletes a day's live stream
-  some days after it uploads the parts, so a day must end up on the parts.
+- **Kanal** (`src/kanal.js`, cron): the @ParlamentSrbija channel through the YouTube Data API (secret `YT_API_KEY`):
+  new uploads every run, older ones backfilled from `KANAL_FROM`, plenary videos of the last 21 days and live/upcoming
+  ones asked again hourly (`gone` = YouTube no longer has it). `classify(title)` → `kind` (sednica / glasanje / pitanja,
+  else null: committees, press conferences, meetings…), `skey` (one sitting across its days: Latin look-alike letters
+  folded, "Prva sednica" and "nastavak Prve sednice" the same), `date`, `part` ((I)…(VI)). Stored in D1 `yt_video`.
+  It fills `start_ms` (actualStartTime) and `dan` (rank of the date in its sitting) of our own days. `GET /api/kanal`:
+  days with their stream and parts in order, the live and the next scheduled sitting.
+- Next (not built yet): the reader run over a day's parts, so our speech times hold after the live stream is deleted
+  (the channel deletes it some days after uploading the parts; then a day must play from the parts); the stenographic
+  notes from parlament.gov.rs for opomene and glasanja; the same title rule in the reader, so only sittings are live.
 
 ## Search
 

@@ -8,6 +8,7 @@ import HOLD from "./hold.html";
 import { adminRoute, userAdmin } from "./admin.js";
 import { authRoute, currentUser } from "./auth.js";
 import { arhivaRoute, arhivaCron, arhivaImport } from "./arhiva.js";
+import { kanalCron, kanalRoute } from "./kanal.js";
 import { badgeLevel } from "./badges.mjs";
 import { AVATAR_FILES } from "./generated/avatars.js";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
@@ -495,6 +496,7 @@ var worker_default = {
       if (p === "/api/version") return json({ v: PAGE_HASH });
       if (p === "/api/live/speakers") return json({ segments: [] });
       if (p === "/api/arhiva" || p === "/api/arhiva/day") return await arhivaRoute(req, env, u, p);
+      if (p === "/api/kanal") return await kanalRoute(req, env, u);
       if (p === "/api/contact" && req.method === "POST") return contact(req, env);
       if (p === "/api/chat") {
         if (req.headers.get("upgrade") !== "websocket") return new Response("websocket only", { status: 426 });
@@ -566,6 +568,12 @@ var worker_default = {
       await arhivaCron(env);
     } catch (e) {
       await log(env, "arhiva", "cron failed: " + e.message);
+    }
+    try {
+      const k = await kanalCron(env);
+      if (k) await log(env, "kanal", k);
+    } catch (e) {
+      await log(env, "kanal", "failed: " + e.message);
     }
     try {
       const n = await arhivaImport(env);
