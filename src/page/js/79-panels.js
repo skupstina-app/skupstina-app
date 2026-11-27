@@ -7,8 +7,9 @@ const c2l=s=>String(s||"").replace(/[Ѐ-џ]/g,c=>{const l=c.toLowerCase(),r=C2L[
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const LISTS=["Studentska lista – Studenti pobeđuju","Savez vojvođanskih Mađara – dr Balint Pastor","Albanska koalicija","Rasim Ljajić – Ljudski (SDP – CDP)","SDA Sandžaka – Čuvari Sandžaka","Usame Zukorlić (SPP) Pokret za ujedinjenje","Aleksandar Vučić – Ujedinjena Srbija"];
 /* grammar needs gender; the official data has none, so: first names ending in -a are women's, minus common men's names */
-const MALE_A=new Set(["nikola","luka","saša","ilija","andrija","kosta","toma","sava","jovica","mića","pera","đura","joca","zoka","mirča","vanja","miša","braca","boža","raša","staša","lazica","ljuba","maša"]);
-const isF=m=>{const f=(m.name||"").split(" ")[0].toLowerCase();return /a$/.test(f)&&!MALE_A.has(f)};
+const MALE_A=new Set(["nikola","luka","saša","ilija","andrija","kosta","toma","sava","jovica","mića","pera","đura","joca","zoka","mirča","vanja","miša","braca","boža","raša","staša","lazica","ljuba","maša","aleksa","feđa","mikica","milija","mirza","nebojša","nemanja","uglješa","đoka","perica","siniša","ljubiša","dragiša","radiša","vojkica","miodrag","miodraga","mića"]),
+ FEM_X=new Set(["sarah","ines","agnes","edit","katalin","ruth","ivon","nives","dolores","beatrix","erzsébet","ildikó","anikó","mirjam","ester","miriam"]);
+const isF=m=>{const f=(m.name||"").split(" ")[0].toLowerCase();return FEM_X.has(f)||(/a$/.test(f)&&!MALE_A.has(f))};
 const MON=["januara","februara","marta","aprila","maja","juna","jula","avgusta","septembra","oktobra","novembra","decembra"];
 const longDate=d=>{const x=/^(\d{1,2})\.(\d{1,2})\.(\d{4})/.exec(d||"");return x?`${+x[1]}. ${MON[+x[2]-1]} ${x[3]}.`:""};
 const mss=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,"0");return h?`${h}:${String(m).padStart(2,"0")}:${x}`:`${m}:${x}`};
