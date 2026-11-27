@@ -45,8 +45,8 @@ function drawMap(T=SALA){
  const fm=V==="day"?active.m:V==="mps"?focusMp:live.m;let o=bench;geo.empty.forEach(p=>{const k=Math.max(2,Math.round(s*.8));o+=`<rect x="${Math.round(p.x-k/2)+.5}" y="${Math.round(p.y-k/2)+.5}" width="${k-1}" height="${k-1}" fill="none" stroke="var(--seat)" stroke-width="1"></rect>`});
  mps.forEach(m=>{const p=posOf.get(m);if(!p)return;
   if(LIVE)o+=seat(m,SH[m.g],1);
-  else if(V==="groups"){const any=selG!==null||popFor==="bench",lead=LEADS.has(m),hl=popFor==="bench"?lead:(!any||selG===m.g);o+=hl?sq(p,any?s*1.15:s,popFor==="bench"?"var(--ink)":SH[m.g],1,m.g):sq(p,s*.85,"var(--seat)",1,m.g)}
-  else if(V==="mps"){if(m===fm)return;const r=fOn()?(fOk(m)?sq(p,s,SH[m.g],1):sq(p,s*.8,"var(--seat)",1)):sq(p,s,SH[m.g],m.g===fm.g?.75:.25);o+=r.replace("<rect ",`<rect data-m="${m.i}" `)}
+  else if(V==="groups"){const any=selG!==null||popFor==="bench",lead=LEADS.has(m),hl=popFor==="bench"?lead:(!any||selG===m.g);o+=(hl?sq(p,any?s*1.15:s,popFor==="bench"?"var(--ink)":SH[m.g],1,m.g):sq(p,s*.85,"var(--seat)",1,m.g)).replace("<rect ",`<rect data-m="${m.i}" `)}
+  else if(V==="mps"){if(m===fm)return;const r=fOn()?(fOk(m)?sq(p,s,SH[m.g],1):sq(p,s*.8,"var(--seat)",1)):sq(p,s,SH[m.g],.8);o+=r.replace("<rect ",`<rect data-m="${m.i}" `)}
   else{const f=m.t/maxT;o+=m===fm?"":(m.t?sq(p,s*(.7+.8*Math.sqrt(f)),SH[m.g]):sq(p,s*.45,"var(--seat)"))}});
 
  const ap=LIVE?RP.get(fm):posOf.get(fm);
@@ -75,73 +75,95 @@ function fcsMark(x,y,k){const h=Math.round(k/2)+2,l=Math.max(3,Math.round(k*.32)
  return `<g class="fcs" fill="var(--ink)" style="transform-origin:${X}px ${Y}px">${r}</g>`}
 const hallRO=new ResizeObserver(()=>drawMap());hallRO.observe(hall);
 
-/* sastav panel: a plain list; details open in a small window */
-let selG=null;
+/* sastav: a plain list. A tap on a group (list or hall) or on a person turns the space under the hall into that
+   group's or person's page (#sdet), × goes back one step (person opened from a group → the group) and then closes it */
+let selG=null,popFor=null;
 const pct=x=>x<.01?"<1%":Math.round(x*100)+"%";
-const pop=$("#pop");
+const sdet=$("#sdet");
 function renderSastav(){
  const el=$("#vGroups");
  el.innerHTML=`<div class="barwrap"><div class="bar100">${groups.map((g,i)=>`<i style="width:${g[2]/2.5}%;background:${SH[i]};opacity:${selG===null||selG===i?1:.3}"></i>`).join("")}</div></div>
- <div class="plist2">${groups.map((g,i)=>`<button type="button" class="prow" data-g="${i}" aria-expanded="${selG===i}" aria-controls="pop"><i style="width:12px;height:12px;background:${SH[i]}"></i><span>${g[0]}</span><span class="num">${g[2]}</span><span class="chev" aria-hidden="true">›</span></button>`).join("")}
+ <div class="plist2">${groups.map((g,i)=>`<button type="button" class="prow" data-g="${i}"><i style="width:12px;height:12px;background:${SH[i]}"></i><span>${g[0]}</span><span class="num">${g[2]}</span><span class="chev" aria-hidden="true">›</span></button>`).join("")}
  <button type="button" class="prow" data-bench="1"><i style="width:12px;height:12px;background:var(--ink)"></i><span>Predsedništvo</span><span class="num"></span><span class="chev" aria-hidden="true">›</span></button></div>`;
  apply(el);
 }
-const roleOf=m=>((m.pg||"").match(/\(([^)]+)\)\s*$/)||[])[1]||"";
-const pgName=m=>(m.pg||"").replace(/\s*\([^)]*\)\s*$/,"").replace(/^Посланичка група\s*/,"").replace(/[„“”"]/g,"");
-const lat=x=>[...(x||"")].map(c=>({А:"A",Б:"B",В:"V",Г:"G",Д:"D",Ђ:"Đ",Е:"E",Ж:"Ž",З:"Z",И:"I",Ј:"J",К:"K",Л:"L",Љ:"Lj",М:"M",Н:"N",Њ:"Nj",О:"O",П:"P",Р:"R",С:"S",Т:"T",Ћ:"Ć",У:"U",Ф:"F",Х:"H",Ц:"C",Ч:"Č",Џ:"Dž",Ш:"Š"}[c]??({а:"a",б:"b",в:"v",г:"g",д:"d",ђ:"đ",е:"e",ж:"ž",з:"z",и:"i",ј:"j",к:"k",л:"l",љ:"lj",м:"m",н:"n",њ:"nj",о:"o",п:"p",р:"r",с:"s",т:"t",ћ:"ć",у:"u",ф:"f",х:"h",ц:"c",ч:"č",џ:"dž",ш:"š"}[c]??c))).join("");
-function realGroup(mem){
- const by=new Map();mem.forEach(m=>{const k=pgName(m)||"";if(!by.has(k))by.set(k,[]);by.get(k).push(m)});
- return [...by.entries()].map(([k,list])=>{const pres=list.find(m=>/^председник/.test(roleOf(m))),dep=list.find(m=>/заменик/.test(roleOf(m)));
-  return `<div class="sec"><span class="lab">${k?"Poslanička grupa":"Bez poslaničke grupe"}</span>${k?`<div class="r"><span>Naziv</span><span>${lat(k)}</span></div>`:""}${pres?`<div class="r"><span>Predsednik</span><span>${pres.name}</span></div>`:""}${dep?`<div class="r"><span>Zamenik</span><span>${dep.name}</span></div>`:""}${by.size>1||!k?`<div class="r"><span>Poslanika</span><span>${list.length}</span></div>`:""}</div>`}).join("");
+const lat=x=>c2l(x);
+const phOf=(m,cls="dph")=>`<span class="${cls}" aria-hidden="true" style="--c:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span>`;
+const cnt=(n,one,few,many)=>`${n} ${n%10===1&&n%100!==11?one:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?few:many}`;
+const kTile=(v,l)=>`<div><b class="px">${v}</b><small>${l}</small></div>`;
+const top=(arr,k=6)=>{const c=new Map();arr.forEach(x=>{if(x)c.set(x,(c.get(x)||0)+1)});return [...c.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"sr")).slice(0,k)};
+const barRows=(rows,tot,col)=>rows.map(([k,n])=>`<div class="dbar"><span>${esc(k)}</span><i style="--w:${(n/tot*100).toFixed(1)}%;--c:${col}"></i><b class="px">${n}</b></div>`).join("");
+const memRow=m=>`<li><button type="button" data-mp="${m.i}">${phOf(m,"mph")}<span class="nm">${esc(m.name)}</span><span class="rl">${esc(m.role?(/potpredsed/i.test(lat(m.role))?"potpredsednik":"predsednik"):groupRole(m,isF(m)).replace(/ predsednika$/,""))}</span></button></li>`;
+const xBtn=()=>`<button type="button" class="pib dx" aria-label="Zatvori">${I_X}</button>`;
+const rk=m=>m.role?3:/^predsedn/.test(groupRole(m))?2:groupRole(m)?1:0;
+function groupDet(i){
+ const g=groups[i],mem=mps.filter(m=>m.g===i),n=mem.length||g[2],f=mem.filter(isF).length,ages=mem.map(ageOf).filter(x=>x!=null);
+ const avg=ages.length?Math.round(ages.reduce((a,b)=>a+b,0)/ages.length):null;
+ const pgs=top(mem.map(m=>groupName(m)||"Bez poslaničke grupe"),4),pars=top(mem.map(m=>m.party?lat(m.party):"Nestranački"),6),places=top(mem.map(m=>lat((m.place||"").split(",")[0]).trim()),6);
+ const lead=[...mem].sort((a,b)=>rk(b)-rk(a)||a.name.localeCompare(b.name,"sr"));
+ return `<div class="dhd"><i class="dsw" style="background:${SH[i]}"></i><div class="dtt"><h3>${esc(g[0])}</h3><small>${esc(LISTS[i]||"")}</small></div>${xBtn()}</div>
+ <div class="dk">${kTile(n,"poslanika")}${kTile(pct(n/250),"mesta")}${kTile(pct(VOTES[i]/VOTERS),"glasova")}</div>
+ <div class="dseat"><i style="width:${n/2.5}%;background:${SH[i]}"></i><span class="maj" style="left:${MAJ/2.5}%"></span></div>
+ ${mem.length?`<div class="dsec"><h4>Poslaničke grupe</h4>${pgs.map(([k,c])=>{const gm=mem.filter(m=>(groupName(m)||"Bez poslaničke grupe")===k),pr=gm.find(m=>/^predsedni/.test(groupRole(m))),zm=gm.find(m=>/^zameni/.test(groupRole(m)));
+  return `<div class="dpg"><b>${esc(k)}</b><span class="px">${c}</span>${pr?`<button type="button" data-mp="${pr.i}">${phOf(pr,"mph")}<span>${esc(pr.name)}</span><small>${isF(pr)?"predsednica":"predsednik"}</small></button>`:""}${zm?`<button type="button" data-mp="${zm.i}">${phOf(zm,"mph")}<span>${esc(zm.name)}</span><small>${isF(zm)?"zamenica":"zamenik"}</small></button>`:""}</div>`}).join("")}</div>
+ <div class="dsec"><h4>Sastav</h4><div class="dsex"><i style="width:${(f/n*100).toFixed(1)}%"></i></div><div class="dsl"><span>Žene <b class="px">${f}</b></span><span>Muškarci <b class="px">${n-f}</b></span></div>
+  ${avg?`<div class="dk dk2">${kTile(avg,"prosek godina")}${kTile(Math.min(...ages),"najmlađi")}${kTile(Math.max(...ages),"najstariji")}</div>`:""}</div>
+ ${pars.length>1||(pars[0]&&pars[0][0]!=="Nestranački")?`<div class="dsec"><h4>Stranke</h4>${barRows(pars,n,SH[i])}</div>`:""}
+ ${places.length?`<div class="dsec"><h4>Odakle su</h4>${barRows(places,n,SH[i])}</div>`:""}
+ <div class="dsec"><h4>Poslanici</h4><ol class="dmem">${lead.map(memRow).join("")}</ol></div>`:""}`;
 }
-function groupPop(i){
- const g=groups[i],L=V1?null:LEAD[i],mem=mps.filter(m=>m.g===i),tk=talks.filter(t=>t.m.g===i),tT=tk.reduce((a,t)=>a+t.d,0);
- const top=[...mem].filter(m=>m.t).sort((a,b)=>b.t-a.t).slice(0,3),silent=mem.filter(m=>!m.t).length;
- return `<div class="phd"><i style="width:12px;height:12px;background:${SH[i]}"></i><h3>${g[0]}</h3><button type="button" class="x" aria-label="Zatvori">×</button></div>
- ${V1?realGroup(mem):""}<div class="sec"${V1?" hidden":""}><span class="lab">Poslanička grupa</span>${L?`${L[2]?`<div class="r"><span>Naziv</span><span>${L[2]}</span></div>`:""}<div class="r"><span>Predsednik</span><span>${L[0]}</span></div><div class="r"><span>Zamenik</span><span>${L[1]}</span></div>`:`<span class="m">Još nije objavljeno</span>`}</div>
- <div class="sec"${V1?" hidden":""}><span class="lab">Danas</span><div class="big"><div><span class="px">${tk.length}</span><span class="lab">govora</span></div><div><span class="px">${tT?dur(tT).replace(" min","m").replace(" h ","h "):"0"}</span><span class="lab">za govornicom</span></div><div><span class="px">${g[2]-silent}/${g[2]}</span><span class="lab">govorilo</span></div></div>
- ${top.length?`<span class="lab" style="margin-top:6px">Najviše govorili</span>${top.map(m=>`<div class="r"><span>${m.name}</span><span class="m">${dur(m.t)}</span></div>`).join("")}`:`<span class="m">Danas niko nije govorio</span>`}</div>
- <div class="sec"><details><summary>Izbori 2026</summary><div class="r"><span>Glasova</span><span>${VOTES[i].toLocaleString("sr-RS")}</span></div><div class="r"><span>Udeo glasova</span><span>${pct(VOTES[i]/VOTERS)}</span></div><div class="r"><span>Udeo mesta</span><span>${pct(g[2]/250)}</span></div></details></div>
- <button type="button" class="b dark" data-members="${i}">Svi poslanici (${g[2]})</button>`;
+function benchDet(){
+ const sp=mps.filter(m=>m.role).sort((a,b)=>(/potpredsed/i.test(lat(a.role))?1:0)-(/potpredsed/i.test(lat(b.role))?1:0)||a.name.localeCompare(b.name,"sr"));
+ return `<div class="dhd"><i class="dsw" style="background:var(--ink)"></i><div class="dtt"><h3>Predsedništvo</h3></div>${xBtn()}</div>
+ <div class="dsec"><ol class="dmem">${sp.map(memRow).join("")}<li><button type="button" disabled><span class="mph"></span><span class="nm">Mirjana Radaković</span><span class="rl">generalna sekretarka</span></button></li></ol></div>`;
 }
-function benchPop(){
- if(V1){const sp=REAL.filter(r=>r.role).sort((a,b)=>(/^Председник/.test(b.role)?1:0)-(/^Председник/.test(a.role)?1:0)||a.l.localeCompare(b.l,"sr"));return `<div class="phd"><i style="width:12px;height:12px;background:var(--ink)"></i><h3>Predsedništvo</h3><button type="button" class="x" aria-label="Zatvori">×</button></div>
- <div class="sec">${sp.length?sp.map(r=>`<div class="r"><span>${r.l}</span><span class="m">${lat(r.role).replace(/ Narodne skupštine.*$/,"")}</span></div>`).join(""):`<span class="m">Podaci uskoro</span>`}</div><div class="sec"><div class="r"><span>Mirjana Radaković</span><span class="m">Generalna sekretarka</span></div></div>`}
- return `<div class="phd"><i style="width:12px;height:12px;background:var(--ink)"></i><h3>Predsedništvo</h3><button type="button" class="x" aria-label="Zatvori">×</button></div>
- <div class="sec"><span class="lab">Predsednik Skupštine</span><div class="r"><span>Aleksandar Čupić</span><span class="m">kandidat Studentske liste</span></div></div>
- <div class="sec"><span class="lab">Potpredsednici</span><span class="m">Biraju se na konstitutivnoj sednici</span></div>
- <div class="sec"><span class="lab">Danas predsedava</span><span class="m">Prikazuje se tokom sednice</span></div>`;
+function mpDet(m){
+ const f=isF(m),a=ageOf(m),party=m.party?lat(m.party):(f?"Nestranačka":"Nestranački"),gn=groupName(m),gr=groupRole(m,f),on=typeof muted!=="undefined"&&muted.has(m);
+ const fact=(k,v,c)=>v?`<div class="fact${c?" "+c:""}"><small>${k}</small><span>${esc(v)}</span></div>`:"";
+ const days=(typeof arDays!=="undefined"&&arDays?arDays:[]).filter(d=>(d.mps||[]).some(x=>Number(x)===Number(m.id)));
+ return `<div class="dhd dhm">${phOf(m,"dph")}<div class="dtt"><h3>${esc(m.name)}</h3><small><i class="dsw" style="background:${SH[m.g]}"></i>${esc(groups[m.g][0])}</small></div>
+ <span class="dact"><button type="button" class="pib" data-mute aria-pressed="${on}" aria-label="${on?"Uključi zvuk za":"Utišaj kad god govori:"} ${esc(m.name)}">${on?I_POFF:I_PON}</button>${xBtn()}</span></div>
+ <div class="facts">${m.role?fact("Funkcija",(/potpredsed/i.test(lat(m.role))?(f?"Potpredsednica":"Potpredsednik"):(f?"Predsednica":"Predsednik"))+" Skupštine","w3"):""}${fact("Stranka",party,"w2")}${fact("Godište",m.by?`${m.by}. (${a})`:"")}${fact("Mesto",lat(m.place),"w2")}${fact(f?"Poslanica od":"Poslanik od",(m.md||"").replace(/\.(\d)/g,". $1"))}${fact("Zanimanje",lat(m.prof),"w3")}${fact("Poslanička grupa",gn?gn+(gr?" · "+gr:""):"","w3")}</div>
+ ${m.t?`<div class="dk dk2">${kTile(dur(m.t),"danas")}${m.w?kTile(m.w,"opomene"):""}</div>`:""}
+ ${days.length?`<div class="dsec"><h4>${f?"Govorila":"Govorio"} na sednicama</h4><ol class="ddays">${days.map(d=>{const dt=arDate(d.date);return `<li><button type="button" data-ard="${d.date}"><b class="px">${dt.getUTCDate()}</b><span>${AR_WD[dt.getUTCDay()]} · ${AR_MON[dt.getUTCMonth()]}</span><small>${esc(d.ses)}</small><span class="chev">›</span></button></li>`}).join("")}</ol></div>`:""}`;
 }
-let popFor=null;
-const plink=$("#plink");
+/* the hall follows: a group (or the bench) is framed, a person is zoomed in on */
 function placeFocus(){
- if(popFor===null||pop.hidden||view!=="groups"){svg.style.transform="";plink.hidden=true;return}
- const W=hall.clientWidth,H=hall.clientHeight,mob=innerWidth<=760;
- const pts=popFor==="bench"?[geo.bench]:mps.filter(m=>m.g===popFor).map(m=>geo.pos.get(m));if(!pts||!pts.length)return;
- let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,sx=0,sy=0;pts.forEach(p=>{x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y);sx+=p.x;sy+=p.y});
- const c={x:sx/pts.length,y:sy/pts.length};
- const pw=mob?0:Math.min(360,W-24),side=c.x<W/2?"right":"left";
- let vH=H;if(mob){const t=pop.getBoundingClientRect().top-hall.getBoundingClientRect().top;vH=Math.max(80,Math.min(H,t))}
- const f0=mob?0:side==="left"?pw+24:0,f1=mob?W:side==="left"?W:W-pw-24,fw=f1-f0,fx=(f0+f1)/2,fy=vH*.5;
- const bw=Math.max(x1-x0,popFor==="bench"?geo.bench.w:18),bh=Math.max(y1-y0,18);
- const z=Math.max(mob?.6:1,Math.min(2.6,fw*.72/bw,vH*.7/bh));
- svg.style.transform=`translate(${(fx-z*c.x).toFixed(1)}px,${(fy-z*c.y).toFixed(1)}px) scale(${z.toFixed(3)})`;
- if(mob){pop.style.left="";pop.style.top="";plink.hidden=true;return}
- pop.style.left=(side==="left"?12:W-pw-12)+"px";
- const ph=pop.offsetHeight,bH=board.clientHeight,top=Math.max(12,Math.min(fy-34,bH-ph-12));pop.style.top=top+"px";
- const ly=Math.min(Math.max(fy,top+20),top+ph-20),edge=side==="left"?12+pw:W-pw-12,tx=fx+(side==="left"?-Math.min(bw*z/2,fw*.3):Math.min(bw*z/2,fw*.3));
- plink.hidden=false;plink.classList.toggle("rev",side==="right");
- const a=Math.min(edge,tx),b=Math.max(edge,tx);plink.style.left=a+"px";plink.style.width=Math.max(0,b-a-6)+"px";plink.style.top=ly+"px";
- if(side==="right")plink.style.left=(a+6)+"px";
+ if(popFor===null||view!=="groups"){if(view==="groups")svg.style.transform="";return}
+ const W=hall.clientWidth,H=hall.clientHeight;
+ const pts=popFor==="bench"?[geo.bench]:mps.filter(m=>m.g===popFor).map(m=>geo.pos.get(m)).filter(Boolean);if(!pts.length)return;
+ let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;pts.forEach(p=>{x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y)});
+ const c={x:(x0+x1)/2,y:(y0+y1)/2},bw=Math.max(x1-x0,popFor==="bench"?geo.bench.w:18),bh=Math.max(y1-y0,18);
+ const z=Math.max(1,Math.min(2.6,W*.8/bw,H*.75/bh));
+ svg.style.transform=`translate(${(W/2-z*c.x).toFixed(1)}px,${(H/2-z*c.y).toFixed(1)}px) scale(${z.toFixed(3)})`;
 }
-function openPop(what,anchor){popFor=what;pop.innerHTML=what==="bench"?benchPop():groupPop(what);apply(pop);pop.hidden=false;
- selG=what==="bench"?null:what;renderSastav();drawMap();pop.querySelector(".x").focus({preventScroll:true})}
-function closePop(){if(pop.hidden)return;pop.hidden=true;popFor=null;selG=null;svg.style.transform="";plink.hidden=true;renderSastav();drawMap()}
-pop.addEventListener("click",e=>{if(e.target.closest(".x"))closePop();const m=e.target.closest("[data-members]");if(m){gFilter=+m.dataset.members;sFilter="";aFilter=-1;$("#q").value="";closePop();renderMps("");setView("mps")}});
-$("#vGroups").addEventListener("click",e=>{const b=e.target.closest(".prow");if(!b)return;const w=b.dataset.bench?"bench":+b.dataset.g;popFor===w?closePop():openPop(w)});
-svg.addEventListener("click",e=>{if(view!=="groups")return;if(e.target.closest("[data-bench]")){popFor==="bench"?closePop():openPop("bench");return}const r=e.target.closest("rect[data-g]");if(r){const g=+r.dataset.g;popFor===g?closePop():openPop(g)}});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
-document.addEventListener("click",e=>{if(!pop.hidden&&!e.target.closest("#pop,.prow,#hallSvg"))closePop()});
+let det=null;
+function showDet(d){
+ det=d;
+ if(d.k==="mp"){if(view!=="mps"){view="mps";board.dataset.view="mps";$$("#salaSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v==="mps"))}
+  popFor=null;selG=null;focusMp=d.m;mpZoom=true;sdet.innerHTML=mpDet(d.m);
+  if(typeof arDays!=="undefined"&&!arDays&&typeof arLoad==="function")arLoad().then(()=>{if(det===d){sdet.innerHTML=mpDet(d.m);apply(sdet)}})}
+ else{if(view!=="groups"){view="groups";board.dataset.view="groups";$$("#salaSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v==="groups"))}
+  mpZoom=false;popFor=d.k==="bench"?"bench":d.i;selG=d.k==="bench"?null:d.i;sdet.innerHTML=d.k==="bench"?benchDet():groupDet(d.i)}
+ apply(sdet);sdet.hidden=false;sdet.scrollTop=0;board.classList.add("hasdet");sdet.classList.remove("in");void sdet.offsetWidth;sdet.classList.add("in");
+ renderSastav();drawMap()}
+function closeDet(all){
+ if(!det)return;const d=det;if(!all&&d.back){const b=d.back;showDet(b);return}
+ det=null;sdet.hidden=true;sdet.innerHTML="";board.classList.remove("hasdet");
+ if(d.k==="mp"){mpZoom=false;if(d.view&&d.view!==view)setView(d.view)}
+ popFor=null;selG=null;svg.style.transform="";renderSastav();drawMap()}
+const openMp=(m,from)=>showDet({k:"mp",m,back:from||null,view:from?"groups":view});
+const openPop=w=>showDet(w==="bench"?{k:"bench"}:{k:"g",i:w}),closePop=()=>closeDet(true);
+sdet.addEventListener("click",e=>{
+ if(e.target.closest(".dx")){closeDet();return}
+ if(e.target.closest("[data-mute]")&&det&&det.m){toggleMute(det.m);showDet(det);return}
+ const mp=e.target.closest("[data-mp]");if(mp){const from=det&&det.k!=="mp"?det:det&&det.back;openMp(mps[+mp.dataset.mp],from);return}
+ const ad=e.target.closest("[data-ard]");if(ad&&typeof arDays!=="undefined"){const d=arDays.find(x=>x.date===ad.dataset.ard);if(d){setTab("arhiva");arOpen(d)}}});
+$("#vGroups").addEventListener("click",e=>{const b=e.target.closest(".prow");if(!b)return;openPop(b.dataset.bench?"bench":+b.dataset.g)});
+svg.addEventListener("click",e=>{if(view!=="groups")return;if(e.target.closest("[data-bench]")){openPop("bench");return}
+ const r=e.target.closest("rect[data-m]");if(!r){if(det)closeDet(true);return}const m=mps[+r.dataset.m];
+ if(det&&det.k==="g"&&det.i===m.g)openMp(m,det);else openPop(m.g)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&det&&fmenu.hidden)closeDet()});
 renderSastav();
 
 /* lens lists: the row in the middle is the focused one */
@@ -180,16 +202,16 @@ fmenu.onclick=e=>{e.stopPropagation();const b=e.target.closest("[data-k]");if(!b
  drawFilters();renderMps($("#q").value);mpl.scrollTop=0;mpLens.run();drawMap()};
 document.addEventListener("pointerdown",e=>{if(!fmenu.hidden&&!e.target.closest("#fmenu,#fbtn"))openF(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!fmenu.hidden)openF(false)});
-const renderMps=q=>{const f=fold(q||"");const list=order.filter(m=>fOk(m)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));drawFilters();
+const alpha=[...mps].sort((a,b)=>a.name.localeCompare(b.name,"sr"));
+const renderMps=q=>{const f=fold(q||"");const list=alpha.filter(m=>fOk(m)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));drawFilters();
  mpl.innerHTML=list.length?list.map(m=>`<li data-i="${m.i}" style="--c:${SH[m.g]}"><button type="button">${phm(m,`<span class="ph" aria-hidden="true"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`)}<span><span class="nm">${m.name}</span><br><span class="g">${groups[m.g][1]}</span></span><span class="d">${m.t?dur(m.t):""}${m.w?`<span class="w">${m.w}</span>`:""}</span></button></li>`).join(""):`<li class="empty">Nema rezultata</li>`;apply(mpl);mpLens.run()};
-const mpLens=lens(mpl,i=>{focusMp=mps[i];if(view==="mps")drawMap()});
+const mpLens=lens(mpl,i=>{if(det)return;focusMp=mps[i];if(view==="mps")drawMap()});
 $("#q").addEventListener("input",e=>{renderMps(e.target.value);mpl.scrollTop=0});
-mpl.addEventListener("click",e=>{const li=e.target.closest("li[data-i]");if(!li)return;const m=mps[li.dataset.i];
- if(m===focusMp&&li.classList.contains("on"))mpZoom=!mpZoom;else mpZoom=true;drawMap()});
+mpl.addEventListener("click",e=>{const li=e.target.closest("li[data-i]");if(!li)return;openMp(mps[li.dataset.i])});
 svg.addEventListener("click",e=>{if(view!=="mps")return;const r=e.target.closest("rect[data-m]");
- if(!r){if(mpZoom){mpZoom=false;drawMap()}return}
+ if(!r){if(det)closeDet(true);else if(mpZoom){mpZoom=false;drawMap()}return}
  const m=mps[+r.dataset.m];if(!mpl.querySelector(`li[data-i="${m.i}"]`)){gFilter=null;sFilter="";aFilter=-1;$("#q").value="";renderMps("")}
- mpZoom=true;focusMp=m;const li=mpl.querySelector(`li[data-i="${m.i}"]`);if(li)mpl.scrollTo({top:li.offsetTop-mpl.clientHeight/2+li.offsetHeight/2,behavior:reduce?"auto":"smooth"});drawMap()});
+ const li=mpl.querySelector(`li[data-i="${m.i}"]`);if(li)mpl.scrollTop=li.offsetTop-mpl.clientHeight/2+li.offsetHeight/2;openMp(m)});
 renderMps("");
 /* seats saved in the admin reach open pages without a reload: /api/seats (saved seats only, cached 15 s) is checked a few seconds after
    load (the page itself can be up to 5 minutes old) and then every minute while the page is visible; every map redraws from seatLayout() */
