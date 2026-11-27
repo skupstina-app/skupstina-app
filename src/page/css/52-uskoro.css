@@ -1,8 +1,8 @@
-/* v1 phones: Arhiva and Rang tabs show a "Dolazi uskoro" screen (html/uskoro.html), pixel art in frames, plays once */
+/* v1 phones: Arhiva and Rang tabs show a "Dolazi uskoro" screen (html/uskoro.html), no heading, the building and the words in the middle; pixel art, plays once */
 .uskoro{display:none}
 @media(min-width:761px){.uskoro{display:none!important}}
 body:not(.v1) .uskoro{display:none!important}
-.soonbox{display:grid;place-items:center;align-content:center;gap:22px;min-height:max(300px,calc(100svh - 72px - 20px - 64px - 68px - var(--tbb,18px) - 24px));padding:40px 20px}
+.soonbox{display:grid;place-items:center;align-content:center;gap:22px;min-height:calc(100svh - 72px - 20px - 68px - var(--tbb,18px));padding:0 20px}
 .soonart{width:138px;height:126px;color:var(--ink)}
 .soonart .mu{fill:var(--mute2)}
 .soonart .tl{fill:var(--live)}
@@ -14,17 +14,3 @@ body:not(.v1) .uskoro{display:none!important}
 .soonart .fb{animation:sk-fb 1.6s steps(1) .3s both}
 @keyframes sk-fa{0%{visibility:visible}15%{visibility:hidden}30%{visibility:visible}45%{visibility:hidden}60%,100%{visibility:visible}}
 @keyframes sk-fb{0%{visibility:hidden}15%{visibility:visible}30%{visibility:hidden}45%{visibility:visible}60%,100%{visibility:hidden}}
-/* hammer: two light knocks drive the nail in, then the hammer rests up */
-.soonart .h1,.soonart .h2,.soonart .n0,.soonart .n1{visibility:hidden}
-.soonart .hu{animation:sk-hu 1.4s steps(1) .4s both}
-.soonart .h1{animation:sk-h1 1.4s steps(1) .4s both}
-.soonart .h2{animation:sk-h2 1.4s steps(1) .4s both}
-.soonart .n0{animation:sk-n0 1.4s steps(1) .4s both}
-.soonart .n1{animation:sk-n1 1.4s steps(1) .4s both}
-.soonart .n2{animation:sk-n2 1.4s steps(1) .4s both}
-@keyframes sk-hu{0%{visibility:visible}30%{visibility:hidden}42%{visibility:visible}62%{visibility:hidden}74%,100%{visibility:visible}}
-@keyframes sk-h1{0%{visibility:hidden}30%{visibility:visible}42%,100%{visibility:hidden}}
-@keyframes sk-h2{0%{visibility:hidden}62%{visibility:visible}74%,100%{visibility:hidden}}
-@keyframes sk-n0{0%{visibility:visible}30%,100%{visibility:hidden}}
-@keyframes sk-n1{0%{visibility:hidden}30%{visibility:visible}62%,100%{visibility:hidden}}
-@keyframes sk-n2{0%{visibility:hidden}62%,100%{visibility:visible}}
