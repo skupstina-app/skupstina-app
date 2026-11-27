@@ -43,6 +43,19 @@ setInterval(()=>{if(xv!=="stats")$("#podBtn").setAttribute("aria-label",dayAsk(t
 $("#podBtn").onclick=()=>xView(xv==="stats"?"":"stats");
 $("#phBtn").onclick=()=>{if(xv==="prof")xView("");else if(curSp)xView("prof",curSp)};
 
+/* circles that would overlap push each other apart, while a spring pulls each one back to its seat: they end up as close to
+   their seats as they can without covering each other. The smaller circle moves more. Runs once per render (few dozen circles). */
+function spread(ns,W=300,H=168){
+ const pad=.8,n=ns.length;if(n<2)return;
+ for(let it=0;it<200;it++){const k=it<160?.06*(1-it/160):0;
+  for(const a of ns){a.x+=(a.hx-a.x)*k;a.y+=(a.hy-a.y)*k}
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const a=ns[i],b=ns[j];let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);const min=a.r+b.r+pad;
+   if(d>=min)continue;if(d<1e-3){dx=Math.cos(i*2.4+j);dy=Math.sin(i*2.4+j);d=1}
+   const ov=min-d,wa=b.r*b.r/(a.r*a.r+b.r*b.r),ux=dx/d,uy=dy/d;
+   a.x-=ux*ov*wa;a.y-=uy*ov*wa;b.x+=ux*ov*(1-wa);b.y+=uy*ov*(1-wa)}
+  for(const a of ns){a.x=Math.min(W-a.r,Math.max(a.r,a.x));a.y=Math.min(H-a.r,Math.max(a.r,a.y))}
+ }
+}
 /* seat map: the hall as on the Sala tab, the same seats (seatLayout() in 30-hall.js): the presidium bench at the top, the 8 sections
    below it with a slight aisle between them; whoever spoke is coloured and bigger, the longer the bigger */
 function seatMap(by){
@@ -55,10 +68,13 @@ function seatMap(by){
  LY.plan.empty.forEach(k=>{const p=at.get(k);base+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="1.7" fill="none" stroke="var(--seat)" stroke-width=".8"/>`});
  const top=[];
  mps.forEach(m=>{const p=pos.get(m);if(!p)return;const o=by.get(m);
-  if(o&&o.t>0)top.push([o.t,`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(3+6.5*Math.sqrt(o.t/mx)).toFixed(1)}" fill="${SH[m.g]}" stroke="var(--bg)" stroke-width="1"><title>${esc(m.name)} · ${mss(o.t)}</title></circle>`]);
+  if(o&&o.t>0)top.push({m,t:o.t,hx:p.x,hy:p.y,x:p.x,y:p.y,r:3+6.5*Math.sqrt(o.t/mx)});
   else base+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.2" fill="var(--seat)"/>`});
+ spread(top);
+ /* a circle pushed off its seat keeps a thin line back to it */
+ const f=v=>v.toFixed(1),tie=top.filter(n=>Math.hypot(n.x-n.hx,n.y-n.hy)>n.r*.6).map(n=>`<line x1="${f(n.hx)}" y1="${f(n.hy)}" x2="${f(n.x)}" y2="${f(n.y)}" stroke="${SH[n.m.g]}" stroke-width=".8" opacity=".5"/><circle cx="${f(n.hx)}" cy="${f(n.hy)}" r="1.4" fill="${SH[n.m.g]}" opacity=".6"/>`).join("");
  /* bigger circles first, so a small one next to a big one stays visible on top */
- return `<svg class="smap" viewBox="0 0 300 168" role="img" aria-label="Sala: veći krug, duže govorio">${base}${top.sort((a,b)=>b[0]-a[0]).map(x=>x[1]).join("")}</svg>`;
+ return `<svg class="smap" viewBox="0 0 300 168" role="img" aria-label="Sala: veći krug, duže govorio">${base}${tie}${top.sort((a,b)=>b.t-a.t).map(n=>`<circle cx="${f(n.x)}" cy="${f(n.y)}" r="${f(n.r)}" fill="${SH[n.m.g]}" stroke="var(--bg)" stroke-width="1"><title>${esc(n.m.name)} · ${mss(n.t)}</title></circle>`).join("")}</svg>`;
 }
 /* which day the speaker timeline is about: "danas", "juče", the date, or "" when not known. The stats keep showing the last sitting until
    the next one starts, so they must say which day it was. tlAt is `sitting` from /api/live/speakers: the last moment the stream was
@@ -75,7 +91,7 @@ const dayWhen=w=>w||"na poslednjoj sednici";
 const dayAsk=w=>w==="danas"||w==="juče"?`Ko je ${w} najviše govorio`:`Ko je najviše govorio ${dayWhen(w)}`;
 function renderStats(by){
  const list=[...by.entries()].filter(([,o])=>o.t>0).sort((a,b)=>b[1].t-a[1].t);
- const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><i style="background:${SH[m.g]}"></i><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])} · ${o.n} ${o.n===1?"put":"puta"}</small></span><span class="tm nt">${mss(o.t)}</span></button></li>`).join("");
+ const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><span class="sph" style="--gc:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])} · ${o.n} ${o.n===1?"put":"puta"}</small></span><span class="tm nt">${mss(o.t)}</span></button></li>`).join("");
  const w=tlDay();
  $("#p-stats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${dayWhen(w)}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
  apply($("#p-stats"));
