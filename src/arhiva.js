@@ -24,7 +24,12 @@ const lat = (s) => [...String(s || "")].map((c) => {
 export function sessionName(title) {
   const t = lat(title);
   const m = /(\S+)\s+sednic[ae]/i.exec(t);
-  if (!m) return "Sednica";
+  if (!m) {
+    const z = /(\S+)\s+(vanredn|redovn)\S*\s+zasedanj/i.exec(t);
+    if (!z) return "Sednica";
+    const o = z[1].replace(/og$/i, "o");
+    return o[0].toUpperCase() + o.slice(1).toLowerCase() + " " + z[2].toLowerCase() + "o zasedanje";
+  }
   let ord = m[1].replace(/e$/, "a");
   ord = ord[0].toUpperCase() + ord.slice(1).toLowerCase();
   const z = /(\S+\s+(?:redovnog|vanrednog)\s+zasedanja)/i.exec(t);
@@ -93,22 +98,134 @@ export async function arhivaCron(env) {
 
 const J = (o, age) => new Response(JSON.stringify(o), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": `public, max-age=${age}` } });
 
+const bgClock = (ms) => new Date(ms).toLocaleTimeString("en-GB", { timeZone: "Europe/Belgrade", hour: "2-digit", minute: "2-digit", hour12: false }).replace(/^0(\d)/, "$1");
+
 export async function arhivaRoute(req, env, u, p) {
   await ensure(env);
+  await ensureDan(env);
   if (p === "/api/arhiva") {
-    const { results } = await env.DB.prepare("SELECT video,date,title,start_ms,len_s,dan,first_s,last_s,talk_s,n,speakers,mps,status FROM arhiva_dani WHERE date IS NOT NULL ORDER BY date DESC").all();
-    results.forEach((r) => {
-      r.ses = sessionName(r.title);
-      r.mps = String(r.mps || "").split(",").filter(Boolean).map(Number);
-      delete r.title;
-    });
-    return J({ days: results }, 60);
+    // imported days (ar_dan) first; a day only our reader has (arhiva_dani) shows until the import brings it
+    const full = (await env.DB.prepare("SELECT date,sid,ses,dan,total_s,first_clock,last_clock,n,speakers,op,gl,hay,lines FROM ar_dan").all()).results;
+    const got = new Set(full.map((r) => r.date));
+    const own = (await env.DB.prepare("SELECT video,date,title,start_ms,dan,first_s,last_s,n,speakers,mps FROM arhiva_dani WHERE date IS NOT NULL").all()).results
+      .filter((r) => !got.has(r.date)).map((r) => ({
+        date: r.date, video: r.video, ses: sessionName(r.title), dan: r.dan, total_s: r.last_s - r.first_s,
+        first_clock: r.start_ms ? bgClock(r.start_ms + r.first_s * 1000) : null, last_clock: r.start_ms ? bgClock(r.start_ms + r.last_s * 1000) : null,
+        n: r.n, speakers: r.speakers, op: null, gl: null, hay: "", mps: String(r.mps || "").split(",").filter(Boolean).map(Number), obrada: 1
+      }));
+    full.forEach((r) => { r.lines = JSON.parse(r.lines || "[]"); });
+    const days = [...full, ...own].sort((a, b) => (a.date < b.date ? 1 : -1));
+    return J({ days }, 60);
   }
   if (p === "/api/arhiva/day") {
-    const v = u.searchParams.get("v") || "";
-    if (!/^[\w-]{6,20}$/.test(v)) return J({ error: "video" }, 0);
-    const { results } = await env.DB.prepare("SELECT start_s a, end_s b, mp, talk_s t FROM speech_segments WHERE video=? ORDER BY start_s").bind(v).all();
-    return J({ video: v, segs: results.map((s) => [s.a, s.b ?? s.a, s.mp, Math.round(s.t ?? (s.b ?? s.a) - s.a)]) }, 60);
+    const d = u.searchParams.get("d") || "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      const row = await env.DB.prepare("SELECT doc FROM ar_dan WHERE date=?").bind(d).first();
+      if (row) return new Response(row.doc, { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=300" } });
+      const r = await env.DB.prepare("SELECT video,date,title,start_ms,len_s,dan FROM arhiva_dani WHERE date=?").bind(d).first();
+      if (!r) return J({ error: "day" }, 0);
+      const { results } = await env.DB.prepare("SELECT start_s a, end_s b, mp FROM speech_segments WHERE video=? ORDER BY start_s").bind(r.video).all();
+      const end = results.length ? results[results.length - 1].b || results[results.length - 1].a : 0;
+      return J({
+        date: r.date, ses: sessionName(r.title), dan: r.dan, total: r.len_s || end + 60, obrada: 1,
+        parts: [{ v: r.video, at: 0, dur: r.len_s || end + 60, s0: 0 }],
+        speeches: results.map((s) => [s.a, Math.round((s.b ?? s.a) - s.a), s.mp, "", r.start_ms ? bgClock(r.start_ms + s.a * 1000) : "", "", 0]),
+        ev: [], agenda: [], inter: [], src: "skupstina.app"
+      }, 60);
+    }
+    return J({ error: "day" }, 0);
   }
   return null;
+}
+
+// ---- import from skupstina.live (public JSON, made from the Assembly's own recordings and stenographic notes) ----
+// Every 10 min the cron reads https://skupstina.live/data/sessions.json; a day that is new or was updated there is read
+// whole (traka-<id>.json) and stored as one document in ar_dan (doc: what the archive shows; tekst: the transcript, one
+// line per speech, kept for search). Our own day rows (arhiva_dani, from the reader) stay as a fallback for days the
+// import doesn't have yet. Times in a doc are "day seconds": the day's parts played back to back, pauses cut out.
+const LIVE = "https://skupstina.live";
+const fold = (s) => lat(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/dj/g, "d");
+
+async function ensureDan(env) {
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS ar_dan(date TEXT PRIMARY KEY, sid TEXT, ses TEXT, dan INTEGER, total_s REAL, first_clock TEXT, last_clock TEXT, n INTEGER, speakers INTEGER, op INTEGER, gl INTEGER, hay TEXT, lines TEXT, doc TEXT, tekst TEXT, source TEXT, src_updated TEXT, updated_at INTEGER)").run();
+}
+
+// "izričem vam (drugu) opomenu" said by the chair. Whom: a name in the same sentence (one who spoke that day), or the
+// MP whose speech the chair interrupted (the same MP right before and right after). Anything less sure is left out.
+function opomene(sp, people) {
+  const out = [], names = Object.values(people).filter((p) => p.mp && p.role !== "Predsedavajući").map((p) => {
+    const last = fold(p.name).split(" ").pop();
+    return { p, stem: last.slice(0, Math.max(4, last.length - 1)) };
+  });
+  const isChair = (s) => (people[s.who] || {}).role === "Predsedavajući";
+  sp.forEach((s, i) => {
+    if (!isChair(s)) return;
+    const txt = (s.lines || []).map((l) => l.w.join(" ")).join(" ");
+    for (const sent of txt.split(/(?<=[.!?])\s+/)) {
+      const f = fold(sent);
+      if (!/izricem\b[^.!?]{0,30}opomen/.test(f) || /\bne izricem/.test(f)) continue;
+      let who = names.find((n) => f.split(/[^a-z]+/).some((w) => w.length >= 4 && w.startsWith(n.stem)));
+      if (!who) {
+        const prev = sp.slice(0, i).reverse().find((x) => !isChair(x)), next = sp.slice(i + 1).find((x) => !isChair(x));
+        if (prev && next && prev.who === next.who && people[prev.who] && people[prev.who].mp) who = { p: people[prev.who] };
+      }
+      if (who) out.push({ k: "opomena", at: s.at, mp: +who.p.mp, name: who.p.name, t: sent.trim().slice(0, 200), drugu: /drug/.test(f) ? 1 : 0 });
+      break;
+    }
+  });
+  return out;
+}
+
+export function buildDoc(t, sid, dan) {
+  const people = t.people || {}, sp = t.speeches || [];
+  const who = (s) => people[s.who] || { name: lat(s.who) };
+  const speeches = sp.map((s) => {
+    const p = who(s);
+    return [Math.round(s.at * 10) / 10, Math.round(s.dur), p.mp ? +p.mp : null, p.mp ? "" : p.name, s.clock || "", s.summary || "", p.role === "Predsedavajući" ? 1 : 0];
+  });
+  const votes = (t.votes || []).filter((v) => v.kind !== "kvorum").map((v) => ({
+    k: v.kind === "konstatacija" ? "konstatacija" : "glasanje", at: v.at, t: v.title || "", h: v.headline || "", o: v.outcome || "",
+    p: v.passed === false ? 0 : 1, r: v.result || null, opt: (v.options || []).map((o) => [o.label, o.n])
+  }));
+  const ev = [...votes, ...opomene(sp, people)].sort((a, b) => a.at - b.at);
+  const parts = (t.parts || []).map((p) => ({ v: p.v, at: p.at, dur: p.dur, s0: p.from || 0 }));
+  const agenda = (t.agenda || []).map((a) => [a.n, a.at, a.title]);
+  const inter = (t.inter || []).map((x) => [x.at, x.who, x.text]);
+  const mps = new Set(speeches.filter((s) => s[2]).map((s) => s[2]));
+  const ses = sessionName(t.title) === "Sednica" ? t.title.replace(/\s*·.*$/, "") : sessionName(t.title);
+  const doc = { date: t.date, sid, ses: /konstitutivn/i.test(t.title) ? "Prva (konstitutivna) sednica" : ses, dan, total: t.total, parts, speeches, ev, agenda, inter, src: "skupstina.live" };
+  const last = sp[sp.length - 1];
+  const gl = votes.filter((v) => v.k === "glasanje").length, op = ev.filter((e) => e.k === "opomena").length;
+  const names = [...mps].map((id) => { const p = Object.values(people).find((x) => +x.mp === id); return p ? p.name : ""; });
+  const hay = fold([doc.ses, ...agenda.map((a) => a[2]), ...votes.map((v) => [v.t, v.h, v.o].join(" ")), ...names].join(" | "));
+  const lines = [...agenda.map((a) => a[2]), ...votes.map((v) => v.h || v.o || v.t)].filter(Boolean);
+  const tekst = sp.map((s) => (s.lines || []).map((l) => l.w.join(" ")).join(" ")).join("\n");
+  let end = null;
+  if (last && /^\d{1,2}:\d{2}$/.test(last.clock)) {
+    const [h, m] = last.clock.split(":").map(Number), x = h * 60 + m + Math.round(last.dur / 60);
+    end = Math.floor(x / 60) % 24 + ":" + String(x % 60).padStart(2, "0");
+  }
+  return { doc, row: { first_clock: sp[0] ? sp[0].clock : null, last_clock: end, n: sp.length, speakers: mps.size, op, gl, hay, lines: JSON.stringify(lines), tekst } };
+}
+
+export async function arhivaImport(env) {
+  await ensureDan(env);
+  const r = await fetch(LIVE + "/data/sessions.json", { headers: { "user-agent": "skupstina.app arhiva (+https://skupstina.app)" } });
+  if (!r.ok) throw new Error("sessions.json " + r.status);
+  const list = await r.json();
+  const have = new Map((await env.DB.prepare("SELECT date, src_updated FROM ar_dan").all()).results.map((x) => [x.date, x.src_updated]));
+  let done = 0;
+  for (const s of list) {
+    if (s.status !== "ready" || have.get(s.date) === s.updated) continue;
+    if (done >= 2) break; // a few days per run keeps the cron short; the rest come on the next runs
+    const tr = await fetch(LIVE + "/data/traka-" + s.id + ".json", { headers: { "user-agent": "skupstina.app arhiva (+https://skupstina.app)" } });
+    if (!tr.ok) throw new Error(s.id + " " + tr.status);
+    const t = await tr.json();
+    const dm = /-d(\d+)$/.exec(s.id);
+    const { doc, row } = buildDoc(t, s.id, dm ? +dm[1] : null);
+    await env.DB.prepare("INSERT OR REPLACE INTO ar_dan(date,sid,ses,dan,total_s,first_clock,last_clock,n,speakers,op,gl,hay,lines,doc,tekst,source,src_updated,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(s.date, s.id, doc.ses, doc.dan, doc.total, row.first_clock, row.last_clock, row.n, row.speakers, row.op, row.gl, row.hay, row.lines, JSON.stringify(doc), row.tekst, "skupstina.live", s.updated, Date.now()).run();
+    done++;
+  }
+  return done;
 }

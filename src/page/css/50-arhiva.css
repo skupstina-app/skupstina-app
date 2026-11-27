@@ -119,3 +119,33 @@
 .ar-tok .d{font-size:14px;color:var(--mute)}
 .ar-tok .gap{display:flex;align-items:center;gap:10px;padding:10px max(16px,4vw);font-size:13px;color:var(--mute)}
 .ar-tok .gap::after{content:"";flex:1;border-top:1px dashed var(--mute2)}
+/* day: summary, agenda, warnings, votes */
+.ar-ki{display:flex;align-items:center;gap:7px}
+.ar-ki .mi{width:18px;height:18px}
+.ar-ukr{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;font-size:16px;line-height:1.5}
+.ar-ukr li{display:flex;gap:10px}
+.ar-ukr li::before{content:"";width:6px;height:6px;margin-top:9px;flex:none;background:var(--ink)}
+.ar-rows{list-style:none;margin:0;padding:0}
+.ar-rows li{display:flex;align-items:center;gap:10px;min-height:54px;padding:8px 0;border-top:1px solid var(--line)}
+.ar-rows li:first-child{border-top:0}
+.ar-rows>li>.mi{width:20px;height:20px}
+.ar-an{width:22px;flex:none;color:var(--mute2)}
+.ar-rt{flex:1;min-width:0;display:flex;flex-direction:column;font-size:16px}
+.ar-rt b{font-weight:500}
+.ar-rt small{font-size:13px;color:var(--mute)}
+.ar-tm{font-size:15px;color:var(--mute)}
+.ar-pl{width:32px;height:32px;flex:none;border:0;border-radius:6px;display:grid;place-items:center;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset}
+.ar-pl .mi{width:12px;height:12px}
+.ar-pass{flex:none;font-size:12px;padding:4px 7px;border-radius:4px;background:var(--ink);color:var(--bg)}
+.ar-pass.no{background:var(--chip);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}
+.ar-src{font-size:13px;line-height:1.5;color:var(--mute)}
+/* recording: markers above the strip, part joins, the current speech's summary */
+.ar-mk{position:relative;height:20px}
+.ar-mk button{position:absolute;top:0;transform:translateX(-50%);width:22px;height:20px;padding:0;border:0;background:none;display:grid;place-items:center}
+.ar-mk .mi{width:15px;height:15px}
+.ar-head{top:30px}
+.ar-bar u{position:absolute;top:0;bottom:0;width:1px;background:var(--bg)}
+.ar-tok .sum{display:none;margin-top:4px;font-size:14px;line-height:1.45;color:var(--ink);-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ar-tok button.on .sum{display:-webkit-box}
+.ar-tok button.ev>.mi{width:18px;height:18px;margin:0 1px}
+.ar-tok .ar-pass{margin-left:auto}

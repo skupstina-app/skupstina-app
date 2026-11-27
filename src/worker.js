@@ -7,7 +7,7 @@ import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
 import { adminRoute, userAdmin } from "./admin.js";
 import { authRoute, currentUser } from "./auth.js";
-import { arhivaRoute, arhivaCron } from "./arhiva.js";
+import { arhivaRoute, arhivaCron, arhivaImport } from "./arhiva.js";
 import { badgeLevel } from "./badges.mjs";
 import { AVATAR_FILES } from "./generated/avatars.js";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
@@ -566,6 +566,12 @@ var worker_default = {
       await arhivaCron(env);
     } catch (e) {
       await log(env, "arhiva", "cron failed: " + e.message);
+    }
+    try {
+      const n = await arhivaImport(env);
+      if (n) await log(env, "arhiva", "imported " + n + " day(s) from skupstina.live");
+    } catch (e) {
+      await log(env, "arhiva", "import failed: " + e.message);
     }
     const q = await getState(env, "mps_queue");
     const last = await getState(env, "mps_list_at");

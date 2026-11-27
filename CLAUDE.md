@@ -124,16 +124,32 @@ Map of this repo. Read this first, then open only the file you need.
 
 ## Arhiva
 
-- Data: `src/arhiva.js`. The cron (every 10 min, first thing in `scheduled`) turns the reader's D1 `speech_segments`
-  (one YouTube stream = one sitting day) into `arhiva_dani`: title and `start_ms` (stream second 0 on the clock, from
-  `startTimestamp` on the stream's YouTube page; oEmbed for the title if the page can't be read, retried hourly until the
-  start is known), date from the title, first/last speech, speakers. `dan` (N. dan) and `status` ('snimak' = u obradi)
-  wait for the stenographic notes. Routes: `GET /api/arhiva`, `GET /api/arhiva/day?v=<video>` (60 s cache).
+- One sitting day = one document in D1 `ar_dan` (`doc` JSON, `tekst` = transcript for later search). `src/arhiva.js`:
+  - **Import** (`arhivaImport`, cron every 10 min): https://skupstina.live/data/sessions.json lists their days; a day that is
+    new or updated there (`src_updated`) is read whole (`traka-<id>.json`) and turned into our document by `buildDoc`:
+    `parts` [{v, at, dur, s0}] (YouTube videos, or stretches of one stream, back to back with the pauses cut out),
+    `speeches` [at, dur, mp|null, name if not an MP, clock, summary, chair], `ev` (glasanje and konstatacija from their
+    votes, kvorum left out; opomena found by us in the chair's words, see `opomene()`), `agenda`, `inter`. All `at` are
+    day seconds. At most 2 days per run. Days of the 15th convocation (17, 18, 19, 24, 25 Nov 2026) come from here.
+  - **Opomene** are only kept when sure: the chair says "izričem (vam) (drugu) opomenu", and the MP is named in that
+    sentence (surname stem) or the chair cut into one MP's speech (same MP right before and after). Others are left out.
+  - **Our own days** (`arhivaCron`): the reader's `speech_segments` (one stream = one day) → `arhiva_dani` (title,
+    `start_ms`, `len_s` from the stream's YouTube page, which YouTube often refuses to Cloudflare, then null). Such a day
+    shows (`obrada: 1`, "u obradi") only until the import has the same date.
+  - Routes: `GET /api/arhiva` (list, with `hay` and `lines` for search), `GET /api/arhiva/day?d=<date>` (the document).
 - Page (`65-arhiva.js`): `#arhiva[data-v=list|day|play]`, the phone's back button walks back (history state `{ar}`).
-  The recording is the whole stream in our own YouTube player (`arP`, the live `yt` is paused), so the reader's times
-  fit as they are; silences over 20 min shrink to 2 % of the strip. Day stats reuse `seatMap()` and `.xlist` from the
-  live stats panel. Search uses `sfold` and drops the last letter of long words.
+  The recording plays the day's parts back to back in our own YouTube player (`arP`; the live `yt` is paused): at a
+  part's end the next part loads, or inside one stream we jump over the pause. Clock times come from the speeches'
+  clocks. Day page: Ukratko (headlines of passed votes and konstatacije, not "Povreda Poslovnika"), dnevni red, the
+  live stats' `seatMap()` + `.xlist`, opomene, glasanja; every row opens the recording at that moment. The list hides
+  chair turns under 45 s. Filters: Sve / Opomene / Glasanja / one MP. Search uses `sfold` and drops the last letter of
+  long words; the line that matched shows under the day.
 - Who sees it: `body.arh` (admins while V1, via a wrapper around `admSet`); everyone else keeps "Dolazi uskoro".
+- Next (not built yet): our own pipeline so we don't depend on the import — YouTube Data API (`YT_API_KEY`) to list the
+  channel's videos, a title rule to tell plenary sittings from committees and press conferences (Latin look-alike
+  letters folded, "Prva sednica" / "nastavak Prve sednice" as one sitting, parts "(I)…(VI)"), the reader run over the
+  parts, the stenographic notes from parlament.gov.rs for opomene and glasanja. The channel deletes a day's live stream
+  some days after it uploads the parts, so a day must end up on the parts.
 
 ## Search
 
