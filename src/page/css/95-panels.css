@@ -26,7 +26,7 @@ body[data-xv=stats] .side>:not(#p-stats),body[data-xv=prof] .side>:not(#p-prof){
 .xlist{list-style:none;margin:0;padding:0}
 .xlist button{width:100%;display:flex;align-items:center;gap:10px;padding:10px 0;border:0;border-top:1px solid var(--line);background:none;text-align:left;min-height:52px}
 .xlist .rk{width:18px;flex:none;color:var(--mute);font-size:14px}
-.xlist i{width:8px;height:8px;border-radius:4px;flex:none}
+.xlist .sph{width:34px;height:34px;border-radius:50%;flex:none;background:var(--seat) center 20%/cover;box-shadow:0 0 0 2px color-mix(in srgb,var(--gc) 70%,transparent)}
 .xlist .nm{flex:1;min-width:0;display:flex;flex-direction:column}
 .xlist .nm b{font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .xlist .nm small{font-size:13px;color:var(--mute)}
