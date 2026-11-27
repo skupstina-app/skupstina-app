@@ -4,7 +4,7 @@
 const box=$("#msgs"),pane=$("#p-chat"),cin=$("#cin"),cst=$("#cst"),dlg=$("#authDlg"),aErr=$("#aErr");
 let ws=null,me=null,blocks=[],blocked=new Set(),backoff=1000,last="",ids=new Set(),ping=0,ticket=null,pendPw=null,color=0,clientId=null,gsiReady=false;
 const ERR={login:"Prijavi se da pišeš.",name_len:"Ime mora imati od 2 do 20 znakova.",name_chars:"Ime može imati slova, brojeve, razmak, tačku i crtice.",name_bad:"To ime nije dozvoljeno.",name_taken:"To ime je zauzeto. Izaberi drugo.",name_wait:"Ime možeš da menjaš jednom u 30 dana.",banned:"Privremeno ne možeš da pišeš.",long:"Poruka je duža od 300 znakova.",fast:"Polako, sačekaj par sekundi.",dup:"Ista poruka je već poslata.",bad:"Poruka ima uvredljive reči i nije poslata.",link:"Linkovi i imejlovi nisu dozvoljeni.",phone:"Brojevi telefona nisu dozvoljeni.",off:"Veza je prekinuta, povezujem ponovo…",wait:"Povezujem…",saved:"Sačuvano.",
- email:"Proveri email adresu.",password:"Lozinka mora imati bar 8 znakova.",wrong:"Pogrešan email ili lozinka.",use_google:"Ovaj nalog koristi prijavu preko Google-a.",email_taken:"Nalog sa tim emailom već postoji. Prijavi se.",slow:"Previše pokušaja. Probaj ponovo kasnije.",ticket:"Isteklo je vreme. Prijavi se ponovo.",google:"Google prijava nije uspela.",popup:"Pregledač je blokirao Google prozor. Dozvoli iskačuće prozore za skupstina.app i probaj ponovo.",net:"Nema veze. Pokušaj ponovo."};
+ email:"Proveri email adresu.",password:"Lozinka mora imati bar 8 znakova.",wrong:"Pogrešan email ili lozinka.",use_google:"Ovaj nalog koristi prijavu preko Google-a.",email_taken:"Nalog sa tim emailom već postoji. Prijavi se.",slow:"Previše pokušaja. Probaj ponovo kasnije.",ticket:"Isteklo je vreme. Prijavi se ponovo.",google:"Google prijava nije uspela.",net:"Nema veze. Pokušaj ponovo."};
 const say=(el,k)=>{el.textContent=k?(ERR[k]||k):"";apply(el)};
 const ucol=n=>{let h=5381;for(const c of n.toLocaleLowerCase("sr"))h=(h*33+c.codePointAt(0))>>>0;return h%8};
 const dmy=t=>{const d=new Date(t);return d.getDate()+". "+(d.getMonth()+1)+". "+d.getFullYear()+"."};
@@ -82,12 +82,26 @@ let gWant=false;
 function loadGsi(){if(gsiReady||!clientId)return;gsiReady=true;const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;
  s.onerror=()=>{gsiReady=false;s.remove();if(gWant){gWant=false;say(aErr,"net")}};
  s.onload=()=>{if(gWant){gWant=false;say(aErr,"")}gClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:"openid email profile",
-  error_callback:e=>{const t=e&&e.type;if(t==="popup_closed")return;say(aErr,t==="popup_failed_to_open"?"popup":"google")},
+  error_callback:e=>{const t=e&&e.type;if(t==="popup_closed")return;if(t==="popup_failed_to_open"){gRedirect();return}say(aErr,"google")},
   callback:async r=>{
    if(!r||!r.access_token){say(aErr,"google");return}const j=await post("/api/auth/google",{access_token:r.access_token});
    if(!j.ok){say(aErr,j.err||"google");return}if(j.user){signedIn(j.user);return}ticket=j.ticket;pendPw=null;openProfile(j.suggest||"")}})};
  document.head.appendChild(s)}
 $("#aGoogle").onclick=()=>{say(aErr,"");if(gClient){gClient.requestAccessToken({prompt:"select_account"});return}if(!clientId){say(aErr,"google");return}gWant=true;loadGsi();say(aErr,"wait")};
+/* no popup (blocked, in-app browser, home-screen app): the same sign-in as a full-page trip to Google and back.
+   Google returns the token in the hash (#access_token=…&state=…); it is taken off the address at once */
+function gRedirect(){const st=Math.random().toString(36).slice(2)+Date.now().toString(36);
+ try{sessionStorage.setItem("gst",st)}catch(e){}
+ location.href="https://accounts.google.com/o/oauth2/v2/auth?"+new URLSearchParams({client_id:clientId,redirect_uri:location.origin+"/",response_type:"token",scope:"openid email profile",prompt:"select_account",state:st})}
+{const h=new URLSearchParams(location.hash.slice(1));
+ if(h.has("access_token")||h.get("error")){let st=null;try{st=sessionStorage.getItem("gst");sessionStorage.removeItem("gst")}catch(e){}
+  history.replaceState(null,"",location.pathname+location.search);
+  const tok=h.get("access_token"),ok=tok&&st&&h.get("state")===st;
+  if(h.get("error")!=="access_denied")(async()=>{await null;
+   const j=ok?await post("/api/auth/google",{access_token:tok}):{ok:false,err:"google"};
+   if(j.ok&&j.user){signedIn(j.user);return}
+   if(j.ok){ticket=j.ticket;pendPw=null;openProfile(j.suggest||"");return}
+   setMode("in");step("start");show();say(aErr,j.err||"google")})()}}
 function setColor(c){color=c;$("#aPrev").className="nt u"+c}
 function openProfile(suggest){const edit=!!me&&!ticket&&!pendPw;
  $("#aName").value=edit?me.name:(suggest||"");
