@@ -305,12 +305,15 @@ export async function beleskeCron(env, force = false) {
     if (heads.every((h) => h && h.ok) && heads.map(sigOf).join("|") === d.sig) continue;
     if (done.length >= 3) { await env.DB.prepare("UPDATE ar_beleske SET checked_at=0").run(); break; } // the rest on the next run
     let paras = [], sigs = [];
-    for (const u of urls) {
-      const r = await fetch(u, { headers: UA });
-      if (!r.ok) throw new Error("docx " + r.status);
-      sigs.push(sigOf(r));
-      paras = paras.concat(await docxParas(await r.arrayBuffer()));
-    }
+    // one broken file must not stop the other days: note it and go on (tried again on the next run)
+    try {
+      for (const u of urls) {
+        const r = await fetch(u, { headers: UA });
+        if (!r.ok) throw new Error("docx " + r.status);
+        sigs.push(sigOf(r));
+        paras = paras.concat(await docxParas(await r.arrayBuffer()));
+      }
+    } catch (e) { done.push(date + " failed: " + e.message); continue; }
     const sig = sigs.join("|");
     if (sig === d.sig) continue;
     if (!mpList) mpList = (await env.DB.prepare("SELECT id, name_lat name FROM mps").all()).results;

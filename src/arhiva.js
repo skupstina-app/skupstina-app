@@ -1,4 +1,4 @@
-import { currentUser } from "./auth.js";
+import { currentUser, trusted } from "./auth.js";
 import { userAdmin } from "./admin.js";
 import { applySten, stFor } from "./beleske.js";
 // Arhiva: one row per sitting day (one YouTube stream of @ParlamentSrbija), made from the speech timeline the reader keeps
@@ -164,7 +164,8 @@ async function potvrde(req, env, u) {
     d = b.d;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(b.d || "") || !Number.isFinite(+b.at)) return J({ error: "bad" }, 0);
     const adm = (await userAdmin(env, user).catch(() => null)) ? 1 : 0;
-    await env.DB.prepare("INSERT OR REPLACE INTO ar_potvrda(date,at,uid,da,mp,adm,ts) VALUES(?,?,?,?,?,?,?)").bind(b.d, +b.at, user.id, b.da ? 1 : 0, b.mp ? +b.mp : null, adm, Date.now()).run();
+    // only admins and trusted accounts (auth.js trusted()) are counted, so a few fresh accounts can't settle an opomena
+    if (adm || trusted(user)) await env.DB.prepare("INSERT OR REPLACE INTO ar_potvrda(date,at,uid,da,mp,adm,ts) VALUES(?,?,?,?,?,?,?)").bind(b.d, +b.at, user.id, b.da ? 1 : 0, b.mp ? +b.mp : null, adm, Date.now()).run();
   }
   const { results } = await env.DB.prepare("SELECT at, uid, da, mp, adm FROM ar_potvrda WHERE date=?").bind(d || "").all();
   const by = new Map();
@@ -287,9 +288,12 @@ export async function arhivaImport(env) {
   const list = await r.json();
   const have = new Map((await env.DB.prepare("SELECT date, src_updated FROM ar_dan").all()).results.map((x) => [x.date, x.src_updated]));
   let done = 0, allMps = null;
+  const errs = [];
   for (const s of list) {
     if (s.status !== "ready" || have.get(s.date) === s.updated + PARSER) continue;
     if (done >= 3) break; // a few days per run keeps the cron short; the rest come on the next runs
+    // one broken day must not stop the days after it: note it and go on (it is tried again next run)
+    try {
     const tr = await fetch(LIVE + "/data/traka-" + s.id + ".json", { headers: { "user-agent": "skupstina.app arhiva (+https://skupstina.app)" } });
     if (!tr.ok) throw new Error(s.id + " " + tr.status);
     const t = await tr.json();
@@ -303,6 +307,8 @@ export async function arhivaImport(env) {
     await env.DB.prepare("INSERT OR REPLACE INTO ar_dan(date,sid,ses,dan,total_s,first_clock,last_clock,n,speakers,op,gl,hay,lines,doc,tekst,source,src_updated,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
       .bind(s.date, s.id, doc.ses, doc.dan, doc.total, row.first_clock, row.last_clock, row.n, row.speakers, row.op, row.gl, row.hay, row.lines, JSON.stringify(doc), row.tekst, "skupstina.live", s.updated + PARSER, Date.now()).run();
     done++;
+    } catch (e) { errs.push(s.id + ": " + e.message); }
   }
+  if (errs.length) throw new Error(errs.join(" | ") + " (imported " + done + ")");
   return done;
 }

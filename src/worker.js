@@ -6,7 +6,7 @@ import PAGE from "./generated/index.html";
 import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
 import { adminRoute, userAdmin } from "./admin.js";
-import { authRoute, currentUser } from "./auth.js";
+import { authRoute, currentUser, trusted } from "./auth.js";
 import { arhivaRoute, arhivaCron, arhivaImport } from "./arhiva.js";
 import { kanalCron, kanalRoute } from "./kanal.js";
 import { beleskeCron } from "./beleske.js";
@@ -280,7 +280,8 @@ function badWords(text) {
   return false;
 }
 __name(badWords, "badWords");
-var LINK_RE = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|rs|me|io|ly|gg|tv|info|xyz|ru|eu|ba|hr|co|app|live|link|to)\b|\S+@\S+\.\S+|t\.me\/)/i;
+// .to .me .co are also everyday words after a missed space ("Tačno.To je…"), so those three only count with a path after them
+var LINK_RE = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|rs|io|ly|gg|tv|info|xyz|ru|eu|ba|hr|app|live|link)\b|\b[a-z0-9-]+\.(me|co|to)\/|\S+@\S+\.\S+|t\.me\/)/i;
 var PHONE_RE = /(\+\s*3\s*8\s*1|\b0)\s*6\d[\s\-\/.]*\d{3}[\s\-\/.]*\d{3,4}|\d{9,}/;
 function checkText(x) {
   if (badWords(x)) return "bad";
@@ -434,13 +435,17 @@ var ChatRoom = class {
       if (!a.uid) return this.send(ws, { t: "err", code: "login" });
       const id = +m.id, msg = this.q("SELECT uid,hidden FROM msgs WHERE id=?", id)[0];
       if (!msg || msg.hidden || msg.uid === a.uid) return;
+      // only trusted accounts' reports count (auth.js trusted()); the page shows "Prijavljeno" either way
+      const rep = await this.user(a.uid);
+      if (!trusted(rep) || untilMs(rep.banned_until) > Date.now()) return;
       this.sql.exec("INSERT OR IGNORE INTO reports(mid,rid,at) VALUES(?,?,?)", id, a.uid, Date.now());
       const n = this.q("SELECT COUNT(*) n FROM reports WHERE mid=?", id)[0].n;
       if (n >= REPORTS_TO_HIDE) {
         this.sql.exec("UPDATE msgs SET hidden=1 WHERE id=?", id);
         this.all({ t: "del", ids: [id] });
         const lost = this.q("SELECT COUNT(*) n FROM msgs WHERE uid=? AND hidden=1 AND at>?", msg.uid, Date.now() - 36e5)[0].n;
-        if (lost >= 3 && msg.uid) await this.banUser(msg.uid, 864e5);
+        // never an automatic ban for an admin (moderators, the owner): only a person bans them
+        if (lost >= 3 && msg.uid && !await userAdmin(this.env, await this.user(msg.uid)).catch(() => null)) await this.banUser(msg.uid, 864e5);
       }
       this.sql.exec("DELETE FROM reports WHERE at<?", Date.now() - 7 * 864e5);
       return;

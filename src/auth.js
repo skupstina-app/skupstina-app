@@ -69,6 +69,11 @@ function belgradeDay(t) {
   catch (e) { return new Date(t).toISOString().slice(0, 10); }
 }
 
+/** An account whose word counts in reports and crowd answers: signed in with Google (the email is proved), or one that
+ *  has watched at least an hour. Email + password accounts cost nothing, so a few fresh ones must not be able to hide
+ *  messages, ban someone or settle an opomena. */
+export const trusted = (u) => !!u && ((!!u.sub && !u.pw) || (u.watch_s || 0) >= 3600);
+
 /** The signed-in user (row from users), or null. */
 export async function currentUser(req, env) {
   if (!env.SALT) return null;
@@ -155,7 +160,9 @@ export async function authRoute(req, env, u, p, checkName) {
     let user = await env.DB.prepare("SELECT * FROM users WHERE sub=?").bind(g.sub).first();
     if (!user) {
       user = await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(g.email).first();
-      if (user) await env.DB.prepare("UPDATE users SET sub=? WHERE id=?").bind(g.sub, user.id).run(); // link a password account
+      // link a password account: Google just proved the email, the password never did (anyone could have signed up
+      // with this address first), so it goes and only Google signs in from now on
+      if (user) user = await env.DB.prepare("UPDATE users SET sub=?, pw=NULL WHERE id=? RETURNING *").bind(g.sub, user.id).first();
     }
     if (user) {
       await env.DB.prepare("UPDATE users SET seen_at=? WHERE id=?").bind(now(), user.id).run();
