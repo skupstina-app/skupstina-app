@@ -189,7 +189,7 @@ async function potvrde(req, env, u) {
 // line per speech, kept for search). Our own day rows (arhiva_dani, from the reader) stay as a fallback for days the
 // import doesn't have yet. Times in a doc are "day seconds": the day's parts played back to back, pauses cut out.
 const LIVE = "https://skupstina.live";
-const PARSER = "#v3"; // bump when buildDoc changes: every day is read again
+const PARSER = "#v4"; // bump when buildDoc changes: every day is read again
 const fold = (s) => lat(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/dj/g, "d");
 
 async function ensureDan(env) {
@@ -203,13 +203,18 @@ async function ensureDan(env) {
 // to cand (people who spoke around it as the choices), for visitors to confirm. "izrekao sam opomenu X … povlačim"
 // takes X's opomena of that day back.
 const OP_NOW = /\b(izricem|izreknem|izreci cu|izrecicu)\b[^.!?]{0,40}\bopomen|\bopomen\w*[^.!?]{0,6}\bizricem\b/;
-export function opomene(sp, people) {
+export function opomene(sp, people, allMps = []) {
   const out = [], cand = [], names = Object.values(people).filter((p) => p.mp && p.role !== "Predsedavajući").map((p) => {
     const last = fold(p.name).split(" ").pop();
     return { p, stem: last.slice(0, Math.max(4, last.length - 1)) };
   });
   const isChair = (s) => (people[s.who] || {}).role === "Predsedavajući";
   const named = (txt) => { const ws = fold(txt).split(/[^a-z]+/); return names.find((n) => ws.some((w) => w.length >= 4 && w.startsWith(n.stem))); };
+  // an MP who didn't speak that day can still get one ("Vama izričem opomenu. Gospodine Mirkoviću, …"): any MP, but only
+  // when a form of address stands right before the name
+  const others = allMps.map((m) => { const last = fold(m.name).split(" ").pop(); return { p: { mp: m.id, name: m.name }, stem: last.slice(0, Math.max(4, last.length - 1)) }; });
+  const addressed = (txt) => { const m = /\b(gospodine|gospodjo|gospodo|poslanice|kolega|kolegice|koleginice)\s+([a-z]+)/g; let x; const f = fold(txt);
+    while ((x = m.exec(f))) { const w = x[2]; const hit = others.filter((n) => w.length >= 4 && w.startsWith(n.stem)); if (hit.length === 1) return hit[0]; } return null; };
   sp.forEach((s, i) => {
     if (!isChair(s)) return;
     const sents = (s.lines || []).map((l) => l.w.join(" ")).join(" ").split(/(?<=[.!?…])\s+/);
@@ -221,7 +226,7 @@ export function opomene(sp, people) {
         return;
       }
       if (!OP_NOW.test(f) || /\b(ne|nisam|necu|nije|nisu)\b[^.!?]{0,25}\b(izricem|izreknem|izreci)/.test(f)) return;
-      let who = named(sent) || named(sents.slice(k + 1, k + 3).join(" "));
+      let who = named(sent) || named(sents.slice(k + 1, k + 3).join(" ")) || addressed(sents.slice(k, k + 3).join(" "));
       if (!who) {
         const prev = sp.slice(0, i).reverse().find((x) => !isChair(x)), next = sp.slice(i + 1).find((x) => !isChair(x));
         if (prev && next && prev.who === next.who && people[prev.who] && people[prev.who].mp) who = { p: people[prev.who] };
@@ -237,7 +242,7 @@ export function opomene(sp, people) {
   return { out, cand };
 }
 
-export function buildDoc(t, sid, dan) {
+export function buildDoc(t, sid, dan, allMps = []) {
   const people = t.people || {}, sp = t.speeches || [];
   const who = (s) => people[s.who] || { name: lat(s.who) };
   const speeches = sp.map((s) => {
@@ -248,7 +253,7 @@ export function buildDoc(t, sid, dan) {
     k: v.kind === "konstatacija" ? "konstatacija" : "glasanje", at: v.at, t: v.title || "", h: v.headline || "", o: v.outcome || "",
     p: v.passed === false ? 0 : 1, r: v.result || null, opt: (v.options || []).map((o) => [o.label, o.n])
   }));
-  const op = opomene(sp, people);
+  const op = opomene(sp, people, allMps);
   const ev = [...votes, ...op.out].sort((a, b) => a.at - b.at);
   const parts = (t.parts || []).map((p) => ({ v: p.v, at: p.at, dur: p.dur, s0: p.from || 0 }));
   const agenda = (t.agenda || []).map((a) => [a.n, a.at, a.title]);
@@ -280,7 +285,7 @@ export async function arhivaImport(env) {
   if (!r.ok) throw new Error("sessions.json " + r.status);
   const list = await r.json();
   const have = new Map((await env.DB.prepare("SELECT date, src_updated FROM ar_dan").all()).results.map((x) => [x.date, x.src_updated]));
-  let done = 0;
+  let done = 0, allMps = null;
   for (const s of list) {
     if (s.status !== "ready" || have.get(s.date) === s.updated + PARSER) continue;
     if (done >= 3) break; // a few days per run keeps the cron short; the rest come on the next runs
@@ -288,7 +293,8 @@ export async function arhivaImport(env) {
     if (!tr.ok) throw new Error(s.id + " " + tr.status);
     const t = await tr.json();
     const dm = /-d(\d+)$/.exec(s.id);
-    const { doc, row } = buildDoc(t, s.id, dm ? +dm[1] : null);
+    if (!allMps) allMps = (await env.DB.prepare("SELECT id, name_lat name FROM mps WHERE active=1").all()).results;
+    const { doc, row } = buildDoc(t, s.id, dm ? +dm[1] : null, allMps);
     await env.DB.prepare("INSERT OR REPLACE INTO ar_dan(date,sid,ses,dan,total_s,first_clock,last_clock,n,speakers,op,gl,hay,lines,doc,tekst,source,src_updated,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
       .bind(s.date, s.id, doc.ses, doc.dan, doc.total, row.first_clock, row.last_clock, row.n, row.speakers, row.op, row.gl, row.hay, row.lines, JSON.stringify(doc), row.tekst, "skupstina.live", s.updated + PARSER, Date.now()).run();
     done++;
