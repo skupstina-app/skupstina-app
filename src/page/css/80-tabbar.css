@@ -13,7 +13,7 @@
 .ic{width:26px;height:26px}
 @media(max-width:760px){
 :root{--tbb:max(18px,calc(env(safe-area-inset-bottom,0px) + 4px))}
-body{padding-bottom:calc(56px + var(--tbb))}
+body{padding-bottom:calc(68px + var(--tbb))}
 .nav{background:var(--bg);box-shadow:0 1px 0 var(--line)}
 .nav .word{color:var(--ink)}
 .nav .livechip,.nav .menubtn{display:none}
@@ -29,16 +29,22 @@ section{padding-top:20px}
 .livewin{margin-top:12px}
 .head{margin-bottom:14px}
 .head h2{font-size:34px}
-.tabbar{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--bg);box-shadow:0 -1px 0 var(--line);padding:8px 6px var(--tbb)}
-.tabbar button{border:0;background:none;display:grid;place-items:center;justify-self:center;width:60px;height:44px;padding:0;border-radius:12px;color:var(--mute2);box-shadow:0 0 0 1px var(--line) inset;transition:background-color .15s,color .15s,box-shadow .15s,transform .1s}
+/* floating pill: pixel (stepped) corners, the page shows around it; same top edge as the old full-width bar */
+.tabbar{--px3:polygon(9px 0,calc(100% - 9px) 0,calc(100% - 9px) 3px,calc(100% - 3px) 3px,calc(100% - 3px) 9px,100% 9px,100% calc(100% - 9px),calc(100% - 3px) calc(100% - 9px),calc(100% - 3px) calc(100% - 3px),calc(100% - 9px) calc(100% - 3px),calc(100% - 9px) 100%,9px 100%,9px calc(100% - 3px),3px calc(100% - 3px),3px calc(100% - 9px),0 calc(100% - 9px),0 9px,3px 9px,3px 3px,9px 3px);
+--px2:polygon(6px 0,calc(100% - 6px) 0,calc(100% - 6px) 2px,calc(100% - 2px) 2px,calc(100% - 2px) 6px,100% 6px,100% calc(100% - 6px),calc(100% - 2px) calc(100% - 6px),calc(100% - 2px) calc(100% - 2px),calc(100% - 6px) calc(100% - 2px),calc(100% - 6px) 100%,6px 100%,6px calc(100% - 2px),2px calc(100% - 2px),2px calc(100% - 6px),0 calc(100% - 6px),0 6px,2px 6px,2px 2px,6px 2px);
+display:flex;align-items:center;gap:4px;position:fixed;left:0;right:0;bottom:calc(var(--tbb) - 8px);z-index:50;width:max-content;margin:0 auto;padding:8px;isolation:isolate;filter:drop-shadow(0 1px 1px rgba(0,0,0,.06)) drop-shadow(0 8px 18px rgba(0,0,0,.14))}
+:root[data-mode=dark] .tabbar{filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)) drop-shadow(0 10px 22px rgba(0,0,0,.55))}
+.tabbar::before,.tabbar::after{content:"";position:absolute;z-index:-1;clip-path:var(--px3)}
+.tabbar::before{inset:0;background:color-mix(in srgb,var(--ink) 13%,var(--card))}
+.tabbar::after{inset:1px;background:var(--card)}
+.tabbar button{border:0;background:none;display:grid;place-items:center;flex:none;width:56px;height:44px;padding:0;border-radius:0;clip-path:var(--px2);color:var(--mute2);transition:background-color .15s,color .15s,transform .1s}
 .tabbar button:active{transform:scale(.94)}
-.tabbar button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.tabbar button[aria-current=page]{color:var(--ink);background:var(--card);box-shadow:var(--raise)}
-.tabbar .mid{position:relative;width:auto;height:auto;border-radius:12px}
-.tabbar .mid[aria-current=page]{background:none;box-shadow:none}
-.tabbar .mid .well{display:grid;place-items:center;width:60px;height:44px;border-radius:12px;background:var(--btn);color:var(--btn-ink)}
+.tabbar button:focus-visible{outline:none;background:color-mix(in srgb,var(--ink) 12%,var(--card));color:var(--ink)}
+.tabbar button[aria-current=page]{color:var(--ink);background:color-mix(in srgb,var(--ink) 8%,var(--card))}
+.tabbar .mid{position:relative}
+.tabbar .mid .well{display:grid;place-items:center;width:48px;height:36px;clip-path:var(--px2);background:var(--btn);color:var(--btn-ink)}
+.tabbar .mid .ic{width:24px;height:24px}
 .tabbar .mid .icw{position:relative;display:block;line-height:0}
-.tabbar .mid[aria-current=page] .well{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--btn)}
 .tabbar .mid .sq{position:absolute;left:calc(100% * 12 / 13 - 3px);top:calc(100% / 13 - 5px);width:6px;height:6px}
 }
 @media(min-width:761px){#profil{display:none!important}}
