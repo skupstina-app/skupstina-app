@@ -131,8 +131,14 @@ Map of this repo. Read this first, then open only the file you need.
     `speeches` [at, dur, mp|null, name if not an MP, clock, summary, chair], `ev` (glasanje and konstatacija from their
     votes, kvorum left out; opomena found by us in the chair's words, see `opomene()`), `agenda`, `inter`. All `at` are
     day seconds. At most 2 days per run. Days of the 15th convocation (17, 18, 19, 24, 25 Nov 2026) come from here.
-  - **Opomene** are only kept when sure: the chair says "izričem (vam) (drugu) opomenu", and the MP is named in that
-    sentence (surname stem) or the chair cut into one MP's speech (same MP right before and after). Others are left out.
+  - **Opomene** (`opomene()`): the chair gives one now ("izričem vam opomenu", "moram da vam izreknem opomenu"), not
+    talks about one. Sure = the MP is named in that sentence or the next two ("… Gospodine Mirkoviću"), or the chair cut
+    into one MP's speech (same MP before and after) → `ev`. Not sure → `cand` (with the MPs who spoke around it), which
+    signed-in visitors confirm in the recording (a bubble while it plays; `GET/POST /api/arhiva/potvrde`, D1
+    `ar_potvrda`): settled by an admin's answer, or by ≥3 answers with one side ≥3× the other. "izrekao sam opomenu X …
+    povlačim" takes X's opomena back. `PARSER` (in arhiva.js) is part of `src_updated`: bump it and every day is read again.
+  - **Roles change over time** (a temporary chair at the first sittings, new groups): each doc keeps that day's
+    `who` {mp: [role, list]} and `chairs`; speeches by the chair carry the chair flag and are left out of "Najviše govorili".
   - **Our own days** (`arhivaCron`): the reader's `speech_segments` (one stream = one day) → `arhiva_dani` (title,
     `start_ms`, `len_s` from the stream's YouTube page, which YouTube often refuses to Cloudflare, then null). Such a day
     shows (`obrada: 1`, "u obradi") only until the import has the same date.
@@ -144,6 +150,8 @@ Map of this repo. Read this first, then open only the file you need.
   live stats' `seatMap()` + `.xlist`, opomene, glasanja; every row opens the recording at that moment. The list hides
   chair turns under 45 s. Filters: Sve / Opomene / Glasanja / one MP. Search uses `sfold` and drops the last letter of
   long words; the line that matched shows under the day.
+- Sources are not shown under the content: they are listed in O sajtu → Izvori (`html/kontakt.html`, Podešavanja on phones) and the footer.
+- "Sledeća sednica" (YouTube's next scheduled plenary stream, from `yt_video`) shows only on the newest day, until a newer day is in.
 - Who sees it: `body.arh` (admins while V1, via a wrapper around `admSet`); everyone else keeps "Dolazi uskoro".
 - **Kanal** (`src/kanal.js`, cron): the @ParlamentSrbija channel through the YouTube Data API (secret `YT_API_KEY`):
   new uploads every run, older ones backfilled from `KANAL_FROM`, plenary videos of the last 21 days and live/upcoming

@@ -495,7 +495,7 @@ var worker_default = {
       if (p === "/api/seats") return seatsJson(req, env, ctx);
       if (p === "/api/version") return json({ v: PAGE_HASH });
       if (p === "/api/live/speakers") return json({ segments: [] });
-      if (p === "/api/arhiva" || p === "/api/arhiva/day") return await arhivaRoute(req, env, u, p);
+      if (p === "/api/arhiva" || p === "/api/arhiva/day" || p === "/api/arhiva/potvrde") return await arhivaRoute(req, env, u, p);
       if (p === "/api/kanal") return await kanalRoute(req, env, u);
       if (p === "/api/contact" && req.method === "POST") return contact(req, env);
       if (p === "/api/chat") {

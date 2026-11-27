@@ -14,6 +14,7 @@ const AI={
  pesak:arPx([[2,0,9,1],[2,12,9,1],[3,1,1,2],[9,1,1,2],[4,3,1,1],[8,3,1,1],[5,4,3,1],[6,5,1,3],[5,8,1,1],[7,8,1,1],[4,9,1,1],[8,9,1,1],[3,10,1,2],[9,10,1,2],[4,11,5,1]]),
  play:arPx([[3,2,2,9],[5,3,2,7],[7,4,2,5],[9,5,2,3]]),
  pause:arPx([[3,2,3,9],[8,2,3,9]]),
+ x:arPx([[2,2,2,2],[9,2,2,2],[4,4,2,1],[7,4,2,1],[5,5,3,3],[4,8,2,1],[7,8,2,1],[2,9,2,2],[9,9,2,2]]),
  glas:arPx([[1,1,11,1],[1,11,11,1],[1,2,1,9],[11,2,1,9],[3,6,1,1],[4,7,1,1],[5,8,1,1],[6,7,1,1],[7,6,1,1],[8,5,1,1],[9,4,1,1]]),
  /* opomena: a warning triangle with a dark "!" (not the text colour, so it reads as a sign in both themes) */
  op:`<svg class="mi ar-al" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges"><g fill="var(--alarm)"><rect x="6" y="1" width="1" height="1"/><rect x="5" y="2" width="3" height="2"/><rect x="4" y="4" width="5" height="2"/><rect x="3" y="6" width="7" height="2"/><rect x="2" y="8" width="9" height="2"/><rect x="1" y="10" width="11" height="1"/><rect x="0" y="11" width="13" height="1"/></g><g fill="#1b1410"><rect x="6" y="4" width="1" height="4"/><rect x="6" y="9" width="1" height="1"/></g></svg>`};
@@ -22,15 +23,19 @@ const arDur=s=>{s=Math.max(0,Math.round(s/60));const h=Math.floor(s/60),m=s%60;r
 const arMss=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,"0");return h?`${h}:${String(m).padStart(2,"0")}:${x}`:`${m}:${x}`};
 const arDate=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(Date.UTC(y,m-1,d,12))};
 const arTitle=d=>{const dt=arDate(d.date);return `${AR_WDL[dt.getUTCDay()]}, ${dt.getUTCDate()}. ${AR_MON[dt.getUTCMonth()]}`};
+/* "Sledeća sednica": only on the newest day, until a newer one comes */
+const arNextLine=d=>{if(!arNext||!arDays||d!==arDays[0])return"";const t=new Date(arNext.at),f=o=>t.toLocaleString("sr-Latn-RS",{timeZone:"Europe/Belgrade",...o});
+ const dd=new Date(t.toLocaleDateString("en-CA",{timeZone:"Europe/Belgrade"})+"T12:00:00Z");
+ return `<span class="ar-next">${AI.sat}Sledeća sednica · ${AR_WD[dd.getUTCDay()]} ${dd.getUTCDate()}. ${AR_MON[dd.getUTCMonth()].slice(0,3)} u ${f({hour:"2-digit",minute:"2-digit",hour12:false}).replace(/^0/,"")}</span>`};
 const arSub=d=>arEsc(d.ses)+(d.dan?` · ${d.dan}. dan`:"");
 let arMpBy=null;const arMp=id=>{if(id==null)return null;if(!arMpBy)arMpBy=new Map(mps.map(m=>[Number(m.id),m]));return arMpBy.get(Number(id))||null};
 const arGroup=m=>m?(m.g===6?"Srbija pobeđuje":groups[m.g][1]):"";
 /* a speech's person: an MP from our list, or the name the day gave (ministers and others) */
-const arWho=s=>{const m=arMp(s[2]);return m?{m,name:m.name,g:arGroup(m),c:SH[m.g]}:{m:null,name:s[3]||"Predsedavajući",g:s[3]?"":"Narodna skupština",c:"var(--mute2)"}};
+const arWho=s=>{const m=arMp(s[2]);return m?{m,name:m.name,g:s[6]?"Predsedava":arGroup(m),c:SH[m.g]}:{m:null,name:s[3]||"Predsedavajući",g:s[3]?"":"Narodna skupština",c:"var(--mute2)"}};
 
-let arDays=null,arLoading=false,arDay=null,arDoc=null,arAll=false;
+let arDays=null,arNext=null,arLoading=false,arDay=null,arDoc=null,arAll=false;
 async function arLoad(){if(arDays||arLoading)return;arLoading=true;
- try{const r=await fetch("/api/arhiva");arDays=(await r.json()).days||[]}catch(e){arDays=[]}arLoading=false;arList()}
+ try{const r=await fetch("/api/arhiva");const j=await r.json();arDays=j.days||[];arNext=j.next||null}catch(e){arDays=[]}arLoading=false;arList()}
 
 /* search: Serbian letters and script folded (sfold); every word must match, its last letter dropped when it is long
    so "generalni sekretar" also finds "generalnog sekretara". The line that matched shows under the day. */
@@ -55,7 +60,7 @@ function arList(){
    const nm=(d.mps||[]).map(arMp).filter(m=>m&&ws.some(w=>sfold(m.name).includes(w))).map(m=>m.name).slice(0,3);
    hit=ln?arMark(ln,ws):nm.length?arEsc(nm.join(", ")):""}
   const span=d.first_clock?`${d.first_clock}–${d.last_clock||""}`:"";
-  html+=`<li><a href="#arhiva" data-ard="${arEsc(d.date)}"><span class="ar-n"><b>${dt.getUTCDate()}</b><small>${AR_WD[dt.getUTCDay()]}</small></span><span class="ar-c"><b>${arEsc(d.ses)}</b><span class="ar-s">${[d.dan?d.dan+". dan":"",span].filter(Boolean).join(" · ")}</span><span class="ar-f"><span>${AI.sat}<span class="px">${arDur(d.total_s)}</span></span>${d.op?`<span aria-label="Opomene">${AI.op}<span class="px">${d.op}</span></span>`:""}${d.gl?`<span aria-label="Glasanja">${AI.glas}<span class="px">${d.gl}</span></span>`:""}${live?'<span class="ar-tag live"><i class="sq"></i>uživo</span>':d.obrada?`<span class="ar-tag">${AI.pesak}u obradi</span>`:""}</span>${hit?`<span class="ar-hit">${hit}</span>`:""}</span></a></li>`});
+  html+=`<li><a href="#arhiva" data-ard="${arEsc(d.date)}"><span class="ar-n"><b>${dt.getUTCDate()}</b><small>${AR_WD[dt.getUTCDay()]}</small></span><span class="ar-c"><b>${arEsc(d.ses)}</b><span class="ar-s">${[d.dan?d.dan+". dan":"",span].filter(Boolean).join(" · ")}</span><span class="ar-f"><span>${AI.sat}<span class="px">${arDur(d.total_s)}</span></span>${d.op?`<span aria-label="Opomene">${AI.op}<span class="px">${d.op}</span></span>`:""}${d.gl?`<span aria-label="Glasanja">${AI.glas}<span class="px">${d.gl}</span></span>`:""}${live?'<span class="ar-tag live"><i class="sq"></i>uživo</span>':d.obrada?`<span class="ar-tag">${AI.pesak}u obradi</span>`:""}</span>${hit?`<span class="ar-hit">${hit}</span>`:""}${ws.length?"":arNextLine(d)}</span></a></li>`});
  box.innerHTML=html+"</ol>";apply(box)}
 $("#arQ").addEventListener("input",arList);
 $("#arQx").onclick=()=>{$("#arQ").value="";arList();$("#arQ").focus()};
@@ -68,7 +73,7 @@ function arView(v,push){const ch=AR.dataset.v!==v;AR.dataset.v=v;if(v!=="play")a
 addEventListener("popstate",e=>{let v=e.state&&e.state.ar||"list";if(!arDay)v="list";if(v===AR.dataset.v)return;arView(v);if(v==="day")arRenderDay()});
 
 async function arOpen(d){arDay=d;arDoc=null;arTot=null;arOps=[];arGls=[];arAll=false;arFilt="sve";arPosMp=null;arView("day",true);arRenderDay();
- try{const r=await fetch("/api/arhiva/day?d="+encodeURIComponent(d.date));const j=await r.json();if(!j.error)arDoc=j}catch(e){}
+ try{const [r]=await Promise.all([fetch("/api/arhiva/day?d="+encodeURIComponent(d.date)),arPotvrde()]);const j=await r.json();if(!j.error)arDoc=j}catch(e){}
  if(arDay===d){arPrep();arRenderDay()}}
 /* clock at a day second: the last speech before it with a clock, plus the seconds since */
 function arClockAt(t,sec){const S=arDoc&&arDoc.speeches||[];let b=null;for(const s of S){if(s[0]>t+.5)break;if(s[4])b=s}
@@ -77,9 +82,17 @@ function arClockAt(t,sec){const S=arDoc&&arDoc.speeches||[];let b=null;for(const
  return hh+":"+String(mm).padStart(2,"0")+(sec?":"+String(ss).padStart(2,"0"):"")}
 /* what the day page and the recording share: talk time per MP, the events */
 let arTot=null,arOps=[],arGls=[];
-function arPrep(){const D=arDoc;arTot=new Map();arOps=[];arGls=[];if(!D)return;
- D.speeches.forEach(s=>{const m=arMp(s[2]);if(!m)return;const o=arTot.get(m)||{t:0,n:0};o.t+=s[1];if(!s[6])o.n++;arTot.set(m,o)});
- arOps=(D.ev||[]).filter(e=>e.k==="opomena");arGls=(D.ev||[]).filter(e=>e.k==="glasanje")}
+/* the chair's turns are left out of "who spoke most" (they stay in the list of the recording) */
+let arPv=[],arPend=[];
+function arPrep(){const D=arDoc;arTot=new Map();arOps=[];arGls=[];arPend=[];if(!D)return;
+ D.speeches.forEach(s=>{const m=arMp(s[2]);if(!m||s[6])return;const o=arTot.get(m)||{t:0,n:0};o.t+=s[1];o.n++;arTot.set(m,o)});
+ arOps=(D.ev||[]).filter(e=>e.k==="opomena");arGls=(D.ev||[]).filter(e=>e.k==="glasanje");
+ /* opomene visitors confirmed join the sure ones; open ones wait for answers */
+ (D.cand||[]).forEach(c=>{const v=arPv.find(x=>Math.abs(x.at-c.at)<.2);
+  if(v&&v.st==="da"){const m=arMp(v.mp);arOps.push({k:"opomena",at:c.at,mp:v.mp,name:m?m.name:"",t:c.t,potvrda:1})}
+  else if(!v||!v.st)arPend.push({...c,my:v?v.my:null})});
+ arOps.sort((a,b)=>a.at-b.at)}
+async function arPotvrde(){if(!arDay)return;try{const r=await fetch("/api/arhiva/potvrde?d="+arDay.date,{cache:"no-store"});arPv=await r.json()}catch(e){arPv=[]}}
 const arRes=r=>r?[r.za!=null?`za ${r.za}`:"",r.protiv!=null?`protiv ${r.protiv}`:"",r.uzdrzano?`uzdržano ${r.uzdrzano}`:""].filter(Boolean).join(" · "):"";
 function arRenderDay(){const d=arDay;if(!d)return;const D=arDoc;
  const list=arTot?[...arTot.entries()].sort((a,b)=>b[1].t-a[1].t):[];
@@ -88,15 +101,14 @@ function arRenderDay(){const d=arDay;if(!d)return;const D=arDoc;
  const ukr=D&&!D.obrada?(D.ev||[]).filter(e=>(e.k==="glasanje"||e.k==="konstatacija")&&e.p!==0&&!/^Povreda Poslovnika/i.test(e.t)).map(e=>e.h||e.o).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,4):[];
  const play=(at,label)=>`<button type="button" class="ar-pl" data-art="${at}" aria-label="${arEsc(label)}">${AI.play}</button>`;
  $("#arDay").innerHTML=`<div class="ar-h"><button type="button" class="ar-back" id="arDBack">‹ Arhiva</button>
-<div><h2>${arTitle(d)}</h2><p>${arSub(d)}</p></div>
+<div><h2>${arTitle(d)}</h2><p>${arSub(d)}</p>${arNextLine(d)}</div>
 <div class="ar-k"><div><span>Trajanje</span><b>${arDur(d.total_s)}</b>${span?`<span>${span}</span>`:""}</div><div><span>Govornika</span><b>${d.speakers}</b></div>${d.obrada?"":`<div><span>Opomene</span><b class="ar-ki">${d.op?AI.op:""}${d.op||0}</b></div><div><span>Glasanja</span><b class="ar-ki">${d.gl?AI.glas:""}${d.gl||0}</b></div>`}</div></div>
 ${d.obrada?`<div class="ar-wait"><span>${AI.pesak}</span><span><b>U obradi</b><small>Sažetak, opomene i glasanja stižu sa stenografskim beleškama.</small></span></div>`:""}
 ${ukr.length?`<section class="ar-sec"><h3>Ukratko</h3><ul class="ar-ukr">${ukr.map(x=>`<li>${arEsc(x)}</li>`).join("")}</ul></section>`:""}
 ${D&&D.agenda&&D.agenda.length?`<section class="ar-sec"><h3>Dnevni red</h3><ol class="ar-rows">${D.agenda.map(a=>`<li><span class="ar-an">${a[0]}.</span><span class="ar-rt">${arEsc(a[2])}</span><span class="px ar-tm">${arClockAt(a[1])}</span>${play(a[1],"Pusti od ove tačke")}</li>`).join("")}</ol></section>`:""}
 <section class="ar-sec">${arTot?seatMap(arTot):""}<h3>Najviše govorili</h3>${arTot?`<ol class="xlist">${rows}</ol>${list.length>5?`<button type="button" class="ar-more" id="arMore">${arAll?"Prikaži manje":`Vidi sve · ${list.length} ›`}</button>`:""}`:'<p class="m">Učitava se…</p>'}</section>
-${arOps.length?`<section class="ar-sec"><h3>Opomene</h3><ol class="ar-rows">${arOps.map(e=>{const m=arMp(e.mp);return `<li>${AI.op}<span class="ar-rt"><b>${arEsc(m?m.name:e.name)}</b><small>${arEsc(arGroup(m))}${e.drugu?" · druga opomena":""}</small></span><span class="px ar-tm">${arClockAt(e.at)}</span>${play(e.at,"Pusti opomenu")}</li>`}).join("")}</ol></section>`:""}
+${arOps.length?`<section class="ar-sec"><h3>Opomene</h3><ol class="ar-rows">${arOps.map(e=>{const m=arMp(e.mp);return `<li>${AI.op}<span class="ar-rt"><b>${arEsc(m?m.name:e.name||"Opomena")}</b><small>${arEsc(arGroup(m))}${e.drugu?" · druga opomena":""}</small></span><span class="px ar-tm">${arClockAt(e.at)}</span>${play(e.at,"Pusti opomenu")}</li>`}).join("")}</ol></section>`:""}
 ${arGls.length?`<section class="ar-sec"><h3>Glasanja</h3><ol class="ar-rows">${arGls.map(e=>`<li>${AI.glas}<span class="ar-rt"><b>${arEsc(e.h||e.t)}</b><small>${arEsc(arRes(e.r)||e.o)}</small></span><span class="ar-pass${e.p?"":" no"}">${e.p?"Usvojeno":"Odbijeno"}</span>${play(e.at,"Pusti glasanje")}</li>`).join("")}</ol></section>`:""}
-${D?`<p class="ar-src">Izvor: snimci Narodne skupštine (YouTube)${D.src==="skupstina.live"?" · obrada: skupstina.live":" · vreme govora: skupština.app"}</p>`:""}
 ${D?`<button type="button" class="ar-go" id="arGo">${AI.play}Gledaj snimak</button>`:""}`;
  apply($("#arDay"));
  $("#arDBack").onclick=()=>history.state&&history.state.ar?history.back():arView("list");
@@ -115,29 +127,41 @@ let arRows=[];
 function arBuildRows(){const D=arDoc,r=[];if(!D){arRows=r;return}
  (D.agenda||[]).forEach(a=>r.push({k:"t",at:a[1],a}));
  D.speeches.forEach((s,i)=>{if(s[6]&&s[1]<45)return;r.push({k:"s",at:s[0],s,i})});
- (D.ev||[]).forEach(e=>{if(e.k==="opomena"||e.k==="glasanje")r.push({k:e.k,at:e.at,e})});
+ arOps.forEach(e=>r.push({k:"opomena",at:e.at,e}));arGls.forEach(e=>r.push({k:"glasanje",at:e.at,e}));
  r.sort((a,b)=>a.at-b.at||(a.k==="t"?-1:1));arRows=r}
 const arShow=x=>arFilt==="sve"?true:arFilt==="op"?x.k==="opomena":arFilt==="gl"?x.k==="glasanje":x.k==="s"&&x.s[2]===arPosMp;
 function arRenderStrip(){const D=arDoc;if(!D)return;
  const dim=arFilt==="op"||arFilt==="gl";
  $("#arBar").innerHTML=D.speeches.map(s=>{const w=arWho(s),off=dim||(arFilt==="pos"&&s[2]!==arPosMp);return `<i class="${off?"off":""}" style="left:${arPct(arPos(s[0]))};width:${arPct(Math.max(.25,arPos(s[1])))};background:${w.c}"></i>`}).join("")
   +D.parts.slice(1).map(p=>`<u style="left:${arPct(arPos(p.at))}"></u>`).join("");
- $("#arMk").innerHTML=(D.ev||[]).filter(e=>(e.k==="opomena"&&arFilt!=="gl"&&arFilt!=="pos")||(e.k==="glasanje"&&arFilt!=="op"&&arFilt!=="pos")).map(e=>`<button type="button" data-art="${e.at}" style="left:${arPct(arPos(e.at))}" aria-label="${e.k==="opomena"?"Opomena":"Glasanje"} u ${arClockAt(e.at)}">${e.k==="opomena"?AI.op:AI.glas}</button>`).join("");
+ /* markers above the strip: one per moment, or one with a count where several fall close together (a run of votes);
+    a thin tick on the strip for each of them */
+ const evs=[...(arFilt==="gl"||arFilt==="pos"?[]:arOps.map(e=>({k:"opomena",at:e.at}))),...(arFilt==="op"||arFilt==="pos"?[]:arGls.map(e=>({k:"glasanje",at:e.at})))].sort((a,b)=>a.at-b.at);
+ const cl=[];evs.forEach(e=>{const p=arPos(e.at),c=cl.filter(x=>x.k===e.k).pop();if(c&&p-c.p1<3.5){c.p1=p;c.at.push(e.at)}else cl.push({k:e.k,p0:p,p1:p,at:[e.at]})});
+ $("#arMk").innerHTML=cl.map(c=>`<button type="button" data-art="${c.at[0]}" style="left:${arPct(Math.min(96,Math.max(2,(c.p0+c.p1)/2)))}" aria-label="${c.k==="opomena"?"Opomen"+(c.at.length>1?"e":"a"):"Glasanj"+(c.at.length>1?"a":"e")}${c.at.length>1?" ("+c.at.length+")":""} u ${arClockAt(c.at[0])}">${c.k==="opomena"?AI.op:AI.glas}${c.at.length>1?`<b class="px">${c.at.length}</b>`:""}</button>`).join("");
+ $("#arBar").insertAdjacentHTML("beforeend",evs.map(e=>`<s class="${e.k==="opomena"?"op":""}" style="left:${arPct(arPos(e.at))}"></s>`).join(""));
  /* hour labels where the clock passes a full hour, not too close together */
  const hrs=[];let lastH=null;D.speeches.forEach(s=>{if(!s[4])return;const h=+s[4].split(":")[0];if(lastH!=null&&h!==lastH){const p=arPos(s[0]);if(p>4&&p<96&&!hrs.some(x=>Math.abs(x.p-p)<9))hrs.push({p,l:h})}lastH=h});
  $("#arHours").innerHTML=hrs.map(x=>`<span style="left:${arPct(x.p)}">${x.l}</span>`).join("")}
-function arRenderTok(){let html="";
- arRows.forEach((x,j)=>{if(!arShow(x))return;
-  if(x.k==="t"){if(arFilt==="sve")html+=`<li class="gap">Tačka ${x.a[0]} · ${arEsc(x.a[2])}</li>`;return}
-  if(x.k==="s"){const w=arWho(x.s);html+=`<li><button type="button" data-arj="${j}"><span class="t px">${arClockAt(x.at)}</span><i style="background:${w.c}"></i><span class="nm"><b>${arEsc(w.name)}</b><small>${arEsc(w.g)}</small>${x.s[5]?`<span class="sum">${arEsc(x.s[5])}</span>`:""}</span><span class="d px">${arMss(x.s[1])}</span></button></li>`;return}
+let arOpenRuns=new Set();
+function arRenderTok(){let html="";const vis=[];arRows.forEach((x,j)=>{if(arShow(x)&&!(x.k==="t"&&arFilt!=="sve"))vis.push([x,j])});
+ const row=(x,j)=>{
+  if(x.k==="t")return `<li class="gap">Tačka ${x.a[0]} · ${arEsc(x.a[2])}</li>`;
+  if(x.k==="s"){const w=arWho(x.s);return `<li><button type="button" data-arj="${j}"><span class="t px">${arClockAt(x.at)}</span><i style="background:${w.c}"></i><span class="nm"><b>${arEsc(w.name)}</b><small>${arEsc(w.g)}</small>${x.s[5]?`<span class="sum">${arEsc(x.s[5])}</span>`:""}</span><span class="d px">${arMss(x.s[1])}</span></button></li>`}
   const e=x.e,m=arMp(e.mp);
-  html+=`<li><button type="button" data-arj="${j}" class="ev"><span class="t px">${arClockAt(x.at)}</span>${e.k==="opomena"?AI.op:AI.glas}<span class="nm"><b>${arEsc(e.k==="opomena"?(m?m.name:e.name):(e.h||e.t))}</b><small>${e.k==="opomena"?"Opomena"+(e.drugu?" · druga":""):arEsc(arRes(e.r)||"Glasanje")}</small></span>${e.k==="glasanje"?`<span class="ar-pass${e.p?"":" no"}">${e.p?"Usvojeno":"Odbijeno"}</span>`:""}</button></li>`});
+  return `<li><button type="button" data-arj="${j}" class="ev"><span class="t px">${arClockAt(x.at)}</span>${e.k==="opomena"?AI.op:AI.glas}<span class="nm"><b>${arEsc(e.k==="opomena"?(m?m.name:e.name||"Opomena"):(e.h||e.t))}</b><small>${e.k==="opomena"?"Opomena"+(e.drugu?" · druga":""):arEsc(arRes(e.r)||"Glasanje")}</small></span>${e.k==="glasanje"?`<span class="ar-pass${e.p?"":" no"}">${e.p?"Usvojeno":"Odbijeno"}</span>`:""}</button></li>`};
+ /* three or more votes in a row fold into one line (open it to see them all); the Glasanja filter shows them all */
+ for(let i=0;i<vis.length;i++){const [x,j]=vis[i];
+  if(arFilt==="sve"&&x.k==="glasanje"){let n=i;while(n+1<vis.length&&vis[n+1][0].k==="glasanje")n++;
+   if(n-i>=2&&!arOpenRuns.has(j)){const last=vis[n][0];html+=`<li><button type="button" class="ev run" data-arrun="${j}"><span class="t px">${arClockAt(x.at)}</span>${AI.glas}<span class="nm"><b>${n-i+1} glasanja</b><small>${arClockAt(x.at)}–${arClockAt(last.at)}</small></span><span class="d">›</span></button></li>`;i=n;continue}}
+  html+=row(x,j)}
  $("#arTok").innerHTML=html||'<li class="gap">Nema govora.</li>';apply($("#arTok"));arCurI=-1}
 function arChips(){const fo=$("#arFOp"),fg=$("#arFGl");
- fo.hidden=!arOps.length;fo.innerHTML=`${AI.op}Opomene <span class="px">${arOps.length}</span>`;
- fg.hidden=!arGls.length;fg.innerHTML=`${AI.glas}Glasanja <span class="px">${arGls.length}</span>`;
+ fo.hidden=!arOps.length;fo.innerHTML=`${AI.op}<span class="px">${arOps.length}</span>`;fo.setAttribute("aria-label","Opomene");
+ fg.hidden=!arGls.length;fg.innerHTML=`${AI.glas}<span class="px">${arGls.length}</span>`;fg.setAttribute("aria-label","Glasanja");
  [["#arFAll","sve"],["#arFOp","op"],["#arFGl","gl"],["#arFPos","pos"]].forEach(([s,f])=>$(s).setAttribute("aria-pressed",arFilt===f));
- const m=arFilt==="pos"?arMp(arPosMp):null;$("#arFPosL").textContent=m?m.name:"Poslanik"}
+ const m=arFilt==="pos"?arMp(arPosMp):null,sel=$("#arSel");sel.hidden=!m;
+ if(m){const o=arTot&&arTot.get(m);sel.innerHTML=`<i style="background:${SH[m.g]}"></i><b>${arEsc(m.name)}</b>${o?`<small class="px">${o.n}× · ${arMss(o.t)}</small>`:""}<button type="button" id="arSelX" aria-label="Poništi">${AI.x}</button>`;apply(sel);$("#arSelX").onclick=()=>arFilter("sve")}}
 function arFilter(f,mp){arFilt=f;if(f==="pos")arPosMp=mp;$("#arPos").hidden=true;arChips();arRenderStrip();arRenderTok();arTick(true)}
 function arPlay(mp,at){const d=arDay,D=arDoc;if(!d||!D)return;arView("play",true);
  $("#arPT").textContent=arTitle(d);$("#arPS").innerHTML=arSub(d);apply($(".ar-top"));
@@ -181,11 +205,26 @@ function arTick(force){if(AR.dataset.v!=="play"||!arDoc)return;const D=arDoc,n=a
  let j=-1;for(let k=0;k<arRows.length;k++){const x=arRows[k];if(x.at>t+1)break;if(arShow(x)&&x.k!=="t")j=k}
  if(j!==arCurI||force){arCurI=j;$$("#arTok button.on").forEach(b=>b.classList.remove("on"));const b=$(`#arTok [data-arj="${j}"]`);
   if(b){b.classList.add("on");if(Date.now()-arScrollAt>6000){const r=b.getBoundingClientRect(),top=$(".ar-stick").getBoundingClientRect().bottom;if(r.top<top||r.bottom>innerHeight-90)scrollBy({top:r.top-top-8,behavior:reduce?"auto":"smooth"})}}}
+ arAskShow(t);
  if(on&&Date.now()-arSaved>3000){arSaved=Date.now();store.set("arhiva-poz",JSON.stringify({d:arDay.date,t}))}}
+/* a moment we weren't sure of: signed-in visitors are asked, once, while it plays (from just before to 2 min after) */
+let arAskC=null,arAskStep=0;
+function arAskShow(t){const box=$("#arAsk");let me_=null;try{me_=me}catch(e){}
+ const c=me_&&arFilt!=="pos"?arPend.find(c=>c.my==null&&t>=c.at-5&&t<=c.at+120):null;
+ if(c===arAskC)return;arAskC=c;arAskStep=0;box.hidden=!c;if(c)arAskDraw()}
+function arAskDraw(){const c=arAskC,box=$("#arAsk");if(!c)return;
+ box.innerHTML=arAskStep===0?`${AI.op}<span>Da li je ovde izrečena opomena?</span><button type="button" data-ask="da">Da</button><button type="button" data-ask="ne">Ne</button>`
+  :`<span>Kome?</span>${c.opts.map(id=>{const m=arMp(id);return m?`<button type="button" data-ask="mp" data-mp="${id}">${arEsc(m.name)}</button>`:""}).join("")}<button type="button" data-ask="nz">Ne znam</button>`;apply(box)}
+$("#arAsk").addEventListener("click",async e=>{const b=e.target.closest("[data-ask]"),c=arAskC;if(!b||!c)return;const k=b.dataset.ask;
+ if(k==="da"&&c.opts.length&&arAskStep===0){arAskStep=1;arAskDraw();return}
+ const body={d:arDay.date,at:c.at,da:k==="ne"?0:1,mp:k==="mp"?Number(b.dataset.mp):null};c.my=body.da;
+ $("#arAsk").innerHTML="<span>Hvala.</span>";setTimeout(()=>{if(arAskC===c){$("#arAsk").hidden=true}},1500);
+ try{await fetch("/api/arhiva/potvrde",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});await arPotvrde();arPrep();arRenderStrip();arRenderTok();arChips()}catch(x){}});
 setInterval(()=>arTick(false),400);
 addEventListener("scroll",()=>{if(AR.dataset.v==="play")arScrollAt=Date.now()},{passive:true});
 addEventListener("touchmove",()=>{if(AR.dataset.v==="play")arScrollAt=Date.now()},{passive:true});
-$("#arTok").addEventListener("click",e=>{const b=e.target.closest("[data-arj]");if(!b)return;const x=arRows[+b.dataset.arj];arSeek(x.k==="s"?x.at-2:x.at-1)});
+$("#arTok").addEventListener("click",e=>{const g=e.target.closest("[data-arrun]");if(g){arOpenRuns.add(+g.dataset.arrun);arRenderTok();arTick(true);return}
+ const b=e.target.closest("[data-arj]");if(!b)return;const x=arRows[+b.dataset.arj];arSeek(x.k==="s"?x.at-2:x.at-1)});
 $("#arMk").addEventListener("click",e=>{const b=e.target.closest("[data-art]");if(b)arSeek(Number(b.dataset.art)-1)});
 const arToggle=()=>{try{const s=arP.getPlayerState();s===1||s===3?arP.pauseVideo():arP.playVideo()}catch(e){}};
 $("#arShield").onclick=arToggle;$("#arPP").onclick=arToggle;$("#arBig").innerHTML=AI.play;$("#arBig").onclick=arToggle;

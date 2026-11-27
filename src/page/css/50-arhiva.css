@@ -149,3 +149,24 @@
 .ar-tok button.on .sum{display:-webkit-box}
 .ar-tok button.ev>.mi{width:18px;height:18px;margin:0 1px}
 .ar-tok .ar-pass{margin-left:auto}
+/* chips with icon + count; the picked MP as a pill; vote runs; the question bubble */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.ar-chips button .px{font-size:14px}
+.ar-sel{display:flex;align-items:center;gap:10px;height:44px;margin:0 0 10px;padding:0 4px 0 12px;border-radius:6px;background:var(--card);box-shadow:var(--ring);font-size:15px}
+.ar-sel i{width:9px;height:9px;flex:none}
+.ar-sel b{font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ar-sel small{font-size:13px;color:var(--mute)}
+.ar-sel button{width:36px;height:36px;border:0;border-radius:6px;background:none;color:var(--mute);display:grid;place-items:center}
+.ar-sel .mi{width:11px;height:11px}
+.ar-mk b{position:absolute;top:-6px;left:13px;min-width:15px;height:15px;padding:0 3px;border-radius:3px;background:var(--ink);color:var(--bg);font-size:11px;line-height:15px;text-align:center}
+.ar-bar s{position:absolute;top:0;bottom:0;width:1px;margin-left:-.5px;background:var(--ink);opacity:.55;text-decoration:none}
+.ar-bar s.op{background:var(--alarm);opacity:1}
+.ar-tok button.run .d{color:var(--mute);font-size:18px}
+.ar-next{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:var(--live)}
+.ar-next .mi{width:12px;height:12px}
+.ar-ask{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 10px;padding:10px 12px;border-radius:8px;background:var(--card);box-shadow:0 0 0 1px var(--line),0 8px 24px rgba(0,0,0,.18);font-size:15px}
+.ar-ask>span{flex:1 1 160px}
+.ar-ask .mi{width:18px;height:18px}
+.ar-ask button{min-height:36px;padding:0 12px;border:0;border-radius:6px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;font-size:14px}
+.ar-ask button[data-ask=da]{background:var(--btn);color:var(--btn-ink);box-shadow:none}
+.ar-sel[hidden],.ar-ask[hidden],.ar-pos[hidden]{display:none}
