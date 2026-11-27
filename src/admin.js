@@ -1,6 +1,7 @@
 // Admins and the seat map editor (/admin/sala).
 // Who is an admin: the super admin (SUPER, fixed here) and the emails in D1 `admins`, each with its menus (`perms`: sala, mod).
-// The super admin adds and removes admins in the site's Podešavanja → Admin meni → Admini (/admin/api/admins).
+// The super admin adds and removes admins in the site's Podešavanja → Admin meni → Admini (/admin/api/admins),
+// and reads the suggestions and contact messages in Admin meni → Poruke (/admin/api/poruke).
 // An admin is recognised by his site account (signed in with Google) or by the editor's own Google sign-in (cookie sk_admin).
 // Env: GOOGLE_CLIENT_ID (var), ADMIN_EMAILS (var: only seeds the table once, with the Sala menu), SALT (secret, signs the cookie).
 // The old ?key=ADMIN_KEY links still work for the other /admin pages.
@@ -163,6 +164,17 @@ export async function adminRoute(req, env, u, p) {
     }
     const { results } = await env.DB.prepare("SELECT a.email,a.perms,a.at,u.name,u.avatar,u.color,(u.sub IS NOT NULL AND u.pw IS NULL) g FROM admins a LEFT JOIN users u ON u.email=a.email WHERE a.email NOT LIKE '#%' ORDER BY a.at").all();
     return json({ ok: true, super: SUPER, perms: PERMS, admins: results.map((x) => ({ email: x.email, perms: permList(x.perms), name: x.name || null, avatar: x.avatar || null, color: x.color ?? null, google: !!x.g })) });
+  }
+
+  // Poruke (super admin only): suggestions from Beleške (kind "predlog") and the contact form (D1 messages); read, delete
+  if (p === "/admin/api/poruke") {
+    if (!who.super) return json({ ok: false, err: "super" }, 403);
+    if (req.method === "POST") {
+      const b = await req.json().catch(() => ({}));
+      if (b.remove && Number.isInteger(b.id)) await env.DB.prepare("DELETE FROM messages WHERE id=?").bind(b.id).run();
+    }
+    const { results } = await env.DB.prepare("SELECT id,at,kind,msg,mail FROM messages ORDER BY id DESC LIMIT 300").all();
+    return json({ ok: true, msgs: results });
   }
 
   if (!who.perms.includes("sala")) return json({ ok: false, err: "login" }, 401);

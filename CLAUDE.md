@@ -32,7 +32,12 @@ Map of this repo. Read this first, then open only the file you need.
 | Kontakt | `html/kontakt.html` | `90-launch-kontakt` | |
 | Bottom tab bar (phones) | `html/tabbar.html` | `80-tabbar` | `50-tabs-rang` |
 | Footer | `html/footer.html` | | |
+| Logo, favicon, home-screen icons, link preview | `index.html` (meta, og:*), header/footer inline logo | `10-nav` (`.mark`) | `scripts/icons.py` → `assets/icons/` → `src/generated/icons.js`, served at `/favicon.svg`, `/favicon.ico`, `/icons/*`, `/og.png`; `/manifest.webmanifest` (`MANIFEST` in worker.js) |
+| Info button (top right): Beleške (Novo / Sledeće) and a suggestion box (`/api/contact`, kind `predlog`) | `html/header.html` (`#infoPop`) | `80-tabbar` | `25-info` |
 | Data, helpers, boot | | `00-base` | `00-data`, `05-core`, `25-info`, `40-timeline-views`, `74-install-card` (add to home screen), `99-boot` |
+
+The logo is the pixel building from "Dolazi uskoro" (23×21). Change it in `scripts/icons.py` (`LOGO`), run it (with the
+@fontsource Wix Madefor Display folder as argument for `og.png`), and paste the new paths into header/footer.
 
 ## Accounts and chat
 
@@ -93,7 +98,7 @@ Map of this repo. Read this first, then open only the file you need.
   never checked, so it can't make anyone admin). `/api/auth/me` returns `admin: {super, perms}` (or null).
 - Podešavanja → **Admin meni** (only for admins; `21-admin.js`, `71-admin.css`, `#admDlg` in `html/profil.html`):
   **Admini** (super admin only: add by email, tick Sala/Moderator, remove; `GET/POST /admin/api/admins
-  {email, perms[] | remove}`), **Sala** (link to `/admin/sala`), **Moderator** (only the look for now: tiles and rows marked
+  {email, perms[] | remove}`), **Poruke** (super admin only: suggestions from Beleške and contact messages, D1 `messages`; filter Sve/Predlozi/Kontakt, delete; `GET/POST /admin/api/poruke {id, remove}`), **Sala** (link to `/admin/sala`), **Moderator** (only the look for now: tiles and rows marked
   "uskoro"; the real chat tools still live at `/admin/chat?key=`).
 - `/admin/sala`: seat map editor (`src/admin/sala.html`, routes in `src/admin.js`). Opens straight away for an admin with
   `sala` who is signed in on the site (no second sign-in, no Odjavi button, ‹ goes back to the site). Otherwise it offers

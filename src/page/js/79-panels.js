@@ -89,9 +89,11 @@ function tlDay(){
 }
 const dayWhen=w=>w||"na poslednjoj sednici";
 const dayAsk=w=>w==="danas"||w==="juče"?`Ko je ${w} najviše govorio`:`Ko je najviše govorio ${dayWhen(w)}`;
+/* the three numbers of a "Najviše govorili" row (also Arhiva): how many times, then time over share of all the time */
+function xStats(n,t,tot,fmt){const p=tot>0?t/tot*100:0;return `<span class="xs"><span class="xn nt">${n}×</span><span class="xt"><b class="nt">${fmt(t)}</b><small class="nt">${p>0&&p<1?"<1":Math.round(p)}%</small></span></span>`}
 function renderStats(by){
- const list=[...by.entries()].filter(([,o])=>o.t>0).sort((a,b)=>b[1].t-a[1].t);
- const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><span class="sph" style="--gc:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])} · ${o.n} ${o.n===1?"put":"puta"}</small></span><span class="tm nt">${mss(o.t)}</span></button></li>`).join("");
+ const list=[...by.entries()].filter(([,o])=>o.t>0).sort((a,b)=>b[1].t-a[1].t),tot=list.reduce((s,[,o])=>s+o.t,0);
+ const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><span class="sph" style="--gc:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])}</small></span>${xStats(o.n,o.t,tot,mss)}</button></li>`).join("");
  const w=tlDay();
  $("#p-stats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${dayWhen(w)}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
  apply($("#p-stats"));
@@ -106,7 +108,7 @@ function bio(m){
  if(gn)parts.push(`${gr?(gr[0].toUpperCase()+gr.slice(1))+" poslaničke grupe":(f?"Članica poslaničke grupe":"Član poslaničke grupe")} „${gn}”.`);
  return parts.join(" ");
 }
-const I_X=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="2" height="2"/><rect x="9" y="2" width="2" height="2"/><rect x="4" y="4" width="2" height="1"/><rect x="7" y="4" width="2" height="1"/><rect x="5" y="5" width="3" height="3"/><rect x="4" y="8" width="2" height="1"/><rect x="7" y="8" width="2" height="1"/><rect x="2" y="9" width="2" height="2"/><rect x="9" y="9" width="2" height="2"/></svg>`;
+const I_X=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="1" width="2" height="1"/><rect x="11" y="1" width="2" height="1"/><rect x="1" y="2" width="3" height="1"/><rect x="10" y="2" width="3" height="1"/><rect x="2" y="3" width="3" height="1"/><rect x="9" y="3" width="3" height="1"/><rect x="3" y="4" width="3" height="1"/><rect x="8" y="4" width="3" height="1"/><rect x="4" y="5" width="6" height="1"/><rect x="5" y="6" width="4" height="1"/><rect x="5" y="7" width="4" height="1"/><rect x="4" y="8" width="6" height="1"/><rect x="3" y="9" width="3" height="1"/><rect x="8" y="9" width="3" height="1"/><rect x="2" y="10" width="3" height="1"/><rect x="9" y="10" width="3" height="1"/><rect x="1" y="11" width="3" height="1"/><rect x="10" y="11" width="3" height="1"/><rect x="1" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="1"/></svg>`;
 /* profile: name (and, only if he spoke, the day and talk time under it) with mute and × on the right; the party is the first fact */
 function renderProf(by){
  const m=profMp;if(!m){$("#p-prof").innerHTML="";return}

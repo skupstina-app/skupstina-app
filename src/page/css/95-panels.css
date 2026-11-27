@@ -2,6 +2,9 @@
 .vbar[role=group] .who{gap:10px}
 .phw{position:relative;flex:none;display:block;width:40px;height:40px}
 .vbar[role=group] .who .ph{display:block;width:40px;height:40px;padding:0;border:0;border-radius:6px;cursor:pointer;color:var(--ink)}
+.vbar[role=group] .who .ph:empty{display:block}
+.vbar[role=group] .who .ph:not(:empty){display:grid;place-items:center}
+.vbar[role=group] .who .ph .unk{display:block;width:80%;height:80%}
 .phx{position:absolute;inset:0;display:none;place-items:center;border-radius:6px;background:var(--btn);color:var(--btn-ink);pointer-events:none}
 .phw.open .phx{display:grid}
 .phx .mi,.pod .mi{width:18px;height:18px}
@@ -31,6 +34,11 @@ body[data-xv=stats] .side>:not(#p-stats),body[data-xv=prof] .side>:not(#p-prof){
 .xlist .nm b{font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .xlist .nm small{font-size:13px;color:var(--mute)}
 .xlist .tm{font-variant-numeric:tabular-nums;font-size:16px}
+.xlist .xs{flex:none;display:flex;align-items:center;gap:10px}
+.xlist .xn{min-width:30px;padding:3px 6px 2px;border-radius:4px;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;color:var(--mute);font-size:13px;line-height:1.2;text-align:center;font-variant-numeric:tabular-nums;box-sizing:border-box}
+.xlist .xt{display:flex;flex-direction:column;align-items:flex-end;min-width:46px;line-height:1.15;font-variant-numeric:tabular-nums}
+.xlist .xt b{font-weight:400;font-size:16px}
+.xlist .xt small{font-size:12px;color:var(--mute)}
 .phead{display:flex;align-items:center;gap:10px}
 .phead h3{font-size:19px;color:var(--ink)}
 .pph{width:40px;height:40px;border-radius:6px;background:var(--seat);flex:none}

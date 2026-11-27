@@ -43,6 +43,10 @@ const hash = createHash("sha1").update(html).digest("hex").slice(0, 10);
 html = html.replace('"/*@ver*/"', JSON.stringify(hash));
 writeFileSync(new URL("index.html", out), html);
 writeFileSync(new URL("version.js", out), `export default ${JSON.stringify(hash)};\n`);
+// logo files (assets/icons, drawn by scripts/icons.py): favicon, home-screen icons, link preview image
+const ic = new URL("./assets/icons/", import.meta.url);
+const icons = Object.fromEntries(readdirSync(ic).filter((f) => /\.(png|svg)$/.test(f)).sort().map((f) => [f, readFileSync(new URL(f, ic)).toString("base64")]));
+writeFileSync(new URL("icons.js", out), `// built from assets/icons by build.mjs\nexport const ICON_FILES = ${JSON.stringify(icons)};\n`);
 writeFileSync(new URL("avatars.js", out), `// built from assets/avatars by build.mjs\nexport const AVATAR_IDS = ${JSON.stringify(AV_IDS)};\nexport const AVATAR_FILES = ${JSON.stringify(avFiles)};\n`);
 // the admin seat editor shares the seat plan with the page (src/page/js/28-seatplan.js), so both show the same seats
 let sala = readFileSync(new URL("./src/admin/sala.html", import.meta.url), "utf8");

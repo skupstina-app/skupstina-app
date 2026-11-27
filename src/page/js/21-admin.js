@@ -1,9 +1,10 @@
 /* Podešavanja → Admin meni: shown only to admins (/api/auth/me → admin {super, perms}).
    Admini: the super admin adds/removes admins and picks their menus (/admin/api/admins). Sala: opens /admin/sala.
+   Poruke (super admin): suggestions from Beleške and contact messages (/admin/api/poruke), filter, delete.
    Moderator: for now only the look (the tools come later). 20-chat.js calls admSet() with what /api/auth/me says. */
 var ADM=null;
 function admSet(a){ADM=a||null;$("#padmRow").hidden=!ADM;if(!ADM){admClose();return}
- $("#admAdmins").hidden=!ADM.super;$("#admSala").hidden=!ADM.perms.includes("sala");$("#admMod").hidden=!ADM.perms.includes("mod");
+ $("#admAdmins").hidden=!ADM.super;$("#admPoruke").hidden=!ADM.super;$("#admSala").hidden=!ADM.perms.includes("sala");$("#admMod").hidden=!ADM.perms.includes("mod");
 }
 {
 const dl=$("#admDlg"),err=$("#admErr"),list=$("#admList");
@@ -13,7 +14,7 @@ let data=null;
 const say=t=>{err.textContent=t||""};
 const api=async(body)=>{try{const r=await fetch("/admin/api/admins",body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"});return await r.json()}catch(x){return{ok:false,err:"net"}}};
 const ERR={net:"Nema veze. Pokušaj ponovo.",email:"Proveri email adresu.",super:"Samo super admin menja admine.",login:"Prijavi se ponovo."};
-function view(v){dl.querySelectorAll("[data-v]").forEach(x=>x.hidden=x.dataset.v!==v);say("");if(v==="admins")load();apply(dl)}
+function view(v){dl.querySelectorAll("[data-v]").forEach(x=>x.hidden=x.dataset.v!==v);say("");if(v==="admins")load();if(v==="poruke")pLoad();apply(dl)}
 function open(){if(!ADM)return;view("home");if(dl.showModal)dl.showModal();else dl.setAttribute("open","")}
 window.admClose=()=>{if(dl.open)dl.close?dl.close():dl.removeAttribute("open")};
 async function load(){list.innerHTML=`<li class="m">Učitavam…</li>`;const j=await api();if(!j.ok){list.innerHTML="";say(ERR[j.err]||ERR.net);return}data=j;draw()}
@@ -34,4 +35,17 @@ $("#admAdd").addEventListener("submit",async ev=>{ev.preventDefault();const em=$
  const perms=[...$$("#admNewP [data-p]")].filter(b=>b.getAttribute("aria-pressed")==="true").map(b=>b.dataset.p);
  if(await save({email:em,perms})){$("#admEmail").value=""}});
 $("#padm").onclick=open;
+// Poruke
+const KN={predlog:"Predlog",poruka:"Poruka",ispravka:"Ispravka podataka",greska:"Greška na sajtu"};
+let pm=null,pf="";
+const pList=$("#porList");
+const pApi=async(body)=>{try{const r=await fetch("/admin/api/poruke",body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"});return await r.json()}catch(x){return{ok:false,err:"net"}}};
+const when=s=>{const d=new Date(s);return isNaN(d)?String(s||"").slice(0,16).replace("T"," "):d.toLocaleString("sr-Latn-RS",{day:"numeric",month:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"})};
+async function pLoad(){pList.innerHTML=`<li class="m">Učitavam…</li>`;const j=await pApi();if(!j.ok){pList.innerHTML="";say(ERR[j.err]||ERR.net);return}pm=j.msgs;pDraw()}
+function pDraw(){const l=pm.filter(m=>!pf||(pf==="predlog"?m.kind==="predlog":m.kind!=="predlog"));
+ pList.innerHTML=l.length?l.map(m=>`<li data-id="${m.id}"><div class="ph"><span class="pk${m.kind==="predlog"?" pr":""}">${e(KN[m.kind]||m.kind)}</span><span class="m">${e(when(m.at))}</span></div><button type="button" class="rm" aria-label="Obriši">×</button><p class="pt nt">${e(m.msg)}</p>${m.mail?`<a class="pmail nt" href="mailto:${e(m.mail)}">${e(m.mail)}</a>`:""}</li>`).join(""):`<li class="m">Nema poruka.</li>`;apply(pList)}
+$("#porF").addEventListener("click",ev=>{const b=ev.target.closest("[data-f]");if(!b)return;pf=b.dataset.f;$$("#porF [data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b));if(pm)pDraw()});
+pList.addEventListener("click",async ev=>{const rm=ev.target.closest(".rm");if(!rm)return;
+ if(!rm.classList.contains("sure")){rm.classList.add("sure");rm.textContent="Obriši";setTimeout(()=>{if(rm.isConnected){rm.classList.remove("sure");rm.textContent="×"}},3000);return}
+ const j=await pApi({id:+rm.closest("li").dataset.id,remove:true});if(!j.ok){say(ERR[j.err]||ERR.net);return}pm=j.msgs;pDraw()});
 }

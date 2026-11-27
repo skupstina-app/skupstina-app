@@ -96,7 +96,8 @@ async function arPotvrde(){if(!arDay)return;try{const r=await fetch("/api/arhiva
 const arRes=r=>r?[r.za!=null?`za ${r.za}`:"",r.protiv!=null?`protiv ${r.protiv}`:"",r.uzdrzano?`uzdržano ${r.uzdrzano}`:""].filter(Boolean).join(" · "):"";
 function arRenderDay(){const d=arDay;if(!d)return;const D=arDoc;
  const list=arTot?[...arTot.entries()].sort((a,b)=>b[1].t-a[1].t):[];
- const rows=(arAll?list:list.slice(0,5)).map(([m,o],k)=>`<li><button type="button" data-arm="${m.id}"><span class="rk">${k+1}</span><span class="sph" style="--gc:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span><span class="nm"><b>${arEsc(m.name)}</b><small>${arEsc(arGroup(m))} · ${o.n||1} ${(o.n||1)===1?"put":"puta"}</small></span><span class="tm nt">${arMss(o.t)}</span></button></li>`).join("");
+ const arTt=list.reduce((s,[,o])=>s+o.t,0);
+ const rows=(arAll?list:list.slice(0,5)).map(([m,o],k)=>`<li><button type="button" data-arm="${m.id}"><span class="rk">${k+1}</span><span class="sph" style="--gc:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span><span class="nm"><b>${arEsc(m.name)}</b><small>${arEsc(arGroup(m))}</small></span>${xStats(o.n||1,o.t,arTt,arMss)}</button></li>`).join("");
  const span=d.first_clock?`${d.first_clock}–${d.last_clock||""}`:"";
  const ukr=D&&!D.obrada?(D.ev||[]).filter(e=>(e.k==="glasanje"||e.k==="konstatacija")&&e.p!==0&&!/^Povreda Poslovnika/i.test(e.t)).map(e=>e.h||e.o).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,4):[];
  const play=(at,label)=>`<button type="button" class="ar-pl" data-art="${at}" aria-label="${arEsc(label)}">${AI.play}</button>`;

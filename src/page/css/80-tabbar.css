@@ -5,9 +5,20 @@
 .infopop{position:fixed;z-index:45;top:76px;right:calc(max(0px,(100vw - 1240px)/2) + max(16px,4vw));width:min(340px,calc(100% - 32px));background:var(--card);color:var(--ink);border-radius:8px;box-shadow:0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.16);padding:16px 18px}
 .infopop[hidden]{display:none}
 .infopop h3{margin:0 0 4px;font:500 18px/1.25 "Wix Madefor Display",sans-serif}
-.infopop p{font-size:14px}
+.infopop p{font-size:14px;margin:0}
 .infopop ul{margin:10px 0 0;padding-left:18px;display:grid;gap:8px;font-size:15px;line-height:1.4}
 .infopop b{font-weight:500}
+.infopop{max-height:calc(100svh - 96px);overflow:auto}
+.infopop .ih{margin:14px 0 0;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.infopop .ih+ul{margin-top:6px}
+.infopop .idone li::marker{content:"✓  ";color:var(--live)}
+.ipred{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:8px}
+.ipred label{font-size:14px;font-weight:500}
+.ipred textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:70px;font:inherit;font-size:15px;line-height:1.4;padding:8px 10px;border-radius:6px;border:0;background:var(--chip);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}
+.ipred .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.ipred .irow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ipred .irow .m{font-size:14px}
+.ipred .b{min-height:36px;padding:0 14px;font-size:14px}
 @media(max-width:760px){.nav .infobtn{color:var(--ink);background:var(--card);box-shadow:var(--raise);width:40px;height:40px}}
 .tabbar{display:none}
 .ic{width:26px;height:26px}
@@ -17,7 +28,7 @@ body{padding-bottom:calc(68px + var(--tbb))}
 .nav{background:var(--bg);box-shadow:0 1px 0 var(--line)}
 .nav .word{color:var(--ink)}
 .nav .livechip,.nav .menubtn{display:none}
-.mark{width:36px;height:19px}
+.mark{width:30.667px;height:28px;margin-top:-4px}
 main{padding-top:72px;display:flex;flex-direction:column}
 main>*{width:100%}
 #arhiva{order:1}#statistika{order:2}

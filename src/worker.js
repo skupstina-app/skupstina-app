@@ -11,6 +11,7 @@ import { arhivaRoute, arhivaCron, arhivaImport } from "./arhiva.js";
 import { kanalCron, kanalRoute } from "./kanal.js";
 import { badgeLevel } from "./badges.mjs";
 import { AVATAR_FILES } from "./generated/avatars.js";
+import { ICON_FILES } from "./generated/icons.js";
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
 var PG = "https://www.parlament.gov.rs";
 var LIST_URL = PG + "/" + encodeURI("\u043D\u0430\u0440\u043E\u0434\u043D\u0430-\u0441\u043A\u0443\u043F\u0448\u0442\u0438\u043D\u0430/\u0441\u0430\u0441\u0442\u0430\u0432/\u043D\u0430\u0440\u043E\u0434\u043D\u0438-\u043F\u043E\u0441\u043B\u0430\u043D\u0438\u0446\u0438/\u0430\u043A\u0442\u0443\u0435\u043B\u043D\u0438-\u0441\u0430\u0437\u0438\u0432.11.html");
@@ -474,6 +475,18 @@ async function chatRoute(req, env, u) {
   return stub.fetch(new Request(new URL(u.pathname === "/api/chat" ? "/ws" : u.pathname.replace("/admin/chat", "/admin") + u.search, u.origin), { headers: h }));
 }
 __name(chatRoute, "chatRoute");
+// home-screen app (Android/Chrome install; iOS uses the apple-touch-icon and meta tags in index.html)
+var MANIFEST = JSON.stringify({
+  name: "skupština.app", short_name: "Skupština", lang: "sr-Latn", start_url: "/", scope: "/", display: "standalone",
+  background_color: "#f5f5f2", theme_color: "#f5f5f2",
+  description: "Narodna skupština uživo: prenos sednica, poslanici i statistika.",
+  icons: [
+    { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+    { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+    { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" }
+  ]
+});
 var worker_default = {
   async fetch(req, env, ctx) {
     const u = new URL(req.url), p = u.pathname;
@@ -484,6 +497,13 @@ var worker_default = {
         const b64 = Object.hasOwn(AVATAR_FILES, p.slice(3, -4)) && p.endsWith(".png") ? AVATAR_FILES[p.slice(3, -4)] : null;
         if (!b64) return new Response("not found", { status: 404 });
         return new Response(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { headers: { "content-type": "image/png", "cache-control": "public, max-age=86400" } });
+      }
+      if (p === "/manifest.webmanifest") return H(MANIFEST, "application/manifest+json", { "cache-control": "public, max-age=3600" });
+      if (p === "/favicon.ico" || p === "/favicon.svg" || p === "/og.png" || p.startsWith("/icons/")) {
+        const f = p === "/favicon.ico" ? "favicon-32.png" : p.slice(p.lastIndexOf("/") + 1);
+        if (!Object.hasOwn(ICON_FILES, f)) return new Response("not found", { status: 404 });
+        const bytes = Uint8Array.from(atob(ICON_FILES[f]), (c) => c.charCodeAt(0));
+        return new Response(bytes, { headers: { "content-type": f.endsWith(".svg") ? "image/svg+xml" : "image/png", "cache-control": "public, max-age=86400" } });
       }
       if (p.startsWith("/p/")) {
         const id = parseInt(p.slice(3));

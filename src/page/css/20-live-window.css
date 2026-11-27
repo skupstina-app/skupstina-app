@@ -126,7 +126,7 @@ body.islive #h-danas::after{background:var(--live);animation:blink 2.8s ease-in-
 footer{margin-top:clamp(72px,9vw,120px);border-top:1px solid var(--line);padding-block:32px 48px}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
 footer .word{color:var(--ink);font-size:22px}
-footer .mark{width:34px;height:18px}
+footer .mark{width:23px;height:21px}
 footer .fine{font-size:14px;color:var(--mute)}
 footer nav{display:flex;flex-wrap:wrap;gap:4px 20px;font-size:15px;color:var(--mute)}
 

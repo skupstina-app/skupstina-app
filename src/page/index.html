@@ -5,15 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>skupština.app</title>
 <meta name="description" content="Nezavisan sajt o Narodnoj skupštini: prenos sednica uživo i svih 250 narodnih poslanika.">
+<link rel="canonical" href="https://skupstina.app/">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="skupština.app">
+<meta property="og:locale" content="sr_RS">
+<meta property="og:url" content="https://skupstina.app/">
+<meta property="og:title" content="skupština.app">
+<meta property="og:description" content="Nezavisan sajt o Narodnoj skupštini: prenos sednica uživo i svih 250 narodnih poslanika.">
+<meta property="og:image" content="https://skupstina.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="skupština.app">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="skupština.app">
+<meta name="twitter:description" content="Nezavisan sajt o Narodnoj skupštini: prenos sednica uživo i svih 250 narodnih poslanika.">
+<meta name="twitter:image" content="https://skupstina.app/og.png">
 <meta name="apple-mobile-web-app-title" content="Skupština">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f5f5f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111211" media="(prefers-color-scheme: dark)">
 <style>@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-display-cyrillic-400-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-display-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-display-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-display-cyrillic-500-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-display-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Display'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-display-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-text-cyrillic-400-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-text-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 400; src:url(/fonts/wix-madefor-text-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-text-cyrillic-500-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-text-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }@font-face { font-family: 'Wix Madefor Text'; font-style: normal; font-display: swap; font-weight: 500; src:url(/fonts/wix-madefor-text-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }</style>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 11'%3E%3Crect x='7' width='7' height='1'/%3E%3C/svg%3E">
 <style>/*@css*/</style>
 </head>
 <body>
