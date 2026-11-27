@@ -5,7 +5,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
 import PAGE from "./generated/index.html";
 import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
-import { adminRoute, userAdmin } from "./admin.js";
+import { adminRoute, userAdmin, emptySeats } from "./admin.js";
 import { authRoute, currentUser } from "./auth.js";
 import { arhivaRoute, arhivaCron, arhivaImport } from "./arhiva.js";
 import { kanalCron, kanalRoute } from "./kanal.js";
@@ -203,7 +203,7 @@ async function seatsJson(req, env, ctx) {
   const { results } = await env.DB.prepare("SELECT id,seat FROM mps WHERE active=1 AND seat IS NOT NULL").all();
   const s = {};
   for (const x of results) s[x.id] = x.seat;
-  r = new Response(JSON.stringify({ s }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=15" } });
+  r = new Response(JSON.stringify({ s, e: await emptySeats(env) }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=15" } });
   ctx.waitUntil(cache.put(key, r.clone()));
   return r;
 }
@@ -217,7 +217,8 @@ async function page(env, ctx, req) {
   if (!r) {
     const html = PAGE;
     const data = JSON.stringify(await mpsJson(env)).replace(/</g, "\\u003c");
-    r = H(html.replace("/*MPS*/[]", data), "text/html; charset=utf-8", { "cache-control": "public, max-age=300" });
+    const empty = JSON.stringify(await emptySeats(env).catch(() => []));
+    r = H(html.replace("/*MPS*/[]", data).replace("/*EMPTY*/[]", empty), "text/html; charset=utf-8", { "cache-control": "public, max-age=300" });
     ctx.waitUntil(cache.put(key, r.clone()));
   }
   // the edge keeps it 5 min; browsers and home-screen apps must ask every time, so a deploy shows on the next open

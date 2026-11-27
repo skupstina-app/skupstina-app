@@ -34,6 +34,7 @@ html = html.replace("/*@ucolors*/", () => COLORS.map(([l], n) => `.u${n},#msgs .
 html = html.replace("/*@colors*/", () => readFileSync(new URL("./src/colors.mjs", import.meta.url), "utf8").replace(/^\/\/.*\n/gm, "").replace(/\s*\/\/ .*$/gm, "").replace(/^export /gm, ""));
 if (/\/\*@(css|js|avatars|soon|badgeh|ucolors|colors)\*\/|<!--@html /.test(html)) throw new Error("unfilled include marker");
 if (!html.includes("/*MPS*/[]")) throw new Error("MP data placeholder /*MPS*/[] is missing");
+if (!html.includes("/*EMPTY*/[]")) throw new Error("empty seats placeholder /*EMPTY*/[] is missing");
 
 const out = new URL("./src/generated/", import.meta.url);
 mkdirSync(out, { recursive: true });

@@ -7,9 +7,9 @@ let view="groups",active=live,focusMp=live.m;const geo={};
 /* who sits where: seatPlan() and benchSlots() in 28-seatplan.js, worked out once per seat change and shared by every map on the page */
 let layoutSig="",layoutC=null;
 function seatLayout(){
- const sig=mps.map(m=>m.seat||"").join(",");if(layoutC&&sig===layoutSig)return layoutC;layoutSig=sig;
+ const sig=mps.map(m=>m.seat||"").join(",")+"|"+EMPTYSEATS.join(",");if(layoutC&&sig===layoutSig)return layoutC;layoutSig=sig;
  const [SPK,VPS]=V1?splitLeads(mps,m=>m.role,m=>m.name):[null,[]],LEADS=new Set([SPK,...VPS].filter(Boolean)),inHall=mps.filter(m=>!LEADS.has(m));
- const plan=seatPlan(inHall,{seat:m=>m.seat,grp:m=>V1?seatGroupKey(m.g,m.pg):m.g,rank:m=>seatRank(m.pg,m.role),name:m=>m.name,id:m=>m.id??m.i});
+ const plan=seatPlan(inHall,{blocked:EMPTYSEATS,seat:m=>m.seat,grp:m=>V1?seatGroupKey(m.g,m.pg):m.g,rank:m=>seatRank(m.pg,m.role),name:m=>m.name,id:m=>m.id??m.i});
  return layoutC={SPK,VPS,LEADS,inHall,plan,bench:benchSlots(SPK,VPS,m=>m.seat),sig}}
 function drawMap(T=SALA){
  const hall=T.el,svg=T.svg,tip=T.tip,geo=T.geo,LIVE=T.live,V=LIVE?"live":view;
@@ -216,7 +216,8 @@ renderMps("");
 /* seats saved in the admin reach open pages without a reload: /api/seats (saved seats only, cached 15 s) is checked a few seconds after
    load (the page itself can be up to 5 minutes old) and then every minute while the page is visible; every map redraws from seatLayout() */
 async function pullSeats(){if(!V1||document.hidden)return;
- try{const r=await fetch("/api/seats");if(!r.ok)return;const s=(await r.json()).s||{};let ch=false;
+ try{const r=await fetch("/api/seats");if(!r.ok)return;const j=await r.json(),s=j.s||{},e=(j.e||[]).slice().sort();let ch=false;
+  if(e.join()!==EMPTYSEATS.slice().sort().join()){EMPTYSEATS=e;ch=true}
   mps.forEach(m=>{const k=s[m.id]||null;if((m.seat||null)!==k){m.seat=k;ch=true}});
   if(ch){drawMap();renderPanels(true)}}catch(e){}}
 setTimeout(pullSeats,4000);setInterval(pullSeats,60000);

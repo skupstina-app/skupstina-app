@@ -33,6 +33,7 @@ button:hover{border-color:rgba(255,255,255,.3)}
 .blbl,.rlbl{position:absolute;transform:translate(-50%,0);font-size:11px;line-height:12px;color:var(--mute);white-space:nowrap;pointer-events:none}
 .rlbl{transform:translate(-50%,-50%)}
 .seat.taken{border-color:var(--c)}
+.seat.blk{background:rgba(224,122,110,.12);border:1.5px dashed #e07a6e}
 .seat.sel{outline:2px solid var(--live);outline-offset:1px}
 .seat.over{outline:2px dashed var(--live)}
 .seat.no{outline:2px dashed #e07a6e}
@@ -62,6 +63,7 @@ button:hover{border-color:rgba(255,255,255,.3)}
 #card dd{margin:0}
 #card .acts{display:flex;gap:6px;flex-wrap:wrap}
 #card .acts button{font-size:13px;padding:5px 10px}
+#card .acts button.warn{border-color:#e07a6e;color:#e07a6e}
 #card .acts button[aria-pressed=true]{background:var(--live);color:#111211;border-color:var(--live)}
 .zb{display:flex;gap:4px;align-items:center}
 .zb button{padding:3px 10px;min-width:32px}
@@ -129,7 +131,7 @@ const $=s=>document.querySelector(s);
    hallSeats() = the seats, seatPlan() = saved seats + the site's automatic places for everyone else, benchSlots() = the presidium */
 const GROUPS=[["Studentska lista",/СТУДЕНТ/],["SVM",/МАЂАР|MAGYAR/],["Albanska koal.",/АЛБАН|SHQIP/],["Ljudski",/ЉАЈИЋ|ЉУДСКИ/],["SDA Sandžaka",/SDA|СДА|САНЏАК|SANDŽAK/],["Pokret za ujed.",/ПОКРЕТ ЗА УЈЕДИЊЕЊЕ|POKRET ZA UJEDINJENJE/],["Srbija pobeđuje",/УЈЕДИЊЕНА СРБИЈА|ВУЧИЋ/]];
 const gIdx=m=>{const x=(m.l||"").toUpperCase();return GROUPS.findIndex(g=>g[1].test(x))},gOf=m=>{const i=gIdx(m);return i<0?6:i};
-let MPS=[],sel=null,fg=-1,fs=0,fx="";const bySeat=new Map();
+let MPS=[],EMPTY=new Set(),selSeat=null,sel=null,fg=-1,fs=0,fx="";const bySeat=new Map();
 /* filters are remembered in this browser (stranka, mesto, pol) */
 try{const f=JSON.parse(localStorage.getItem("sala-f")||"{}");if(Number.isInteger(f.g))fg=f.g;if(Number.isInteger(f.s))fs=f.s;if(typeof f.x==="string")fx=f.x}catch(e){}
 const saveF=()=>{try{localStorage.setItem("sala-f",JSON.stringify({g:fg,s:fs,x:fx}))}catch(e){}};
@@ -162,11 +164,11 @@ function drawHall(){
   else{const a=!m&&AUTO.get(key),w=m||a;h+=`<button class="seat lead${m?" taken":a?" auto":""}${m&&m.lk?" lk":""}${w&&sel===w?" sel":""}" data-seat="${key}" style="${st}${w?`--c:var(--p${gOf(w)});${w.ph?`background-image:url(/p/${w.id})`:""}`:""}" title="${w?esc(w.n)+" · "+(w===SPK?"predsednik Skupštine":"potpredsednik")+(m&&m.lk?" (zaključan)":"")+(a?" (automatski, nije sačuvano)":"")+" · ":""}mesto ${j+1} u predsedništvu">${w&&!w.ph?`<span>${esc(ini(w.n))}</span>`:""}</button>`;if(a&&!m)SLOTS[j]=a}
   const mm=SLOTS[j];h+=`<span class="blbl" style="left:${x}px;top:${benY+benH+3}px">${mm==="SG"?"GS":mm==="GSD"?"ZGS":mm&&mm===SPK?(gap<62?"Pred.":"Predsednik"):mm?"PP":""}</span>`});
  pts.forEach(p=>{const key=p.key,m=bySeat.get(key),a=!m&&AUTO.get(key),w=m||a,x=cx-p.r*Math.cos(p.a),y=cy+p.r*Math.sin(p.a);
-  h+=`<button class="seat${m?" taken":a?" auto":""}${m&&m.lk?" lk":""}${w&&sel===w?" sel":""}" data-seat="${key}" title="${w?esc(w.n)+(m&&m.lk?" (zaključan)":"")+(a?" (automatski, nije sačuvano)":"")+" · ":""}red ${p.i+1}, sektor ${8-p.k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;${w?`--c:var(--p${gOf(w)});${w.ph?`background-image:url(/p/${w.id})`:""}`:""}">${w&&!w.ph?`<span>${esc(ini(w.n))}</span>`:""}</button>`});
+  const bl=!m&&EMPTY.has(key);h+=`<button class="seat${m?" taken":a?" auto":bl?" blk":""}${m&&m.lk?" lk":""}${(w&&sel===w)||selSeat===key?" sel":""}" data-seat="${key}" title="${bl?"prazno mesto (niko ne sedi) · ":""}${w?esc(w.n)+(m&&m.lk?" (zaključan)":"")+(a?" (automatski, nije sačuvano)":"")+" · ":""}red ${p.i+1}, sektor ${8-p.k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;${w?`--c:var(--p${gOf(w)});${w.ph?`background-image:url(/p/${w.id})`:""}`:""}">${w&&!w.ph?`<span>${esc(ini(w.n))}</span>`:""}</button>`});
  /* row numbers just above both ends of each outer row (the outer sections start one ring back) */
  for(let i=0;i<HALL_OUTER.length;i++){const r=r0+hallRing(i,0)*step;h+=`<span class="rlbl" style="left:${cx-r}px;top:${cy-s*.95}px">${i+1}</span><span class="rlbl" style="left:${cx+r}px;top:${cy-s*.95}px">${i+1}</span>`}
  const el=$("#hall");el.style.width=(W+2*pad)+"px";el.style.height=(cy+R+s/2+10)+"px";el.style.setProperty("--s",s+"px");el.innerHTML=h;
- const placed=MPS.filter(m=>m.s).length;$("#count").textContent=`sačuvano ${placed} / ${MPS.length}`;
+ const placed=MPS.filter(m=>m.s).length;$("#count").textContent=`sačuvano ${placed} / ${MPS.length}`+(EMPTY.size?` · prazno ${EMPTY.size}`:"");
 }
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const ini=n=>n.split(" ").map(w=>w[0]).join("").slice(0,3);
@@ -183,7 +185,7 @@ function drawList(){
  $("#list").innerHTML=rows.map(m=>`<li data-id="${m.id}" class="${sel===m?"sel ":""}${m.lk?"lk":""}" style="--c:var(--p${gOf(m)})"><span class="ph"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><span class="nm"><b>${m.lk?"🔒 ":""}${esc(m.n)}</b><span class="st">${GROUPS[gOf(m)][0]} · ${m.s?placeTxt(m.s):AUTOOF.has(m)?"automatski: "+placeTxt(AUTOOF.get(m)):"bez mesta"}</span></span></li>`).join("");
 }
 const placeTxt=k=>k.startsWith("p-")?`predsedništvo, mesto ${+k.slice(2)+1}`:`red ${+k.split("-")[0]+1}, sektor ${8-k.split("-")[1]}`;
-function draw(){index();drawHall();drawList();if(sel)showCard(sel)}
+function draw(){index();drawHall();drawList();if(sel)showCard(sel);else if(selSeat)showSeatCard(selSeat)}
 /* zoom = the hall's width. Buttons, slider, Ctrl/⌘ + wheel (also trackpad pinch), double-click on empty space, two-finger pinch.
    The point under the cursor / fingers stays put. Remembered per browser. */
 let zoomed=false;
@@ -217,7 +219,7 @@ function place(m,key){if(!m)return;const onBench=key.startsWith("p-");
  const other=at(key);if(other===m)return;
  if(onBench){if(BENCH_FIX[key.slice(2)]){status("To je stalno mesto generalnog sekretara / zamenika",false);return}
 }
- const old=m.s||null;const ch=[{id:m.id,seat:key}];
+ EMPTY.delete(key);const old=m.s||null;const ch=[{id:m.id,seat:key}];
  if(other){other.s=old;ch.push({id:other.id,seat:old})}m.s=key;draw();save(ch)}
 async function unseat(m){if(!m||!m.s)return;if(m.lk&&!await setLock(m,false))return;m.s=null;draw();save([{id:m.id,seat:null}])}
 const seatTxt=m=>m.s?placeTxt(m.s):AUTOOF.has(m)?`automatski: ${placeTxt(AUTOOF.get(m))} (nije sačuvano)`:"bez mesta";
@@ -228,24 +230,36 @@ const roleTxt=m=>/^Председник Народне/.test(m.r||"")?"predsedni
 
 /* the card: name and simple info, lock, remove from seat */
 const card=$("#card");let cardAnchor=null;
-function showCard(m,anchor){sel=m;if(anchor)cardAnchor=anchor;
+function showCard(m,anchor){sel=m;selSeat=null;if(anchor)cardAnchor=anchor;
  const can=!!m.s;
  card.style.setProperty("--c",`var(--p${gOf(m)})`);
  card.innerHTML=`<div class="hd"><span class="ph${m.ph?"":" np"}"${m.ph?` style="background-image:url(/p/${m.id})"`:""}></span><div><b>${esc(m.n)}</b><span class="m">${GROUPS[gOf(m)][0]}</span></div><button class="x" aria-label="Zatvori">×</button></div>
  <dl><dt>Mesto</dt><dd>${seatTxt(m)}</dd>${pgName(m)?`<dt>Grupa</dt><dd>${esc(lat(pgName(m)))}</dd>`:`<dt>Grupa</dt><dd class="m">bez poslaničke grupe</dd>`}${roleTxt(m)?`<dt>Funkcija</dt><dd>${esc(lat(roleTxt(m)))}</dd>`:""}${m.lk?`<dt>Status</dt><dd>zaključan na mestu</dd>`:""}</dl>
- <div class="acts"><button data-act="lock" aria-pressed="${!!m.lk}" ${can||m.lk?"":"disabled"}>${m.lk?"🔒 Zaključan":"Zaključaj"}</button>${m.s?`<button data-act="unseat">Skloni sa mesta</button>`:""}</div>`;
+ <div class="acts"><button data-act="lock" aria-pressed="${!!m.lk}" ${can||m.lk?"":"disabled"}>${m.lk?"🔒 Zaključan":"Zaključaj"}</button>${m.s?`<button data-act="unseat">Skloni sa mesta</button>`:""}${m.s&&!m.s.startsWith("p-")?`<button data-act="empty">Ostavi mesto prazno</button>`:""}</div>`;
  card.hidden=false;placeCard();
  document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));
  document.querySelectorAll(`#list [data-id="${m.id}"]`).forEach(x=>x.classList.add("sel"));const sk=seatKeyOf(m);if(sk)document.querySelector(`[data-seat="${sk}"]`)?.classList.add("sel")}
+/* a hall seat nobody is saved on: leave it empty on purpose (the site puts nobody there) or give it back */
+function showSeatCard(key,anchor){sel=null;selSeat=key;if(anchor)cardAnchor=anchor;const off=EMPTY.has(key);
+ card.style.setProperty("--c","var(--mute)");
+ card.innerHTML=`<div class="hd"><div><b>${off?"Prazno mesto":"Slobodno mesto"}</b><span class="m">${placeTxt(key)}, mesto ${+key.split("-")[2]+1}</span></div><button class="x" aria-label="Zatvori">×</button></div>
+ <div class="acts" style="margin-top:10px"><button data-act="${off?"open":"empty"}"${off?"":' class="warn"'}>${off?"Vrati mesto":"Ostavi prazno"}</button></div>`;
+ card.hidden=false;placeCard();
+ document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));document.querySelector(`[data-seat="${key}"]`)?.classList.add("sel")}
+async function setEmpty(key,on){status("Čuvam…");const j=await api("/admin/api/empty",{seat:key,on}).catch(()=>({ok:false}));
+ if(j.ok){if(on){EMPTY.add(key);MPS.forEach(m=>{if(m.s===key){m.s=null;m.lk=0}})}else EMPTY.delete(key);status(on?"Mesto ostaje prazno":"Mesto vraćeno");draw()}else status("Greška: nije sačuvano",false);return j.ok}
 const seatKeyOf=m=>m.s||AUTOOF.get(m)||null;
-function placeCard(){if(card.hidden||!sel)return;
- const sk=seatKeyOf(sel),el=(sk&&document.querySelector(`[data-seat="${sk}"]`))||document.querySelector(`#list [data-id="${sel.id}"]`)||cardAnchor;
+function placeCard(){if(card.hidden||(!sel&&!selSeat))return;
+ const sk=sel?seatKeyOf(sel):selSeat,el=(sk&&document.querySelector(`[data-seat="${sk}"]`))||(sel&&document.querySelector(`#list [data-id="${sel.id}"]`))||cardAnchor;
  const r=el&&el.isConnected?el.getBoundingClientRect():{left:innerWidth/2,right:innerWidth/2,top:innerHeight/2,bottom:innerHeight/2};
  const w=card.offsetWidth,h=card.offsetHeight;let x=r.right+10,y=r.top-10;if(x+w>innerWidth-8)x=r.left-w-10;if(x<8)x=Math.max(8,Math.min(innerWidth-w-8,r.left));
  if(x===Math.max(8,Math.min(innerWidth-w-8,r.left))&&r.bottom+h+10<innerHeight)y=r.bottom+8;y=Math.max(8,Math.min(innerHeight-h-8,y));card.style.left=x+"px";card.style.top=y+"px"}
-function hideCard(){card.hidden=true;sel=null;document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"))}
-card.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b||!sel)return;const m=sel;
+function hideCard(){card.hidden=true;sel=null;selSeat=null;document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"))}
+card.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
  if(b.classList.contains("x")){hideCard();return}
+ if(selSeat){if(b.dataset.act==="empty")setEmpty(selSeat,true);else if(b.dataset.act==="open")setEmpty(selSeat,false);return}
+ if(!sel)return;const m=sel;
+ if(b.dataset.act==="empty"){const k=m.s;if(k)setEmpty(k,true);return}
  if(b.dataset.act==="unseat"){unseat(m);return}
  if(b.dataset.act==="lock"){const want=!m.lk;
   /* a lead on an automatic bench place: save that place first, so the lock keeps him there */
@@ -296,7 +310,8 @@ function endPress(e,cancel){if(!press||e.pointerId!==press.id)return;const p=pre
   const t=target(e.clientX,e.clientY-LIFT(e));if(t&&t.seat)place(d.m,t.seat.dataset.seat);else if(t&&t.list)unseat(d.m);return}
  if(cancel)return;
  if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>10)return;
- if(p.m){sel===p.m&&!card.hidden?hideCard():showCard(p.m,p.el)}else hideCard()}
+ if(p.m){sel===p.m&&!card.hidden?hideCard():showCard(p.m,p.el)}
+ else if(p.el.dataset&&p.el.dataset.seat&&!p.el.dataset.seat.startsWith("p-")&&!p.el.matches("#list li")){const k=p.el.dataset.seat;selSeat===k&&!card.hidden?hideCard():showSeatCard(k,p.el)}else hideCard()}
 document.addEventListener("pointerup",e=>endPress(e,false));
 document.addEventListener("pointercancel",e=>endPress(e,true));
 document.addEventListener("click",e=>{if(!card.hidden&&!e.target.closest("#card,[data-seat],#list [data-id]"))hideCard()});
@@ -332,7 +347,7 @@ function endSheet(e){if(!sd||e.pointerId!==sd.id)return;const d=sd;sd=null;
  side.style.height="";side.classList.remove("moving");setUp(v<-.4?true:v>.4?false:h>(LO+HI())/2)}
 addEventListener("pointerup",endSheet);addEventListener("pointercancel",endSheet);
 $("#out").onclick=async()=>{await api("/admin/api/logout",{});location.reload()};
-async function load(){const j=await api("/admin/api/seats");if(!j.ok){showLogin();return}MPS=j.mps;let z=null;try{z=+localStorage.getItem("sala-w")}catch(e){}if(z){zoomed=true;HW=z;$("#zoom").value=z}else HW=fit();draw()}
+async function load(){const j=await api("/admin/api/seats");if(!j.ok){showLogin();return}MPS=j.mps;EMPTY=new Set(j.empty||[]);let z=null;try{z=+localStorage.getItem("sala-w")}catch(e){}if(z){zoomed=true;HW=z;$("#zoom").value=z}else HW=fit();draw()}
 function showLogin(){$("#app").hidden=true;$("#login").hidden=false;
  if(!CLIENT_ID){$("#lerr").textContent="Google prijava još nije podešena (nedostaje Client ID).";return}
  const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.onload=()=>{google.accounts.id.initialize({client_id:CLIENT_ID,callback:async r=>{const j=await api("/admin/api/login",{credential:r.credential});if(j.ok)location.reload();else $("#lerr").textContent=j.err==="not_admin"?`${j.email} nije administrator.`:"Prijava nije uspela."}});google.accounts.id.renderButton($("#gbtn"),{theme:"filled_black",size:"large",text:"signin_with",locale:"sr"})};document.head.appendChild(s)}

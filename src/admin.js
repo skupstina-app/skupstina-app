@@ -111,6 +111,19 @@ async function ensureLockCol(env) {
   lockCol = true;
 }
 
+/** Seats the admin left empty on purpose (D1 seat_empty): nobody is placed there, the site draws them as empty outlines. */
+let emptyTbl = false;
+async function ensureEmpty(env) {
+  if (emptyTbl) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS seat_empty(seat TEXT PRIMARY KEY)").run();
+  emptyTbl = true;
+}
+export async function emptySeats(env) {
+  await ensureEmpty(env);
+  const { results } = await env.DB.prepare("SELECT seat FROM seat_empty").all();
+  return results.map((x) => x.seat);
+}
+
 /** After a seat change: drop this data centre's cached copies of the page and of /api/seats, so the change shows at once here;
  *  elsewhere the page catches up within 5 minutes, and open pages pick it up from /api/seats within a minute (30-hall.js). */
 async function purgeSeats(req) {
@@ -180,9 +193,10 @@ export async function adminRoute(req, env, u, p) {
   if (!who.perms.includes("sala")) return json({ ok: false, err: "login" }, 401);
 
   await ensureLockCol(env);
+  await ensureEmpty(env);
   if (p === "/admin/api/seats" && req.method === "GET") {
     const { results } = await env.DB.prepare("SELECT m.id,m.name_lat n,m.electoral_list l,m.mp_group pg,m.assembly_role r,m.seat s,m.seat_lock lk,(SELECT 1 FROM photos p WHERE p.id=m.id) ph FROM mps m WHERE m.active=1 AND m.name_lat IS NOT NULL ORDER BY m.last_name,m.first_name").all();
-    return json({ ok: true, mps: results });
+    return json({ ok: true, mps: results, empty: await emptySeats(env) });
   }
   if (p === "/admin/api/seats" && req.method === "POST") {
     const { set } = await req.json().catch(() => ({}));
@@ -192,10 +206,22 @@ export async function adminRoute(req, env, u, p) {
     for (const x of set) {
       const id = parseInt(x.id), seat = x.seat == null ? null : String(x.seat);
       if (!id || (seat !== null && !SEAT.test(seat))) return json({ ok: false, err: "bad" }, 400);
-      if (seat) st.push(env.DB.prepare("UPDATE mps SET seat=NULL,seat_at=? WHERE seat=? AND id<>?").bind(at, seat, id));
+      if (seat) st.push(env.DB.prepare("UPDATE mps SET seat=NULL,seat_at=? WHERE seat=? AND id<>?").bind(at, seat, id), env.DB.prepare("DELETE FROM seat_empty WHERE seat=?").bind(seat)); // seating someone reopens a seat left empty
       st.push(env.DB.prepare("UPDATE mps SET seat=?,seat_at=? WHERE id=?").bind(seat, at, id));
     }
     await env.DB.batch(st);
+    await purgeSeats(req);
+    return json({ ok: true });
+  }
+  // leave a hall seat empty on purpose (on) or give it back (off); whoever was saved there goes back to the list
+  if (p === "/admin/api/empty" && req.method === "POST") {
+    const { seat, on } = await req.json().catch(() => ({}));
+    if (typeof seat !== "string" || !SEAT.test(seat) || seat.startsWith("p-")) return json({ ok: false, err: "bad" }, 400);
+    if (on) await env.DB.batch([
+      env.DB.prepare("UPDATE mps SET seat=NULL,seat_lock=0,seat_at=? WHERE seat=?").bind(new Date().toISOString(), seat),
+      env.DB.prepare("INSERT OR IGNORE INTO seat_empty(seat) VALUES(?)").bind(seat),
+    ]);
+    else await env.DB.prepare("DELETE FROM seat_empty WHERE seat=?").bind(seat).run();
     await purgeSeats(req);
     return json({ ok: true });
   }

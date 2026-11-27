@@ -9,6 +9,7 @@
    1. a default layout: every group gets a wedge of the hall in proportion to its size (its leaders in front, nearest the centre, then
       alphabetically). The groups go round the hall in the order the saved seats show (the average angle of each group's saved seats),
       so a group's automatic members sit on the same side as its saved ones, never in the middle of another group;
+   Seats the admin left empty on purpose (o.blocked: seat keys) get nobody, saved or automatic: they stay in `empty`, and the wedges are cut from the other seats.
    2. whoever's default seat is free keeps it. Someone whose default seat was taken by a saved seat moves to the nearest free seat in his own
       group's wedge (for example the one freed by a member of his group who was saved somewhere else), so one change in the admin moves one
       person on the site, not the whole hall. */
@@ -50,10 +51,10 @@ function benchSlots(spk,vps,seatOf){
  const late=[];def.forEach(([m,j])=>{if(!S[j])S[j]=m;else late.push(m)});vps.slice(6).forEach(m=>{if(!S.includes(m))late.push(m)});
  late.forEach(m=>{const k=BENCH_NEAR.find(i=>!S[i]);if(k!=null)S[k]=m});
  return S}
-/* list: the MPs in the hall (not the bench). o: {seat(m) saved key or null, grp(m) group key (number), rank(m) 0-3, name(m), id(m)}.
+/* list: the MPs in the hall (not the bench). o: {blocked: [seat keys left empty], seat(m) saved key or null, grp(m) group key (number), rank(m) 0-3, name(m), id(m)}.
    Returns {at: Map MP -> seat key, saved: Set of MPs on a saved seat, zone: Map seat key -> group key of its wedge, empty: [free seat keys]}. */
 function seatPlan(list,o){
- const {seats}=hallSeats(1),byKey=new Map(seats.map(p=>[p.key,p]));seats.forEach(p=>{p.x=-p.r*Math.cos(p.a);p.y=p.r*Math.sin(p.a)});
+ const {seats:all}=hallSeats(1),blk=new Set(o.blocked||[]),seats=all.filter(p=>!blk.has(p.key)),byKey=new Map(seats.map(p=>[p.key,p]));all.forEach(p=>{p.x=-p.r*Math.cos(p.a);p.y=p.r*Math.sin(p.a)});
  const L=[...list].sort((a,b)=>o.id(a)-o.id(b)),G=new Map(L.map(m=>[m,o.grp(m)]));
  const cmp=(a,b)=>o.rank(a)-o.rank(b)||o.name(a).localeCompare(o.name(b),"sr")||o.id(a)-o.id(b);
  /* saved seats (a seat saved twice, which the database doesn't allow, goes to the lower id) */
@@ -82,4 +83,4 @@ function seatPlan(list,o){
  while(cand.length){let bx=-1,bc=1e9;
   cand.forEach((x,i)=>{while(x.n<x.q.length&&occ.has(x.q[x.n].p.key))x.n++;const h=x.q[x.n];if(h&&h.c<bc-1e-9){bc=h.c;bx=i}});
   if(bx<0)break;const x=cand[bx],p=x.q[x.n].p;occ.add(p.key);at.set(x.m,p.key);cand.splice(bx,1)}
- return {at,saved:new Set(saved.keys()),zone,empty:seats.filter(p=>!occ.has(p.key)).map(p=>p.key)}}
+ return {at,saved:new Set(saved.keys()),zone,empty:all.filter(p=>blk.has(p.key)||!occ.has(p.key)).map(p=>p.key)}}

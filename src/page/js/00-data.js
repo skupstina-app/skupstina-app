@@ -11,6 +11,8 @@ const I_PON=`<svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-render
 const I_TROPHY=`<svg class="ic" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="1" width="9" height="1"/><rect x="1" y="2" width="2" height="1"/><rect x="10" y="2" width="2" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="1" y="5" width="2" height="1"/><rect x="10" y="5" width="2" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="3" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="4" y="8" width="5" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="4" y="11" width="5" height="1"/><rect x="3" y="12" width="7" height="1"/></svg>`;
 /* data: the server injects the real MP list here; empty = design preview with sample data */
 const REAL=/*MPS*/[];
+/* seats left empty on purpose (admin): nobody is placed there; the server injects the list, /api/seats keeps it fresh */
+let EMPTYSEATS=/*EMPTY*/[];
 const V1=REAL.length>0;if(V1)document.body.classList.add("v1");
 const VOTES=[2354417,35461,27673,20638,12596,12440,1731323],VOTERS=4441636,MAJ=126;
 const LEAD={0:["Jovo Bakić","Aleksandra Štimac",""],6:["Aleksandar Vučić","Milenko Jovanov","Srbija pobeđuje"]};
