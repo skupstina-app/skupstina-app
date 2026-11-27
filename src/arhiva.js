@@ -108,7 +108,7 @@ export async function arhivaRoute(req, env, u, p) {
   await ensureDan(env);
   if (p === "/api/arhiva") {
     // imported days (ar_dan) first; a day only our reader has (arhiva_dani) shows until the import brings it
-    const full = (await env.DB.prepare("SELECT date,sid,ses,dan,total_s,first_clock,last_clock,n,speakers,op,gl,hay,lines FROM ar_dan").all()).results;
+    const full = (await env.DB.prepare("SELECT date,sid,ses,dan,total_s,first_clock,last_clock,n,speakers,op,gl,hay,lines,(SELECT group_concat(m) FROM (SELECT DISTINCT json_extract(value,'$[2]') m FROM json_each(ar_dan.doc,'$.speeches'))) AS mps FROM ar_dan").all()).results;
     const got = new Set(full.map((r) => r.date));
     const own = (await env.DB.prepare("SELECT video,date,title,start_ms,dan,first_s,last_s,n,speakers,mps FROM arhiva_dani WHERE date IS NOT NULL").all()).results
       .filter((r) => !got.has(r.date)).map((r) => ({
@@ -116,7 +116,7 @@ export async function arhivaRoute(req, env, u, p) {
         first_clock: r.start_ms ? bgClock(r.start_ms + r.first_s * 1000) : null, last_clock: r.start_ms ? bgClock(r.start_ms + r.last_s * 1000) : null,
         n: r.n, speakers: r.speakers, op: null, gl: null, hay: "", mps: String(r.mps || "").split(",").filter(Boolean).map(Number), obrada: 1
       }));
-    full.forEach((r) => { r.lines = JSON.parse(r.lines || "[]"); });
+    full.forEach((r) => { r.lines = JSON.parse(r.lines || "[]"); r.mps = String(r.mps || "").split(",").filter(Boolean).map(Number); });
     const days = [...full, ...own].sort((a, b) => (a.date < b.date ? 1 : -1));
     // the next scheduled sitting (YouTube's upcoming live stream), shown on the newest day until a newer day comes
     let next = null;
