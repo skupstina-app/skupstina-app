@@ -52,9 +52,10 @@ function arList(){
  const hits=arDays.filter(d=>ws.every(w=>arHay(d).includes(w)));
  if(!arDays.length){box.innerHTML='<p class="ar-none">Arhiva je još prazna.</p>';return}
  if(!hits.length){box.innerHTML='<p class="ar-none">Nema rezultata.</p>';return}
- let html="",mon="";const months=new Map();hits.forEach(d=>{const k=d.date.slice(0,7);months.set(k,(months.get(k)||0)+1)});
+ if(arVw==="cal"){box.innerHTML=arCal(hits,ws.length>0);apply(box);return}
+ let html="",mon="";
  hits.forEach(d=>{const dt=arDate(d.date),k=d.date.slice(0,7);
-  if(k!==mon){if(mon)html+="</ol>";mon=k;const c=months.get(k),mn=AR_MON[dt.getUTCMonth()];html+=`<div class="ar-mon"><span>${mn[0].toUpperCase()+mn.slice(1)} ${dt.getUTCFullYear()}</span><span>${c} ${c===1?"dan":"dana"}</span></div><ol class="ar-days">`}
+  if(k!==mon){if(mon)html+="</ol>";mon=k;html+=`<div class="ar-mon"><span>${arMonName(dt)}</span></div><ol class="ar-days">`}
   const live=apiLive&&d.date===bgDay(Date.now());
   let hit="";if(ws.length){const ln=(d.lines||[]).find(l=>ws.some(w=>sfold(l).includes(w)));
    const nm=(d.mps||[]).map(arMp).filter(m=>m&&ws.some(w=>sfold(m.name).includes(w))).map(m=>m.name).slice(0,3);
@@ -62,6 +63,29 @@ function arList(){
   const span=d.first_clock?`${d.first_clock}–${d.last_clock||""}`:"";
   html+=`<li><a href="#arhiva" data-ard="${arEsc(d.date)}"><span class="ar-n"><b>${dt.getUTCDate()}</b><small>${AR_WD[dt.getUTCDay()]}</small></span><span class="ar-c"><b>${arEsc(d.ses)}</b><span class="ar-s">${[d.dan?d.dan+". dan":"",span].filter(Boolean).join(" · ")}</span><span class="ar-f"><span>${AI.sat}<span class="px">${arDur(d.total_s)}</span></span>${d.op?`<span aria-label="Opomene">${AI.op}<span class="px">${d.op}</span></span>`:""}${d.gl?`<span aria-label="Glasanja">${AI.glas}<span class="px">${d.gl}</span></span>`:""}${live?'<span class="ar-tag live"><i class="sq"></i>uživo</span>':d.obrada?`<span class="ar-tag">${AI.pesak}u obradi</span>`:""}</span>${hit?`<span class="ar-hit">${hit}</span>`:""}${ws.length?"":arNextLine(d)}</span></a></li>`});
  box.innerHTML=html+"</ol>";apply(box)}
+const arMonName=dt=>{const mn=AR_MON[dt.getUTCMonth()];return mn[0].toUpperCase()+mn.slice(1)+" "+dt.getUTCFullYear()};
+/* list / calendar switch (remembered in this browser) */
+let arVw=store.get("ar-v")==="cal"?"cal":"list";
+const arVwSet=v=>{arVw=v;store.set("ar-v",v);AR.dataset.vw=v;$$("#arVw button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v))};
+arVwSet(arVw);
+$("#arVw").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b||b.dataset.v===arVw)return;arVwSet(b.dataset.v);arList()});
+/* calendar: one month grid per month from the newest sitting back to the oldest (newest first); sitting days are tiles
+   with the day number, a bar for how long they sat, opomene in the corner; search dims the days that don't match */
+function arCal(hits,q){
+ const all=arDays,hit=new Set(hits.map(d=>d.date)),by=new Map(all.map(d=>[d.date,d]));
+ const today=bgDay(Date.now()),nx=arNext?new Date(arNext.at).toLocaleDateString("en-CA",{timeZone:"Europe/Belgrade"}):"";
+ const ks=all.map(d=>d.date).sort();let [y,m]=ks[ks.length-1].split("-").map(Number);const [y0,m0]=ks[0].split("-").map(Number);
+ const maxS=Math.max(...all.map(d=>d.total_s||0),1);let html="";
+ for(;y>y0||(y===y0&&m>=m0);m===1?(m=12,y--):m--){
+  const first=new Date(Date.UTC(y,m-1,1,12)),n=new Date(Date.UTC(y,m,0,12)).getUTCDate(),lead=(first.getUTCDay()+6)%7;
+  let c="";for(let i=0;i<lead;i++)c+="<i></i>";
+  for(let dd=1;dd<=n;dd++){const k=`${y}-${String(m).padStart(2,"0")}-${String(dd).padStart(2,"0")}`,d=by.get(k),wk=(lead+dd-1)%7>4;
+   const cls=[k===today?"td":"",wk?"wk":""].filter(Boolean).join(" ");
+   if(!d){c+=k===nx?`<span class="nx${cls?" "+cls:""}" title="Sledeća sednica"><b class="px">${dd}</b>${AI.sat}</span>`:`<span${cls?` class="${cls}"`:""}><b class="px">${dd}</b></span>`;continue}
+   const live=apiLive&&k===today,h=Math.max(.08,(d.total_s||0)/maxS);
+   c+=`<a href="#arhiva" data-ard="${k}" class="on${cls?" "+cls:""}${live?" lv":""}${q&&!hit.has(k)?" dim":""}" aria-label="${arEsc(arTitle(d)+", "+d.ses)}"><b class="px">${dd}</b>${d.op?`<span class="op">${AI.op}${d.op>1?`<span class="px">${d.op}</span>`:""}</span>`:""}<i class="ln" style="--h:${h.toFixed(3)}"></i></a>`}
+  html+=`<div class="ar-mon"><span>${arMonName(first)}</span></div><div class="ar-cal"><div class="ar-wd">${["P","U","S","Č","P","S","N"].map(x=>`<span>${x}</span>`).join("")}</div><div class="ar-g">${c}</div></div>`}
+ return html}
 $("#arQ").addEventListener("input",arList);
 $("#arQx").onclick=()=>{$("#arQ").value="";arList();$("#arQ").focus()};
 $("#arDays").addEventListener("click",e=>{const a=e.target.closest("[data-ard]");if(!a)return;e.preventDefault();const d=arDays.find(x=>x.date===a.dataset.ard);

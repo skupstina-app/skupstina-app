@@ -46,12 +46,12 @@ function drawMap(T=SALA){
  mps.forEach(m=>{const p=posOf.get(m);if(!p)return;
   if(LIVE)o+=seat(m,SH[m.g],1);
   else if(V==="groups"){const any=selG!==null||popFor==="bench",lead=LEADS.has(m),hl=popFor==="bench"?lead:(!any||selG===m.g);o+=hl?sq(p,any?s*1.15:s,popFor==="bench"?"var(--ink)":SH[m.g],1,m.g):sq(p,s*.85,"var(--seat)",1,m.g)}
-  else if(V==="mps")o+=m===fm?"":sq(p,s,SH[m.g],m.g===fm.g?.75:.25);
+  else if(V==="mps"){if(m===fm)return;const r=fOn()?(fOk(m)?sq(p,s,SH[m.g],1):sq(p,s*.8,"var(--seat)",1)):sq(p,s,SH[m.g],m.g===fm.g?.75:.25);o+=r.replace("<rect ",`<rect data-m="${m.i}" `)}
   else{const f=m.t/maxT;o+=m===fm?"":(m.t?sq(p,s*(.7+.8*Math.sqrt(f)),SH[m.g]):sq(p,s*.45,"var(--seat)"))}});
 
  const ap=LIVE?RP.get(fm):posOf.get(fm);
  if(V!=="groups"&&!LIVE)o+=sq({x:ap.x,y:ap.y},s*2,SH[fm.g]);
- const k=Math.round(LIVE?RP.get(fm).sz+8:V==="groups"?s+8:s*2+8);if(V!=="groups")o+=`<rect x="${Math.round(ap.x-k/2)}" y="${Math.round(ap.y-k/2)}" width="${k}" height="${k}" fill="none" stroke="var(--ink)" stroke-width="1.5"></rect>`;
+ const k=Math.round(LIVE?RP.get(fm).sz+8:V==="groups"?s+8:s*2+8);if(V!=="groups")o+=LIVE?`<rect x="${Math.round(ap.x-k/2)}" y="${Math.round(ap.y-k/2)}" width="${k}" height="${k}" fill="none" stroke="var(--ink)" stroke-width="1.5"></rect>`:fcsMark(ap.x,ap.y,k);
  svg.innerHTML=o;
  if(V==="groups"){
   tip.style.visibility="hidden";placeFocus();return;
@@ -59,12 +59,20 @@ function drawMap(T=SALA){
   const bl=blocks[selG],c=bl[Math.floor(bl.length/2)];
   tip.innerHTML=`<span>${groups[selG][2]} ${groups[selG][2]===1?"mesto":groups[selG][2]<5?"mesta":"mesta"}</span><b>${groups[selG][0]}</b>`;apply(tip);tip.style.visibility="visible";
   const bw=tip.offsetWidth,bh=tip.offsetHeight;tip.style.left=Math.min(Math.max(c.x-bw/2,8),W-bw-8)+"px";let y=c.y-bh-12;if(y<6)y=c.y+12;tip.style.top=y+"px";return}
+ if(V==="mps"&&!LIVE&&T===SALA){const z=mpZoomZ();if(z>1){const tx=W/2-z*ap.x,ty=H*.55-z*ap.y;svg.style.transform=`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${z})`;TX={tx,ty,z}}else{svg.style.transform="";TX={tx:0,ty:0,z:1}}}
+ else if(!LIVE&&T===SALA){TX={tx:0,ty:0,z:1}}
  tip.style.visibility="visible";
  const head=LIVE?"govori sada":V==="day"?(active.live?"govori":hm(active.t)+"  "+dur(active.d)):groups[fm.g][1];
  tip.innerHTML=`<span>${head}</span><b>${fm.name}</b>${LIVE?groups[fm.g][1]:V==="day"?active.l:(V1?"":fm.t?dur(fm.t)+" danas":"danas nije govorio")}`;apply(tip);
- const bw=tip.offsetWidth,bh=tip.offsetHeight;let x=Math.min(Math.max(ap.x-bw/2,8),W-bw-8),y=ap.y-bh-k/2-6;if(y<6)y=ap.y+k/2+6;tip.style.left=x+"px";tip.style.top=y+"px";
+ const bw=tip.offsetWidth,bh=tip.offsetHeight,zz=LIVE||T!==SALA?{tx:0,ty:0,z:1}:TX,ax=zz.tx+zz.z*ap.x,ay=zz.ty+zz.z*ap.y,kk=k*zz.z;let x=Math.min(Math.max(ax-bw/2,8),W-bw-8),y=ay-bh-kk/2-6;if(y<6)y=ay+kk/2+6;tip.style.left=x+"px";tip.style.top=y+"px";
 }
 const SALA={el:hall,svg,tip,geo,live:false};
+let TX={tx:0,ty:0,z:1},mpZoom=false;
+const mpZoomZ=()=>mpZoom?(innerWidth<=760?2.6:1.7):1;
+/* focus marker: four pixel corners around the seat that snap in (stepped, not smooth) */
+function fcsMark(x,y,k){const h=Math.round(k/2)+2,l=Math.max(3,Math.round(k*.32)),t=1.5,X=Math.round(x),Y=Math.round(y);let r="";
+ [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sy])=>{const cx=X+sx*h,cy=Y+sy*h;r+=`<rect x="${sx<0?cx:cx-l}" y="${sy<0?cy:cy-t}" width="${l}" height="${t}"></rect><rect x="${sx<0?cx:cx-t}" y="${sy<0?cy:cy-l}" width="${t}" height="${l}"></rect>`});
+ return `<g class="fcs" fill="var(--ink)" style="transform-origin:${X}px ${Y}px">${r}</g>`}
 const hallRO=new ResizeObserver(()=>drawMap());hallRO.observe(hall);
 
 /* sastav panel: a plain list; details open in a small window */
@@ -129,7 +137,7 @@ function placeFocus(){
 function openPop(what,anchor){popFor=what;pop.innerHTML=what==="bench"?benchPop():groupPop(what);apply(pop);pop.hidden=false;
  selG=what==="bench"?null:what;renderSastav();drawMap();pop.querySelector(".x").focus({preventScroll:true})}
 function closePop(){if(pop.hidden)return;pop.hidden=true;popFor=null;selG=null;svg.style.transform="";plink.hidden=true;renderSastav();drawMap()}
-pop.addEventListener("click",e=>{if(e.target.closest(".x"))closePop();const m=e.target.closest("[data-members]");if(m){gFilter=+m.dataset.members;closePop();renderMps("");setView("mps")}});
+pop.addEventListener("click",e=>{if(e.target.closest(".x"))closePop();const m=e.target.closest("[data-members]");if(m){gFilter=+m.dataset.members;sFilter="";aFilter=-1;$("#q").value="";closePop();renderMps("");setView("mps")}});
 $("#vGroups").addEventListener("click",e=>{const b=e.target.closest(".prow");if(!b)return;const w=b.dataset.bench?"bench":+b.dataset.g;popFor===w?closePop():openPop(w)});
 svg.addEventListener("click",e=>{if(view!=="groups")return;if(e.target.closest("[data-bench]")){popFor==="bench"?closePop():openPop("bench");return}const r=e.target.closest("rect[data-g]");if(r){const g=+r.dataset.g;popFor===g?closePop():openPop(g)}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
@@ -141,23 +149,48 @@ function lens(list,onFocus){let raf=0,cur=null;
  const pad=()=>{const p=Math.max(0,list.clientHeight/2-30)+"px";list.style.paddingTop=p;list.style.paddingBottom=p};
  const run=()=>{raf=0;const r=list.getBoundingClientRect();if(!r.height)return;const mid=r.top+r.height/2;let best=null,bd=1e9;
   for(const li of list.children){const b=li.getBoundingClientRect();if(b.bottom<r.top-80||b.top>r.bottom+80){li.style.setProperty("--f",0);continue}
-   const d=Math.abs(b.top+b.height/2-mid);li.style.setProperty("--f",Math.max(0,1-d/(r.height*.42)).toFixed(3));if(d<bd&&li.dataset.i){bd=d;best=li}}
+   const d=Math.abs(b.top+b.height/2-mid);li.style.setProperty("--f",Math.round(Math.max(0,1-d/(r.height*.42))*4)/4);if(d<bd&&li.dataset.i){bd=d;best=li}}
   if(best&&best!==cur){cur?.classList.remove("on");best.classList.add("on");cur=best;onFocus(best.dataset.i)}};
  list.addEventListener("scroll",()=>{raf||(raf=requestAnimationFrame(run))},{passive:true});
  list.addEventListener("click",e=>{const li=e.target.closest("li[data-i]");if(li)list.scrollTo({top:li.offsetTop-list.clientHeight/2+li.offsetHeight/2,behavior:reduce?"auto":"smooth"})});
  const ro=new ResizeObserver(()=>{pad();run()});ro.observe(list);
  return {run,center:i=>{const li=list.querySelector(`li[data-i="${i}"]`);if(li){list.scrollTop=li.offsetTop-list.clientHeight/2+li.offsetHeight/2;run()}}};
 }
-/* poslanici list */
+/* poslanici list: search + one filter button (stranka, pol, godine); a tap on a row (or on a seat in the hall) zooms the hall to
+   that MP and the camera follows the list while it scrolls; a tap on the same MP (or on the empty hall) zooms back out */
 const fold=sfold;
 const mpl=$("#mplist");
-let gFilter=null;
-const renderMps=q=>{const f=fold(q||"");const list=order.filter(m=>(gFilter===null||m.g===gFilter)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));
- const fc=$("#fchip");fc.hidden=gFilter===null;if(gFilter!==null){fc.innerHTML=`<button type="button" aria-label="Ukloni filter"><i style="background:${SH[gFilter]}"></i>${groups[gFilter][0]}<span aria-hidden="true">×</span></button>`;apply(fc)}
- mpl.innerHTML=list.length?list.map(m=>`<li data-i="${m.i}"><button type="button">${phm(m,`<span class="ph" aria-hidden="true"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`)}<span><span class="nm">${m.name}</span><br><span class="g">${groups[m.g][1]}</span></span><span class="d">${m.t?dur(m.t):""}${m.w?`<span class="w">${m.w}</span>`:""}</span></button></li>`).join(""):`<li class="empty">Nema rezultata</li>`;apply(mpl);mpLens.run()};
+let gFilter=null,sFilter="",aFilter=-1;
+const sexOf=m=>isF(m)?"z":"m"; /* isF: 79-panels.js */
+const AGES=[["do 35",0,35],["35–50",35,50],["50–65",50,65],["65+",65,200]],YR=new Date().getFullYear();
+const ageOf=m=>m.by?YR-m.by:null;
+const fOn=()=>gFilter!==null||!!sFilter||aFilter>=0;
+const fOk=m=>(gFilter===null||m.g===gFilter)&&(!sFilter||sexOf(m)===sFilter)&&(aFilter<0||(ageOf(m)!=null&&ageOf(m)>=AGES[aFilter][1]&&ageOf(m)<AGES[aFilter][2]));
+const fmenu=$("#fmenu"),fbtn=$("#fbtn");
+const fopt=(k,v,cur,txt,c)=>`<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${String(v)===String(cur)}">${c?`<i style="background:${c}"></i>`:""}${txt}</button>`;
+function drawFilters(){const n=(gFilter!==null)+(!!sFilter)+(aFilter>=0),b=fbtn.querySelector(".n");b.hidden=!n;b.textContent=n;fbtn.classList.toggle("on",!!n);
+ const hasAge=mps.some(m=>m.by);
+ fmenu.innerHTML=`<div><div class="fh"><span>Stranka</span>${n?`<button type="button" data-k="reset">Poništi</button>`:""}</div><div class="fopts">${fopt("g","",gFilter??"","Sve")}${groups.map((g,i)=>g[2]?fopt("g",i,gFilter??"",g[1],SH[i]):"").join("")}</div></div>
+ <div><div class="fh"><span>Pol</span></div><div class="fopts">${fopt("s","",sFilter,"Svi")}${fopt("s","m",sFilter,"Muški")}${fopt("s","z",sFilter,"Ženski")}</div></div>
+ ${hasAge?`<div><div class="fh"><span>Godine</span></div><div class="fopts">${fopt("a",-1,aFilter,"Sve")}${AGES.map((x,i)=>fopt("a",i,aFilter,x[0])).join("")}</div></div>`:""}`;apply(fmenu)}
+const openF=on=>{fmenu.hidden=!on;fbtn.setAttribute("aria-expanded",on);if(on)drawFilters()};
+fbtn.onclick=e=>{e.stopPropagation();openF(fmenu.hidden)};
+fmenu.onclick=e=>{e.stopPropagation();const b=e.target.closest("[data-k]");if(!b)return;const k=b.dataset.k,v=b.dataset.v;
+ if(k==="reset"){gFilter=null;sFilter="";aFilter=-1}else if(k==="g")gFilter=v===""?null:+v;else if(k==="s")sFilter=v;else aFilter=+v;
+ drawFilters();renderMps($("#q").value);mpl.scrollTop=0;mpLens.run();drawMap()};
+document.addEventListener("pointerdown",e=>{if(!fmenu.hidden&&!e.target.closest("#fmenu,#fbtn"))openF(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!fmenu.hidden)openF(false)});
+const renderMps=q=>{const f=fold(q||"");const list=order.filter(m=>fOk(m)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));drawFilters();
+ mpl.innerHTML=list.length?list.map(m=>`<li data-i="${m.i}" style="--c:${SH[m.g]}"><button type="button">${phm(m,`<span class="ph" aria-hidden="true"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`)}<span><span class="nm">${m.name}</span><br><span class="g">${groups[m.g][1]}</span></span><span class="d">${m.t?dur(m.t):""}${m.w?`<span class="w">${m.w}</span>`:""}</span></button></li>`).join(""):`<li class="empty">Nema rezultata</li>`;apply(mpl);mpLens.run()};
 const mpLens=lens(mpl,i=>{focusMp=mps[i];if(view==="mps")drawMap()});
 $("#q").addEventListener("input",e=>{renderMps(e.target.value);mpl.scrollTop=0});
-$("#fchip").addEventListener("click",()=>{gFilter=null;renderMps($("#q").value);mpl.scrollTop=0});renderMps("");
+mpl.addEventListener("click",e=>{const li=e.target.closest("li[data-i]");if(!li)return;const m=mps[li.dataset.i];
+ if(m===focusMp&&li.classList.contains("on"))mpZoom=!mpZoom;else mpZoom=true;drawMap()});
+svg.addEventListener("click",e=>{if(view!=="mps")return;const r=e.target.closest("rect[data-m]");
+ if(!r){if(mpZoom){mpZoom=false;drawMap()}return}
+ const m=mps[+r.dataset.m];if(!mpl.querySelector(`li[data-i="${m.i}"]`)){gFilter=null;sFilter="";aFilter=-1;$("#q").value="";renderMps("")}
+ mpZoom=true;focusMp=m;const li=mpl.querySelector(`li[data-i="${m.i}"]`);if(li)mpl.scrollTo({top:li.offsetTop-mpl.clientHeight/2+li.offsetHeight/2,behavior:reduce?"auto":"smooth"});drawMap()});
+renderMps("");
 /* seats saved in the admin reach open pages without a reload: /api/seats (saved seats only, cached 15 s) is checked a few seconds after
    load (the page itself can be up to 5 minutes old) and then every minute while the page is visible; every map redraws from seatLayout() */
 async function pullSeats(){if(!V1||document.hidden)return;

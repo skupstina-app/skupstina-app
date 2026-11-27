@@ -25,7 +25,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Top nav, menu sheet | `html/header.html` | `10-nav` | `10-nav` |
 | Uživo: player, speaker bar, chat, live stats | `html/live.html` | `20-live-window`, `60-uzivo`, `85-chat` | `15-live`, `20-chat`, `45-numbers`, `70-mini-fullscreen`, `72-mute-engine`, `76-player`, `78-live-status` |
 | Uživo panels: stats (podium button) and MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map: circles that would overlap push apart while a spring pulls them to their seat, `spread()`, with a thin line back to the seat when moved; the list shows each MP's photo ringed in his group colour; `tlDay()`: the stats say which day they are about — danas / juče / date — from `sitting` of `/api/live/speakers` (last time the stream was live; "" → "na poslednjoj sednici")) |
-| Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` |
+| Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` (Sastav / Poslanici is a menu under the hall; on phones the hall stays in view and only the list scrolls; Poslanici: search + filter button `#fbtn` (stranka, pol via `isF`, godine from `by`), a tap on a row or a seat zooms the hall to that MP (`mpZoom`) and the camera follows the list; pixel corner focus `fcsMark`) |
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
 | Arhiva (list of days → one day → its recording with a timeline; see Arhiva below) | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
 | Podešavanja (gear tab, `#profil`): account card with avatar + Izmeni, Ć/Ћ and sun/moon switches, rows, Odjavi se; avatar picker `#avDlg`; mutes, rules dialog; Admin meni `#admDlg` (admins only) | `html/profil.html` | `70-profil`, `71-admin` | `20-chat` (account card, avatar picker), `21-admin` (Admin meni), `55-mutes` |
@@ -156,6 +156,7 @@ The logo is the pixel building from "Dolazi uskoro" (23×21). Change it in `scri
     `start_ms`, `len_s` from the stream's YouTube page, which YouTube often refuses to Cloudflare, then null). Such a day
     shows (`obrada: 1`, "u obradi") only until the import has the same date.
   - Routes: `GET /api/arhiva` (list, with `hay` and `lines` for search), `GET /api/arhiva/day?d=<date>` (the document).
+- List / Kalendar switch next to search (`#arVw`, remembered in localStorage `ar-v`): the calendar (`arCal`) draws a month grid per month (newest first), sitting days as tiles with a duration bar and opomene; months are split by a plain "Novembar 2026" line. The titles "Arhiva" / "Sala" show only on wide screens (`.head.dt`).
 - Page (`65-arhiva.js`): `#arhiva[data-v=list|day|play]`, the phone's back button walks back (history state `{ar}`).
   The recording plays the day's parts back to back in our own YouTube player (`arP`; the live `yt` is paused): at a
   part's end the next part loads, or inside one stream we jump over the pause. Clock times come from the speeches'
