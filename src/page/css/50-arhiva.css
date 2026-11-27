@@ -1,5 +1,5 @@
 /* arhiva: list of sitting days → one day → its recording with a timeline. While the site is in V1 only admins see it
-   (body.arh, set in 65-arhiva.js); everyone else keeps "Dolazi uskoro" on phones. */
+   (body.arh, set in 65-arhiva.js for everyone). */
 @media(min-width:761px){body.v1.arh #arhiva{display:block!important}}
 @media(max-width:760px){body.v1.arh[data-tab=arhiva] #arhiva{display:block!important}body.v1.arh #uskoro-arhiva{display:none!important}}
 #arhiva{max-width:640px;--alarm:#dd5b2c}

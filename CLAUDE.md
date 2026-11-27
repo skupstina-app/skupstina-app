@@ -27,7 +27,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Uživo panels: stats (podium button) and MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map: circles that would overlap push apart while a spring pulls them to their seat, `spread()`, with a thin line back to the seat when moved; the list shows each MP's photo ringed in his group colour; `tlDay()`: the stats say which day they are about — danas / juče / date — from `sitting` of `/api/live/speakers` (last time the stream was live; "" → "na poslednjoj sednici")) |
 | Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` |
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
-| Arhiva (list of days → one day → its recording with a timeline; admins only while V1, see Arhiva below) | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
+| Arhiva (list of days → one day → its recording with a timeline; see Arhiva below) | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
 | Podešavanja (gear tab, `#profil`): account card with avatar + Izmeni, Ć/Ћ and sun/moon switches, rows, Odjavi se; avatar picker `#avDlg`; mutes, rules dialog; Admin meni `#admDlg` (admins only) | `html/profil.html` | `70-profil`, `71-admin` | `20-chat` (account card, avatar picker), `21-admin` (Admin meni), `55-mutes` |
 | Kontakt | `html/kontakt.html` | `90-launch-kontakt` | |
 | Bottom tab bar (phones) | `html/tabbar.html` | `80-tabbar` | `50-tabs-rang` |
@@ -152,7 +152,7 @@ Map of this repo. Read this first, then open only the file you need.
   long words; the line that matched shows under the day.
 - Sources are not shown under the content: they are listed in O sajtu → Izvori (`html/kontakt.html`, Podešavanja on phones) and the footer.
 - "Sledeća sednica" (YouTube's next scheduled plenary stream, from `yt_video`) shows only on the newest day, until a newer day is in.
-- Who sees it: `body.arh` (admins while V1, via a wrapper around `admSet`); everyone else keeps "Dolazi uskoro".
+- Open to everyone since 27 Nov 2026 (`body.arh`, set for all in 65-arhiva.js).
 - **Kanal** (`src/kanal.js`, cron): the @ParlamentSrbija channel through the YouTube Data API (secret `YT_API_KEY`):
   new uploads every run, older ones backfilled from `KANAL_FROM`, plenary videos of the last 21 days and live/upcoming
   ones asked again hourly (`gone` = YouTube no longer has it). `classify(title)` → `kind` (sednica / glasanje / pitanja,

@@ -4,7 +4,7 @@
    [at, dur, mp|null, name if not an MP, clock "10:05", summary, chair 0/1]; ev (glasanje / konstatacija / opomena,
    with at); agenda [n, at, title]. All "at" are day seconds (the parts back to back). A day only our reader has
    (obrada: 1) is one part: the whole stream.
-   While the site is in V1 only admins see it (body.arh): admSet() from 21-admin.js is wrapped below. */
+   Open to everyone (body.arh). */
 const AR=$("#arhiva");
 const AR_MON=["januar","februar","mart","april","maj","jun","jul","avgust","septembar","oktobar","novembar","decembar"];
 const AR_WD=["ned","pon","uto","sre","čet","pet","sub"],AR_WDL=["Nedelja","Ponedeljak","Utorak","Sreda","Četvrtak","Petak","Subota"];
@@ -252,7 +252,5 @@ $("#arPosL").addEventListener("click",e=>{const b=e.target.closest("[data-arp]")
 $("#arPBack").onclick=()=>history.state&&history.state.ar==="play"?history.back():(arView("day"),arRenderDay());
 /* leaving the Arhiva tab stops the recording */
 new MutationObserver(()=>{if(document.body.dataset.tab!=="arhiva")arPause()}).observe(document.body,{attributes:true,attributeFilter:["data-tab"]});
-/* who sees it: admins while V1, everyone in the design preview */
-function arGate(){const on=!V1||!!ADM;document.body.classList.toggle("arh",on);if(on)arLoad()}
-{const base=admSet;admSet=function(a){base(a);arGate()}}
-arGate();
+/* open to everyone */
+document.body.classList.add("arh");arLoad();
