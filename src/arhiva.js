@@ -189,7 +189,7 @@ async function potvrde(req, env, u) {
 // line per speech, kept for search). Our own day rows (arhiva_dani, from the reader) stay as a fallback for days the
 // import doesn't have yet. Times in a doc are "day seconds": the day's parts played back to back, pauses cut out.
 const LIVE = "https://skupstina.live";
-const PARSER = "#v2"; // bump when buildDoc changes: every day is read again
+const PARSER = "#v3"; // bump when buildDoc changes: every day is read again
 const fold = (s) => lat(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/dj/g, "d");
 
 async function ensureDan(env) {
@@ -220,7 +220,7 @@ export function opomene(sp, people) {
         if (w) { const j = out.findIndex((o) => o.mp === +w.p.mp); if (j >= 0) out.splice(j, 1); }
         return;
       }
-      if (!OP_NOW.test(f) || /\bne (izricem|izreknem)|necu/.test(f)) return;
+      if (!OP_NOW.test(f) || /\b(ne|nisam|necu|nije|nisu)\b[^.!?]{0,25}\b(izricem|izreknem|izreci)/.test(f)) return;
       let who = named(sent) || named(sents.slice(k + 1, k + 3).join(" "));
       if (!who) {
         const prev = sp.slice(0, i).reverse().find((x) => !isChair(x)), next = sp.slice(i + 1).find((x) => !isChair(x));
