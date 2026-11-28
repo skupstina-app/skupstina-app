@@ -75,15 +75,15 @@ function arCal(hits,q){
  const all=arDays,hit=new Set(hits.map(d=>d.date)),by=new Map(all.map(d=>[d.date,d]));
  const today=bgDay(Date.now()),nx=arNext?new Date(arNext.at).toLocaleDateString("en-CA",{timeZone:"Europe/Belgrade"}):"";
  const ks=all.map(d=>d.date).sort();let [y,m]=ks[ks.length-1].split("-").map(Number);const [y0,m0]=ks[0].split("-").map(Number);
- const maxS=Math.max(...all.map(d=>d.total_s||0),1);let html="";
+ let html="";
  for(;y>y0||(y===y0&&m>=m0);m===1?(m=12,y--):m--){
   const first=new Date(Date.UTC(y,m-1,1,12)),n=new Date(Date.UTC(y,m,0,12)).getUTCDate(),lead=(first.getUTCDay()+6)%7;
   let c="";for(let i=0;i<lead;i++)c+="<i></i>";
   for(let dd=1;dd<=n;dd++){const k=`${y}-${String(m).padStart(2,"0")}-${String(dd).padStart(2,"0")}`,d=by.get(k),wk=(lead+dd-1)%7>4;
    const cls=[k===today?"td":"",wk?"wk":""].filter(Boolean).join(" ");
    if(!d){c+=k===nx?`<span class="nx${cls?" "+cls:""}" title="Sledeća sednica"><b class="px">${dd}</b>${AI.sat}</span>`:`<span${cls?` class="${cls}"`:""}><b class="px">${dd}</b></span>`;continue}
-   const live=apiLive&&k===today,h=Math.max(.08,(d.total_s||0)/maxS);
-   c+=`<a href="#arhiva" data-ard="${k}" class="on${cls?" "+cls:""}${live?" lv":""}${q&&!hit.has(k)?" dim":""}" aria-label="${arEsc(arTitle(d)+", "+d.ses)}"><b class="px">${dd}</b>${d.op?`<span class="op">${AI.op}${d.op>1?`<span class="px">${d.op}</span>`:""}</span>`:""}<i class="ln" style="--h:${h.toFixed(3)}"></i></a>`}
+   const live=apiLive&&k===today;
+   c+=`<a href="#arhiva" data-ard="${k}" class="on${cls?" "+cls:""}${live?" lv":""}${q&&!hit.has(k)?" dim":""}" aria-label="${arEsc(arTitle(d)+", "+d.ses+(d.op?", opomene: "+d.op:"")+(d.gl?", glasanja: "+d.gl:""))}"><b class="px">${dd}</b>${d.op||d.gl?`<span class="mk">${d.op?`<span class="op">${AI.op}<span class="px">${d.op}</span></span>`:""}${d.gl?`<span class="gl">${AI.glas}<span class="px">${d.gl}</span></span>`:""}</span>`:""}</a>`}
   html+=`<div class="ar-mon"><span>${arMonName(first)}</span></div><div class="ar-cal"><div class="ar-wd">${["P","U","S","Č","P","S","N"].map(x=>`<span>${x}</span>`).join("")}</div><div class="ar-g">${c}</div></div>`}
  return html}
 $("#arQ").addEventListener("input",arList);
