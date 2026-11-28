@@ -54,7 +54,7 @@ pList.addEventListener("click",async ev=>{const rm=ev.target.closest(".rm");if(!
 const nl=$("#novList"),say=t=>{$("#admErr").textContent=t||""};let nm=[];
 const nApi=async b=>{try{const r=await fetch("/admin/api/novosti",b?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}:{cache:"no-store"});return await r.json()}catch(x){return{ok:false}}};
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-const draw=()=>{nl.innerHTML=nm.map(i=>`<li data-id="${i.id}"><div class="ph"><span class="m">${esc(i.day)}</span></div><p class="pt nt"><b>${esc(i.title)}</b>${i.body?": "+esc(i.body):""}</p><button type="button" class="rm" aria-label="Obriši">×</button></li>`).join("")};
+const draw=()=>{nl.innerHTML=nm.map(i=>`<li data-id="${i.id}"><div class="ph"><span class="m">${i.day.slice(8)+i.day.slice(5,7)+i.day.slice(2,4)}</span></div><p class="pt nt"><b>${esc(i.title)}</b>${i.body?": "+esc(i.body):""}</p><button type="button" class="rm" aria-label="Obriši">×</button></li>`).join("")};
 const got=j=>{if(!j.ok){say("Nije sačuvano.");return false}nm=j.items;draw();return true};
 window.nLoad=async()=>{$("#novDay").value=new Date().toLocaleDateString("sv",{timeZone:"Europe/Belgrade"});nl.innerHTML='<li class="m">Učitavam…</li>';got(await nApi())};
 $("#novAdd").addEventListener("submit",async ev=>{ev.preventDefault();say("");if(got(await nApi({day:$("#novDay").value,title:$("#novTitle").value,body:$("#novText").value}))){$("#novTitle").value="";$("#novText").value=""}});
