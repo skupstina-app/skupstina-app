@@ -202,7 +202,7 @@ fmenu.onclick=e=>{e.stopPropagation();const b=e.target.closest("[data-k]");if(!b
  drawFilters();renderMps($("#q").value);mpl.scrollTop=0;mpLens.run();drawMap()};
 document.addEventListener("pointerdown",e=>{if(!fmenu.hidden&&!e.target.closest("#fmenu,#fbtn"))openF(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!fmenu.hidden)openF(false)});
-const alpha=[...mps].sort((a,b)=>a.name.localeCompare(b.name,"sr"));
+const lastName=n=>String(n).trim().split(/\s+/).pop(),alpha=[...mps].sort((a,b)=>lastName(a.name).localeCompare(lastName(b.name),"sr")||a.name.localeCompare(b.name,"sr"));
 const renderMps=q=>{const f=fold(q||"");const list=alpha.filter(m=>fOk(m)&&(!f||fold(m.name+" "+groups[m.g][1]).includes(f)));drawFilters();
  mpl.innerHTML=list.length?list.map(m=>`<li data-i="${m.i}" style="--c:${SH[m.g]}"><button type="button">${phm(m,`<span class="ph" aria-hidden="true"${m.ph?` style="background:var(--seat) url(/p/${m.id}) center 20%/cover"`:""}></span>`)}<span><span class="nm">${m.name}</span><br><span class="g">${groups[m.g][1]}</span></span><span class="d">${m.t?dur(m.t):""}${m.w?`<span class="w">${m.w}</span>`:""}</span></button></li>`).join(""):`<li class="empty">Nema rezultata</li>`;apply(mpl);mpLens.run()};
 const mpLens=lens(mpl,i=>{if(det)return;focusMp=mps[i];if(view==="mps")drawMap()});
