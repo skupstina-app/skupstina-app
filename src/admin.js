@@ -36,6 +36,28 @@ async function ensureAdmins(env) {
   }
   adminsReady = true;
 }
+
+/** Novosti (patch notes) in D1 `novosti(id, day, title, body)`; created once, first filled with the early updates. Newest day first. */
+const NOV0 = [
+  ["2026-11-28", "Laka pretraga Poslovnika", "ukucaj broj člana (npr. 107) i odmah vidiš tekst, a možeš i da pređeš na tačno određeni stav."],
+  ["2026-11-28", "Pametno informisanje tokom gledanja", "kad mnogo gledalaca otvori isti član Poslovnika, i tebi se prikaže mali podsetnik sa njegovim tekstom dok gledaš prenos."],
+  ["2026-11-27", "Arhiva", "prošli dani sednica, sa snimkom i statistikom po danu."],
+  ["2026-11-27", "Profili poslanika", "osnovni podaci o svakom poslaniku."],
+  ["2026-11-26", "Rangiranje po vremenu gledanja", "što duže gledaš prenos, to viši nivo dobijaš."],
+  ["2026-11-26", "Utišavanje poslanika", "isključi zvuk prenosa dok govori neko koga ne želiš da slušaš."],
+  ["2026-11-25", "Profil i ikonice", "tvoj nalog sa avatarom, bojom imena i ikonicom pored imena u četu."],
+  ["2026-11-25", "Tačniji raspored sedenja", "poslanici su u sali tamo gde zaista sede."],
+];
+let novReady = false;
+export async function novList(env) {
+  if (!novReady) {
+    const had = await env.DB.prepare("SELECT 1 FROM sqlite_master WHERE name='novosti'").first();
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS novosti(id INTEGER PRIMARY KEY AUTOINCREMENT, day TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL DEFAULT '')").run();
+    if (!had) await env.DB.batch(NOV0.slice().reverse().map((r) => env.DB.prepare("INSERT INTO novosti(day,title,body) VALUES(?,?,?)").bind(...r)));
+    novReady = true;
+  }
+  return (await env.DB.prepare("SELECT id,day,title,body FROM novosti ORDER BY day DESC, id DESC LIMIT 200").all()).results;
+}
 const permList = (s) => String(s || "").split(",").filter((x) => PERMS.includes(x));
 
 /** What this email may do: {email, super, perms[]}, or null if it is not an admin. */
@@ -175,6 +197,22 @@ export async function adminRoute(req, env, u, p) {
     }
     const { results } = await env.DB.prepare("SELECT id,at,kind,msg,mail FROM messages ORDER BY id DESC LIMIT 300").all();
     return json({ ok: true, msgs: results });
+  }
+
+  // Novosti (super admin only): add / delete patch notes shown in Podešavanja → Novosti
+  if (p === "/admin/api/novosti") {
+    if (!who.super) return json({ ok: false, err: "super" }, 403);
+    if (req.method === "POST") {
+      const b = await req.json().catch(() => ({}));
+      await novList(env);
+      if (b.remove && Number.isInteger(b.id)) await env.DB.prepare("DELETE FROM novosti WHERE id=?").bind(b.id).run();
+      else {
+        const day = String(b.day || ""), title = String(b.title || "").trim().slice(0, 120), body = String(b.body || "").trim().slice(0, 600);
+        if (!/^\d{4}-\d\d-\d\d$/.test(day) || !title) return json({ ok: false, err: "bad" }, 400);
+        await env.DB.prepare("INSERT INTO novosti(day,title,body) VALUES(?,?,?)").bind(day, title, body).run();
+      }
+    }
+    return json({ ok: true, items: await novList(env) });
   }
 
   if (!who.perms.includes("sala")) return json({ ok: false, err: "login" }, 401);

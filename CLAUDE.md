@@ -227,4 +227,4 @@ out, and otherwise marks Podešavanja → Osveži aplikaciju with "novo" (that r
 
 ## Novosti
 
-Podešavanja → row "Novosti" opens `#novDlg` (`html/profil.html`): what shipped, grouped by day, plain language for users. When told about a new update, add it under a new day heading at the top (`.nvd` + `.nvl`).
+Podešavanja → row "Novosti" opens `#novDlg`: patch notes from D1 `novosti(id, day, title, body)` (`GET /api/novosti`; `novHTML()` in 25-info.js groups by day: today / yesterday say "Danas" / "Juče", older ones a short date). Admin meni → Patch notes (super admin; `/admin/api/novosti`, `novList()` in admin.js, table seeded once with the first updates) adds or deletes them, so no deploy is needed.

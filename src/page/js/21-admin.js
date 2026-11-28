@@ -4,7 +4,7 @@
    Moderator: for now only the look (the tools come later). 20-chat.js calls admSet() with what /api/auth/me says. */
 var ADM=null;
 function admSet(a){ADM=a||null;$("#padmRow").hidden=!ADM;if(!ADM){admClose();return}
- $("#admAdmins").hidden=!ADM.super;$("#admPoruke").hidden=!ADM.super;$("#admSala").hidden=!ADM.perms.includes("sala");$("#admMod").hidden=!ADM.perms.includes("mod");
+ $("#admAdmins").hidden=!ADM.super;$("#admPoruke").hidden=!ADM.super;$("#admNov").hidden=!ADM.super;$("#admSala").hidden=!ADM.perms.includes("sala");$("#admMod").hidden=!ADM.perms.includes("mod");
 }
 {
 const dl=$("#admDlg"),err=$("#admErr"),list=$("#admList");
@@ -14,7 +14,7 @@ let data=null;
 const say=t=>{err.textContent=t||""};
 const api=async(body)=>{try{const r=await fetch("/admin/api/admins",body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"});return await r.json()}catch(x){return{ok:false,err:"net"}}};
 const ERR={net:"Nema veze. Pokušaj ponovo.",email:"Proveri email adresu.",super:"Samo super admin menja admine.",login:"Prijavi se ponovo."};
-function view(v){dl.querySelectorAll("[data-v]").forEach(x=>x.hidden=x.dataset.v!==v);say("");if(v==="admins")load();if(v==="poruke")pLoad();apply(dl)}
+function view(v){dl.querySelectorAll("[data-v]").forEach(x=>x.hidden=x.dataset.v!==v);say("");if(v==="admins")load();if(v==="poruke")pLoad();if(v==="novosti")nLoad();apply(dl)}
 function open(){if(!ADM)return;view("home");if(dl.showModal)dl.showModal();else dl.setAttribute("open","")}
 window.admClose=()=>{if(dl.open)dl.close?dl.close():dl.removeAttribute("open")};
 async function load(){list.innerHTML=`<li class="m">Učitavam…</li>`;const j=await api();if(!j.ok){list.innerHTML="";say(ERR[j.err]||ERR.net);return}data=j;draw()}
@@ -48,4 +48,17 @@ $("#porF").addEventListener("click",ev=>{const b=ev.target.closest("[data-f]");i
 pList.addEventListener("click",async ev=>{const rm=ev.target.closest(".rm");if(!rm)return;
  if(!rm.classList.contains("sure")){rm.classList.add("sure");rm.textContent="Obriši";setTimeout(()=>{if(rm.isConnected){rm.classList.remove("sure");rm.textContent="×"}},3000);return}
  const j=await pApi({id:+rm.closest("li").dataset.id,remove:true});if(!j.ok){say(ERR[j.err]||ERR.net);return}pm=j.msgs;pDraw()});
+}
+
+{ // Patch notes: add / delete what Podešavanja → Novosti shows (/admin/api/novosti)
+const nl=$("#novList"),say=t=>{$("#admErr").textContent=t||""};let nm=[];
+const nApi=async b=>{try{const r=await fetch("/admin/api/novosti",b?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}:{cache:"no-store"});return await r.json()}catch(x){return{ok:false}}};
+const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const draw=()=>{nl.innerHTML=nm.map(i=>`<li data-id="${i.id}"><div class="ph"><span class="m">${esc(i.day)}</span></div><button type="button" class="rm" aria-label="Obriši">×</button><p class="pt nt"><b>${esc(i.title)}</b>${i.body?": "+esc(i.body):""}</p></li>`).join("")};
+const got=j=>{if(!j.ok){say("Nije sačuvano.");return false}nm=j.items;draw();return true};
+window.nLoad=async()=>{$("#novDay").value=new Date().toLocaleDateString("sv",{timeZone:"Europe/Belgrade"});nl.innerHTML='<li class="m">Učitavam…</li>';got(await nApi())};
+$("#novAdd").addEventListener("submit",async ev=>{ev.preventDefault();say("");if(got(await nApi({day:$("#novDay").value,title:$("#novTitle").value,body:$("#novText").value}))){$("#novTitle").value="";$("#novText").value=""}});
+nl.addEventListener("click",async ev=>{const rm=ev.target.closest(".rm");if(!rm)return;
+ if(!rm.classList.contains("sure")){rm.classList.add("sure");rm.textContent="Obriši";setTimeout(()=>{if(rm.isConnected){rm.classList.remove("sure");rm.textContent="×"}},3000);return}
+ got(await nApi({id:+rm.closest("li").dataset.id,remove:true}))});
 }

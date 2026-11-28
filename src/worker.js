@@ -5,7 +5,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
 import PAGE from "./generated/index.html";
 import PAGE_HASH from "./generated/version.js";
 import HOLD from "./hold.html";
-import { adminRoute, userAdmin } from "./admin.js";
+import { adminRoute, userAdmin, novList } from "./admin.js";
 import { authRoute, currentUser, trusted } from "./auth.js";
 import { arhivaRoute, arhivaCron, arhivaImport } from "./arhiva.js";
 import { kanalCron, kanalRoute } from "./kanal.js";
@@ -551,6 +551,7 @@ var worker_default = {
       if (p === "/poslovnik.json") return new Response(POSLOVNIK_JSON, { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=3600" } });
       if (p === "/api/mps") return json(await mpsJson(env));
       if (p === "/api/seats") return seatsJson(req, env, ctx);
+      if (p === "/api/novosti") return json({ items: await novList(env) });
       if (p === "/api/version") return json({ v: PAGE_HASH });
       if (p === "/api/live/speakers") return json({ segments: [] });
       if (p === "/api/arhiva" || p === "/api/arhiva/day" || p === "/api/arhiva/potvrde") return await arhivaRoute(req, env, u, p);

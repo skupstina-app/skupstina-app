@@ -16,3 +16,8 @@ const KP=[["Trajanje",dur(elapsed)],["Govori",talks.length],["Govornici",spoke.s
 $$('[role=tab]').forEach(b=>b.onclick=()=>{$$('[role=tab]').forEach(x=>{const on=x===b;x.setAttribute("aria-selected",on);$("#"+x.getAttribute("aria-controls")).hidden=!on});$("#compose").hidden=b.id!=="t-chat"});
 
 
+
+/* Novosti list: items [{day:"YYYY-MM-DD", title, body}] grouped by day; today / yesterday (Belgrade) say so, older days a short date */
+function novHTML(items){const bg=d=>d.toLocaleDateString("sv",{timeZone:"Europe/Belgrade"}),now=new Date(),t=bg(now),y=bg(new Date(+now-864e5)),MON=["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"],esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;"),g={};
+ items.forEach(i=>(g[i.day]=g[i.day]||[]).push(i));
+ return Object.keys(g).sort().reverse().map(d=>`<h4 class="nvd">${d===t?"Danas":d===y?"Juče":(+d.slice(8))+". "+MON[+d.slice(5,7)-1]}</h4><ul class="nvl">${g[d].map(i=>`<li><b>${esc(i.title)}</b>${i.body?": "+esc(i.body):""}</li>`).join("")}</ul>`).join("")||'<p class="m">Nema novosti.</p>'}
