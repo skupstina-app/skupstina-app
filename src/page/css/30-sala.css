@@ -53,7 +53,7 @@
 .pop[hidden]{display:none}
 .pop .phd{display:grid;grid-template-columns:12px minmax(0,1fr) 40px;gap:10px;align-items:center;margin-bottom:12px}
 .pop .phd h3{margin:0;font:500 18px/1.25 "Wix Madefor Display",sans-serif}
-.pop .x{width:40px;height:40px;border:0;border-radius:6px;background:var(--chip);font-size:20px;line-height:1;color:var(--mute)}
+.pop .x{width:44px;height:44px;border:0;border-radius:50%;background:var(--chip);font-size:28px;line-height:1;color:var(--ink)}.pop .x:focus,.pop .x:focus-visible{outline:none}
 .pop .sec{border-top:1px solid var(--line);padding:12px 0;display:grid;gap:6px;font-size:15px}
 .pop .sec:first-of-type{border-top:0;padding-top:0}
 .pop .lab{font-size:13px;color:var(--mute)}

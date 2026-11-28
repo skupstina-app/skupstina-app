@@ -4,13 +4,14 @@
 /* sign-in dialog */
 .adlg{width:min(420px,calc(100vw - 24px));max-height:calc(100svh - 24px);overflow:auto;border:0;border-radius:12px;padding:22px 20px 18px;background:var(--card);color:var(--ink);box-shadow:var(--ring)}
 .adlg::backdrop{background:rgba(0,0,0,.55)}
-.adlg h3{margin:0 0 6px;font:500 20px/1.25 "Wix Madefor Display","Wix Madefor Text",sans-serif}
+.adlg h3{margin:0 0 6px;padding-right:36px;font:500 20px/1.25 "Wix Madefor Display","Wix Madefor Text",sans-serif}
 .adlg p{margin:0 0 14px;font-size:15px}
 .adlg [data-step]{display:flex;flex-direction:column;gap:10px}
 .adlg [data-step][hidden]{display:none}
 .adlg input{width:100%;min-height:46px;padding:0 12px;border-radius:8px;border:0;background:var(--chip);box-shadow:0 0 0 1px var(--line) inset;color:var(--ink);font:inherit}
 .adlg form{display:flex;flex-direction:column;gap:10px}
-.ax{position:absolute;top:8px;right:8px;width:40px;height:40px;border:0;background:none;color:var(--mute);font-size:24px;line-height:1;cursor:pointer}
+.ax{position:absolute;top:8px;right:8px;width:48px;height:48px;border:0;border-radius:50%;background:var(--chip);color:var(--ink);font-size:30px;line-height:1;cursor:pointer;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+.ax:focus,.ax:focus-visible{outline:none}.ax:active{opacity:.7}
 .gsi{min-height:44px;display:flex;justify-content:center}
 .or{display:flex;align-items:center;gap:10px;font-size:13px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
 .abtns{display:flex;gap:8px;flex-wrap:wrap}.abtns .b{flex:1;min-height:46px}
@@ -26,7 +27,7 @@
 .cjoin:active{transform:translateY(1px)}
 .cjoin .gpx{width:20px;height:20px;padding:4px;box-sizing:content-box;border-radius:6px;background:#fff;flex:none}
 .cjoin[hidden],.cbox[hidden],.cme[hidden],.anote[hidden]{display:none!important}
-.adlg h3.act{text-align:center;margin:4px 0 8px}
+.adlg h3.act{text-align:center;margin:4px 0 8px;padding-right:0}
 .agoogle{margin-top:4px}
 .or span{padding:0 2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
