@@ -10,3 +10,17 @@
  b.onclick=()=>set(!document.body.classList.contains("theater"));
  document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("theater"))set(false)});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("theater"))set(false)});}
+/* keyboard on the chat box: pin the live window to the visible viewport so the video stays on screen */
+{const vv=visualViewport,b=document.body,r=document.documentElement.style;
+ const fit=()=>{if(!vv)return;r.setProperty("--vvt",vv.offsetTop+"px");r.setProperty("--vvh",vv.height+"px")};
+ const on=e=>{if(e.target.id!=="cin")return;b.classList.add("kb");fit()};
+ const off=e=>{if(e.target.id!=="cin")return;b.classList.remove("kb");r.removeProperty("--vvt");r.removeProperty("--vvh")};
+ document.addEventListener("focusin",on);document.addEventListener("focusout",off);
+ vv&&["resize","scroll"].forEach(t=>vv.addEventListener(t,()=>b.classList.contains("kb")&&fit()));}
+/* keyboard on the chat box: pin the live window to the visible viewport so the video stays on screen */
+{const vv=visualViewport,b=document.body,r=document.documentElement.style;
+ const fit=()=>{if(!vv)return;r.setProperty("--vvt",vv.offsetTop+"px");r.setProperty("--vvh",vv.height+"px")};
+ const on=e=>{if(e.target.id!=="cin")return;b.classList.add("kb");fit()};
+ const off=e=>{if(e.target.id!=="cin")return;b.classList.remove("kb");r.removeProperty("--vvt");r.removeProperty("--vvh")};
+ document.addEventListener("focusin",on);document.addEventListener("focusout",off);
+ vv&&["resize","scroll"].forEach(t=>vv.addEventListener(t,()=>b.classList.contains("kb")&&fit()));}

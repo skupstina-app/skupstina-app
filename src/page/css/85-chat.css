@@ -20,7 +20,7 @@ body.v1 .vbar[role=group] .who{display:flex!important}
 .vbar[role=group].nosp .who .g{color:var(--mute2)}
 .vbar[role=group].nosp .mmp{opacity:.35;box-shadow:none}
 .vbar[role=group].auto{box-shadow:0 0 0 1.5px var(--ink) inset}
-body.theater .vsticky .vbar[role=group]{margin:0;border-radius:0}
+:is(body.theater,body.kb) .vsticky .vbar[role=group]{margin:0;border-radius:0}
 }
 /* watching badge (19-badges.js): a 15×15 pixel building in front of a name; 15 px keeps the pixels whole on any screen */
 .bdg{display:inline-block;width:15px;height:15px;flex:none;vertical-align:-2px;image-rendering:pixelated}
