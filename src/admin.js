@@ -39,8 +39,8 @@ async function ensureAdmins(env) {
 
 /** Novosti (patch notes) in D1 `novosti(id, day, title, body)`; created once, first filled with the early updates. Newest day first. */
 const NOV0 = [
-  ["2026-11-28", "Laka pretraga Poslovnika", "ukucaj broj člana (npr. 107) i odmah vidiš tekst, a možeš i da pređeš na tačno određeni stav."],
-  ["2026-11-28", "Pametno informisanje tokom gledanja", "kad mnogo gledalaca otvori isti član Poslovnika, i tebi se prikaže mali podsetnik sa njegovim tekstom dok gledaš prenos."],
+  ["2026-11-28", "Laka pretraga Poslovnika", "ukucaj broj člana i odmah vidiš šta piše, pa lako dođeš i do tačnog stava."],
+  ["2026-11-28", "Pametno informisanje tokom gledanja", "dok gledaš prenos, sajt ti pametno predloži član Poslovnika koji vredi da pročitaš."],
   ["2026-11-27", "Arhiva", "prošli dani sednica, sa snimkom i statistikom po danu."],
   ["2026-11-27", "Profili poslanika", "osnovni podaci o svakom poslaniku."],
   ["2026-11-26", "Rangiranje po vremenu gledanja", "što duže gledaš prenos, to viši nivo dobijaš."],
@@ -54,6 +54,10 @@ export async function novList(env) {
     const had = await env.DB.prepare("SELECT 1 FROM sqlite_master WHERE name='novosti'").first();
     await env.DB.prepare("CREATE TABLE IF NOT EXISTS novosti(id INTEGER PRIMARY KEY AUTOINCREMENT, day TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL DEFAULT '')").run();
     if (!had) await env.DB.batch(NOV0.slice().reverse().map((r) => env.DB.prepare("INSERT INTO novosti(day,title,body) VALUES(?,?,?)").bind(...r)));
+    await env.DB.batch([
+      env.DB.prepare("UPDATE novosti SET body=? WHERE body=?").bind("ukucaj broj člana i odmah vidiš šta piše, pa lako dođeš i do tačnog stava.", "ukucaj broj člana (npr. 107) i odmah vidiš tekst, a možeš i da pređeš na tačno određeni stav."),
+      env.DB.prepare("UPDATE novosti SET body=? WHERE body=?").bind("dok gledaš prenos, sajt ti pametno predloži član Poslovnika koji vredi da pročitaš.", "kad mnogo gledalaca otvori isti član Poslovnika, i tebi se prikaže mali podsetnik sa njegovim tekstom dok gledaš prenos."),
+    ]);
     novReady = true;
   }
   return (await env.DB.prepare("SELECT id,day,title,body FROM novosti ORDER BY day DESC, id DESC LIMIT 200").all()).results;
