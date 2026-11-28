@@ -36,7 +36,7 @@ $("#admAdd").addEventListener("submit",async ev=>{ev.preventDefault();const em=$
  if(await save({email:em,perms})){$("#admEmail").value=""}});
 $("#padm").onclick=open;
 // Poruke
-const KN={predlog:"Predlog",poruka:"Poruka",ispravka:"Ispravka podataka",greska:"Greška na sajtu"};
+const KN={predlog:"Predlog",poruka:"Poruka",ispravka:"Ispravka podataka",greska:"Greška na sajtu",pomoc:"Želim da pomognem"};
 let pm=null,pf="";
 const pList=$("#porList");
 const pApi=async(body)=>{try{const r=await fetch("/admin/api/poruke",body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"});return await r.json()}catch(x){return{ok:false,err:"net"}}};

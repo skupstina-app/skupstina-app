@@ -29,7 +29,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
 | Arhiva (list of days → one day → its recording with a timeline; see Arhiva below) | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
 | Podešavanja (gear tab, `#profil`): account card with avatar + Izmeni, Ć/Ћ and sun/moon switches, rows, Odjavi se; avatar picker `#avDlg`; mutes, rules dialog; Admin meni `#admDlg` (admins only) | `html/profil.html` | `70-profil`, `71-admin` | `20-chat` (account card, avatar picker), `21-admin` (Admin meni), `55-mutes` |
-| Kontakt | `html/kontakt.html` | `90-launch-kontakt` | |
+| Kontaktiraj nas (form `#kontDlg`) and Izvori podataka (`#izvDlg`, the old "O sajtu"): dialogs opened from rows in Podešavanja, also from `#kontakt` / `#o-sajtu` links; `html/kontakt.html` is empty | `html/profil.html` | `90-launch-kontakt` | `20-chat` |
 | Bottom tab bar (phones) | `html/tabbar.html` | `80-tabbar` | `50-tabs-rang` |
 | Footer | `html/footer.html` | | |
 | Logo, favicon, home-screen icons, link preview | `index.html` (meta, og:*), header/footer inline logo | `10-nav` (`.mark`) | `scripts/icons.py` → `assets/icons/` → `src/generated/icons.js`, served at `/favicon.svg`, `/favicon.ico`, `/icons/*`, `/og.png`; `/manifest.webmanifest` (`MANIFEST` in worker.js) |

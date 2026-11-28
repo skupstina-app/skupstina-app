@@ -12,6 +12,6 @@ body.v1 .vol{margin-left:auto}
 .krow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .kabout{display:grid;gap:10px;font-size:15px}
 .kabout h3{margin:0;font:500 18px/1.3 "Wix Madefor Display",sans-serif}
-.kabout a{text-decoration:underline;text-underline-offset:2px}
+.kabout a,#izvDlg a{text-decoration:underline;text-underline-offset:2px}
 @media(max-width:900px){.kgrid{grid-template-columns:minmax(0,1fr)}}
 .kizv{margin:6px 0 10px;padding-left:18px;display:grid;gap:6px;font-size:15px;line-height:1.4}

@@ -24,7 +24,7 @@ const post=async(url,body)=>{try{const r=await fetch(url,{method:"POST",headers:
 function ui(){
  $("#pacctBody").innerHTML=me
   ?`<div class="acard"><button type="button" class="avbtn" id="pav" aria-label="Promeni avatar" title="Promeni avatar"><img class="av" src="${avSrc(me.avatar)}" alt="" width="64" height="64"><span class="avpen">${I_EDIT}</span></button><div class="aname"><span class="anrow"><button type="button" class="lvb" id="pLvl" aria-label="Sati gledanja" aria-expanded="false">${lvlIcon()}</button><button type="button" class="nbtn nt u${me.color}" id="pcol" aria-label="Boja imena: ${esc(me.name)}" aria-haspopup="dialog">${esc(me.name)}</button><span class="lvbub px" id="pLvlB" role="status" hidden></span></span><span class="m nt">${esc(me.email||"")}</span></div><button type="button" class="b light aedit" id="pedit">${I_EDIT}<span>Izmeni</span></button></div>`
-  :`<div class="acard"><img class="av" src="${avSrc()}" alt="" width="64" height="64"><div class="aname"><b>Gost</b><span class="m">Prijavi se da pišeš u razgovoru.</span></div></div><button type="button" class="b dark" id="plogin">Napravi nalog ili se prijavi</button>`;
+  :`<div class="acard"><img class="av" src="${avSrc()}" alt="" width="64" height="64"><div class="aname"><b>Gost</b><span class="m">Prijavi se da pišeš u razgovoru.</span></div></div><button type="button" class="b dark" id="plogin">Prijavi se</button>`;
  $("#poutRow").hidden=!me;$("#pblkRow").hidden=!me;$("#pblkN").textContent=blocks.length||"";
  $("#cjoin").hidden=!!me;$("#cbox").hidden=!me;$(".cme").hidden=!me;
  if(!me)preloadGsi();
@@ -235,6 +235,7 @@ avGrid.addEventListener("click",async e=>{const b=e.target.closest(".avt");if(!b
  if(j.ok&&j.user){me=j.user;ui()}else{me={...me,avatar:prev};avPaint();say(avErr,j.err==="login"?"login":"Nije sačuvano. Pokušaj ponovo.")}});
 
 const nd=$("#novDlg"),nClose=()=>nd.close?nd.close():nd.removeAttribute("open");$("#pnov").onclick=async()=>{nd.showModal?nd.showModal():nd.setAttribute("open","");const B=$("#novBody");B.innerHTML='<p class="m">Učitavam…</p>';try{const it=(await(await fetch("/api/novosti")).json()).items;B.innerHTML=novHTML(it);novSeen(it)}catch(x){B.innerHTML='<p class="m">Nije učitano.</p>'}};$("#novX").onclick=nClose;nd.addEventListener("click",e=>{if(e.target===nd)nClose()});
+{const dlg=(id,sel,x)=>{const d=$("#"+id),c=()=>d.close?d.close():d.removeAttribute("open");$$(sel).forEach(a=>a.addEventListener("click",e=>{e.preventDefault();d.showModal?d.showModal():d.setAttribute("open","")}));$("#"+x).onclick=c;d.addEventListener("click",e=>{if(e.target===d)c()})};dlg("kontDlg",'#pkont,a[href="#kontakt"]',"kontX");dlg("izvDlg",'#pizv,a[href="#o-sajtu"]',"izvX")}
 const rd=$("#rulesDlg");$$('a[href="#pravila"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();if(rd.showModal)rd.showModal();else rd.setAttribute("open","")}));
 $("#rulesClose").onclick=()=>rd.close?rd.close():rd.removeAttribute("open");
 fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{me=j.user;clientId=j.clientId;setBlocks(j.blocks||[]);admSet(j.admin)}).catch(()=>{}).finally(()=>{ui();connect()});
