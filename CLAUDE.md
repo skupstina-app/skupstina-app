@@ -24,7 +24,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Head, fonts, first styles | `index.html` (shell) | | |
 | Top nav, menu sheet | `html/header.html` | `10-nav` | `10-nav` |
 | Uživo: player, speaker bar, chat, live stats | `html/live.html` | `20-live-window`, `60-uzivo`, `85-chat` | `15-live`, `20-chat`, `45-numbers`, `70-mini-fullscreen`, `72-mute-engine`, `76-player`, `78-live-status` |
-| Uživo panels: stats (podium button) and MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map: circles that would overlap push apart while a spring pulls them to their seat, `spread()`, with a thin line back to the seat when moved; the list shows each MP's photo ringed in his group colour; `tlDay()`: the stats say which day they are about — danas / juče / date — from `sitting` of `/api/live/speakers` (last time the stream was live; "" → "na poslednjoj sednici")) |
+| Uživo panels: "više" button (2×2 tiles, far right of the speaker bar) → icon tabs: speech stats / Poslovnik; MP profile (tap the speaker photo), time badge on the photo | `html/live.html` (`#p-stats`, `#p-prof`) | `95-panels` | `79-panels` (template bio, seat map: circles that would overlap push apart while a spring pulls them to their seat, `spread()`, with a thin line back to the seat when moved; the list shows each MP's photo ringed in his group colour; `tlDay()`: the stats say which day they are about — danas / juče / date — from `sitting` of `/api/live/speakers` (last time the stream was live; "" → "na poslednjoj sednici")) |
 | Sala (seating map), sastav, poslanici | `html/sala.html` | `30-sala` | `28-seatplan` (who sits where, shared with the admin), `30-hall` (Sastav / Poslanici is a menu under the hall; on phones the hall stays in view and only the list scrolls; Poslanici: search + filter button `#fbtn` (stranka, pol via `isF`, godine from `by`), a tap on a row or a seat zooms the hall to that MP (`mpZoom`) and the camera follows the list; pixel corner focus `fcsMark`) |
 | Rang, govornici | `html/rang.html` | `40-rang` | `50-tabs-rang`, `60-govornici` |
 | Arhiva (list of days → one day → its recording with a timeline; see Arhiva below) | `html/arhiva.html` | `50-arhiva` | `65-arhiva` |
@@ -38,6 +38,20 @@ Map of this repo. Read this first, then open only the file you need.
 
 The logo is the pixel building from "Dolazi uskoro" (23×21). Change it in `scripts/icons.py` (`LOGO`), run it (with the
 @fontsource Wix Madefor Display folder as argument for `og.png`), and paste the new paths into header/footer.
+
+## Poslovnik
+
+- Text: `scripts/poslovnik.py` reads the official page (parlament.gov.rs, "Ceo Poslovnik (prečišćeni tekst)", URL in the script) →
+  `assets/poslovnik.json` ({n, g glava, o odeljak, s: [[stav, alineje…]…]}), served at `/poslovnik.json`. Run it again when the Rules change.
+- Page: `js/80-poslovnik.js`, `css/97-poslovnik.css`. Book tab: type the article, optionally the stav ("107 1" / "107.1");
+  stavovi are numbered rows, the asked one lit, chips jump between stavovi; empty box = all articles by glava.
+- Live: the viewer's open article (typed or picked, held 2 s; a preview never counts) goes to `ChatRoom` (`{t:"psl",n}`, kept on the
+  socket). `pslHot` is strict: ≥`PSL_MIN` viewers opened the same article within `PSL_WIN`, they are ≥`PSL_SHARE` of everyone
+  connected and ≥`PSL_FOCUS` of all who opened any article. Then everyone on Uživo during a broadcast gets a small pop-up under
+  the speaker bar (once per article per 10 min, gone after 40 s), and the book tab shows that article as a preview.
+- Arhiva: `pslRefs()` in arhiva.js finds "povreda Poslovnika … član N (stav M)" in the transcript (only breach speeches, first
+  line naming an article, not Ustav/Kodeks/zakon) → `doc.psl` [at, speech end, član, stav]. While it plays, a book chip with the
+  number shows next to the speaker; tap → the article in a bubble, the stav lit.
 
 ## Accounts and chat
 

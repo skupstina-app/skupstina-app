@@ -49,8 +49,9 @@ function connect(){
  ws=new WebSocket((location.protocol==="https:"?"wss://":"ws://")+location.host+"/api/chat");
  ws.onopen=()=>{backoff=1000;say(cst,"");clearInterval(ping);ping=setInterval(()=>{try{ws.send("ping")}catch(e){}},45000)};
  ws.onmessage=e=>{if(e.data==="pong")return;let d;try{d=JSON.parse(e.data)}catch(x){return}
-  if(d.t==="init"){d.msgs.forEach(add);empty();viewers(d.v)}
+  if(d.t==="init"){d.msgs.forEach(add);empty();viewers(d.v);pslLive(d.psl);pslSay(true)}
   else if(d.t==="m")add(d.m);
+  else if(d.t==="psl")pslLive(d);
   else if(d.t==="v")viewers(d.n);
   else if(d.t==="del")d.ids.forEach(i=>{box.querySelector('[data-id="'+i+'"]')?.remove();ids.delete(i)});
   else if(d.t==="err"){if(d.code==="login"){openAuth();return}say(cst,d.code);if(last&&!cin.value)cin.value=last}};

@@ -1,5 +1,6 @@
 /* speaker panels: under the player, in place of the chat.
-   - podium button (far right of the speaker bar): who spoke how much today, seat map + list; the same spot becomes ×
+   - "više" button (far right of the speaker bar): a row of icon tabs, speech stats (seat map + list) and Poslovnik
+     (80-poslovnik.js); the same spot becomes ×
    - speaker photo: that MP's profile; the photo becomes × while it is open
    Talk times come from the live speaker timeline (TL), counted up to the viewer's own playback position. */
 const C2L={"а":"a","б":"b","в":"v","г":"g","д":"d","ђ":"đ","е":"e","ж":"ž","з":"z","и":"i","ј":"j","к":"k","л":"l","љ":"lj","м":"m","н":"n","њ":"nj","о":"o","п":"p","р":"r","с":"s","т":"t","ћ":"ć","у":"u","ф":"f","х":"h","ц":"c","ч":"č","џ":"dž","ш":"š"};
@@ -36,11 +37,9 @@ function xView(v,m){
  $("#phw").classList.toggle("open",v==="prof");$("#phBtn").setAttribute("aria-expanded",v==="prof");
  $("#phBtn").setAttribute("aria-label",v==="prof"?"Zatvori profil":"Profil govornika");
  $("#podBtn").classList.toggle("open",v==="stats");$("#podBtn").setAttribute("aria-expanded",v==="stats");
- $("#podBtn").setAttribute("aria-label",v==="stats"?"Zatvori statistiku":dayAsk(tlDay()));
- renderPanels(true);
+ $("#podBtn").setAttribute("aria-label",v==="stats"?"Zatvori":"Više");
+ renderPanels(true);xSub();
 }
-/* the podium button's label follows the day of the stats */
-setInterval(()=>{if(xv!=="stats")$("#podBtn").setAttribute("aria-label",dayAsk(tlDay()))},5000);
 $("#podBtn").onclick=()=>xView(xv==="stats"?"":"stats");
 $("#phBtn").onclick=()=>{if(xv==="prof")xView("");else if(curSp)xView("prof",curSp)};
 
@@ -89,17 +88,16 @@ function tlDay(){
  const [y,mo,da]=d.split("-").map(Number);return `${da}. ${MON[mo-1]}${y!==new Date(now).getFullYear()?" "+y+".":""}`;
 }
 const dayWhen=w=>w||"na poslednjoj sednici";
-const dayAsk=w=>w==="danas"||w==="juče"?`Ko je ${w} najviše govorio`:`Ko je najviše govorio ${dayWhen(w)}`;
 /* the three numbers of a "Najviše govorili" row (also Arhiva): how many times, then time over share of all the time */
 function xStats(n,t,tot,fmt){const p=tot>0?t/tot*100:0;return `<span class="xs"><span class="xn nt">${n}×</span><span class="xt"><b class="nt">${fmt(t)}</b><small class="nt">${p>0&&p<1?"<1":Math.round(p)}%</small></span></span>`}
 function renderStats(by){
  const list=[...by.entries()].filter(([,o])=>o.t>0).sort((a,b)=>b[1].t-a[1].t),tot=list.reduce((s,[,o])=>s+o.t,0);
  const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><span class="sph" style="--gc:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])}</small></span>${xStats(o.n,o.t,tot,mss)}</button></li>`).join("");
  const w=tlDay();
- $("#p-stats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${dayWhen(w)}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
- apply($("#p-stats"));
+ $("#xStats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${dayWhen(w)}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
+ apply($("#xStats"));
 }
-$("#p-stats").addEventListener("click",e=>{const b=e.target.closest("[data-pm]");if(b)xView("prof",mps[b.dataset.pm])});
+$("#xStats").addEventListener("click",e=>{const b=e.target.closest("[data-pm]");if(b)xView("prof",mps[b.dataset.pm])});
 
 function bio(m){
  const f=isF(m),gn=groupName(m),gr=groupRole(m,f),d=longDate(m.md),parts=[];

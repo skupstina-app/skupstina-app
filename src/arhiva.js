@@ -191,7 +191,7 @@ async function potvrde(req, env, u) {
 // line per speech, kept for search). Our own day rows (arhiva_dani, from the reader) stay as a fallback for days the
 // import doesn't have yet. Times in a doc are "day seconds": the day's parts played back to back, pauses cut out.
 const LIVE = "https://skupstina.live";
-const PARSER = "#v4"; // bump when buildDoc changes: every day is read again
+const PARSER = "#v5"; // bump when buildDoc changes: every day is read again
 const fold = (s) => lat(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/dj/g, "d");
 
 async function ensureDan(env) {
@@ -244,6 +244,34 @@ export function opomene(sp, people, allMps = []) {
   return { out, cand };
 }
 
+// Povreda Poslovnika: the article (and stav) an MP names. Only a speech that is a breach claim counts (the chair just gave the
+// floor for one, or the MP's opening says so), only the first line that names an article (later ones are argument), and
+// not "član 103. Ustava" / Kodeks / a law. → [at (when it is said), end of the speech, član, stav|null]
+const PSL_RE = /(?<!\p{L})član(?:a|u|om)?\s+(\d{1,3})(?!\d)\.?(?:\s*,?\s*stav(?:a|u|om)?\s+(\d{1,2})(?!\d))?/giu;
+export function pslRefs(sp, people) {
+  const out = [], line = (l) => l.w.join(" ");
+  sp.forEach((s, i) => {
+    if ((people[s.who] || {}).role === "Predsedavajući") return;
+    const L = (s.lines || []).slice(0, 6), prev = sp[i - 1];
+    const ctx = (prev ? (prev.lines || []).slice(-3).map(line).join(" ") : "") + " " + L.slice(0, 3).map(line).join(" ");
+    if (!/povred\w*\s+poslovnik|reklamir/i.test(ctx)) return;
+    for (const l of L) {
+      const x = line(l), ms = [...x.matchAll(PSL_RE)].filter((m) => !/(ustav|kodeks|zakon|ugovor)\w*\W*$/i.test(x.slice(0, m.index)) && !/^\W*(ustava|kodeksa|zakona)/i.test(x.slice(m.index + m[0].length)) && +m[1] > 0);
+      if (!ms.length) continue;
+      const seen = new Set();
+      ms.forEach((m) => {
+        const k = m[1] + "." + (m[2] || "");
+        if (seen.has(k)) return;
+        seen.add(k);
+        const wi = x.slice(0, m.index).split(" ").filter(Boolean).length;
+        out.push([Math.round((s.at + ((l.t || [])[wi] ?? (l.t || [0])[0] ?? 0) / 10) * 10) / 10, Math.round(s.at + s.dur), +m[1], m[2] ? +m[2] : null]);
+      });
+      break;
+    }
+  });
+  return out;
+}
+
 export function buildDoc(t, sid, dan, allMps = []) {
   const people = t.people || {}, sp = t.speeches || [];
   const who = (s) => people[s.who] || { name: lat(s.who) };
@@ -266,7 +294,7 @@ export function buildDoc(t, sid, dan, allMps = []) {
   const roles = {};
   Object.values(people).forEach((p) => { if (p.mp) roles[+p.mp] = [p.role || "", p.list || ""]; });
   const chairs = [...new Set(sp.filter((s) => (people[s.who] || {}).role === "Predsedavajući" && (people[s.who] || {}).mp).map((s) => +people[s.who].mp))];
-  const doc = { date: t.date, sid, ses: /konstitutivn/i.test(t.title) ? "Prva (konstitutivna) sednica" : ses, dan, total: t.total, parts, speeches, ev, cand: op.cand, agenda, inter, who: roles, chairs, src: "skupstina.live" };
+  const doc = { date: t.date, sid, ses: /konstitutivn/i.test(t.title) ? "Prva (konstitutivna) sednica" : ses, dan, total: t.total, parts, speeches, ev, cand: op.cand, agenda, inter, who: roles, chairs, psl: pslRefs(sp, people), src: "skupstina.live" };
   const last = sp[sp.length - 1];
   const gl = votes.filter((v) => v.k === "glasanje").length, opn = ev.filter((e) => e.k === "opomena").length;
   const names = [...mps].map((id) => { const p = Object.values(people).find((x) => +x.mp === id); return p ? p.name : ""; });

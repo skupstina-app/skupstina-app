@@ -11,7 +11,11 @@
 .tbadge{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);padding:0 5px;border-radius:6px;background:var(--bg);box-shadow:0 0 0 1px var(--line) inset;font:12px/16px "Departure Mono",ui-monospace,monospace;color:var(--ink);white-space:nowrap;pointer-events:none}
 .phw.open .tbadge{display:none}
 .vbar[role=group] .mmp{margin:0 0 0 2px}
-.pod{flex:none;width:44px;height:44px;margin-left:auto;border:0;border-radius:6px;display:grid;place-items:center;background:var(--card);color:var(--p0);box-shadow:var(--raise);cursor:pointer}
+.pod{position:relative;flex:none;width:44px;height:44px;margin-left:auto;border:0;border-radius:6px;display:grid;place-items:center;background:var(--card);color:var(--ink);box-shadow:var(--raise);cursor:pointer}
+/* the icon spans are grid boxes, not inline text: no line box under the svg pushing it up */
+.pod .pi,.pod .px{display:grid;place-items:center}.pod .mi{display:block}
+.pod .tl{fill:var(--live)}
+.pod.open .tl{fill:currentColor}
 .pod .px{display:none}
 .pod.open{background:var(--btn);color:var(--btn-ink);box-shadow:none}
 .pod.open .pi{display:none}.pod.open .px{display:grid}

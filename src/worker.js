@@ -13,6 +13,8 @@ import { beleskeCron } from "./beleske.js";
 import { badgeLevel } from "./badges.mjs";
 import { AVATAR_FILES } from "./generated/avatars.js";
 import { ICON_FILES } from "./generated/icons.js";
+import POSLOVNIK from "../assets/poslovnik.json";
+const POSLOVNIK_JSON = JSON.stringify(POSLOVNIK);
 var UA = "Mozilla/5.0 (compatible; skupstina-app; independent non-commercial)";
 var PG = "https://www.parlament.gov.rs";
 var LIST_URL = PG + "/" + encodeURI("\u043D\u0430\u0440\u043E\u0434\u043D\u0430-\u0441\u043A\u0443\u043F\u0448\u0442\u0438\u043D\u0430/\u0441\u0430\u0441\u0442\u0430\u0432/\u043D\u0430\u0440\u043E\u0434\u043D\u0438-\u043F\u043E\u0441\u043B\u0430\u043D\u0438\u0446\u0438/\u0430\u043A\u0442\u0443\u0435\u043B\u043D\u0438-\u0441\u0430\u0437\u0438\u0432.11.html");
@@ -361,6 +363,24 @@ var ChatRoom = class {
   }
   async alarm() {
     this.all({ t: "v", n: this.ctx.getWebSockets().length });
+    const h = this.pslHot();
+    if (h.n + ":" + h.c !== this.lastHot) { this.lastHot = h.n + ":" + h.c; this.all({ t: "psl", ...h }); }
+    // a burst fades by itself once its readers are older than PSL_WIN: look again even if nobody connects or types
+    if (h.n) await this.ctx.storage.setAlarm(Date.now() + 20e3);
+  }
+  /** A burst on one Poslovnik article: in the last PSL_WIN, at least PSL_MIN viewers opened the same article, they are at least
+   *  PSL_SHARE of everyone watching, and at least PSL_FOCUS of everyone who opened any article then. Strict on purpose: a few
+   *  people browsing must never pop it up for all; only a crowd that all looked up the same article at once (an MP just named it). */
+  pslHot() {
+    const c = new Map(), old = Date.now() - PSL_WIN, all = this.ctx.getWebSockets();
+    let any = 0;
+    for (const ws of all) {
+      const a = ws.deserializeAttachment() || {};
+      if (a.psl && a.pat > old) { any++; c.set(a.psl, (c.get(a.psl) || 0) + 1); }
+    }
+    let n = null, k = 0;
+    for (const [x, v] of c) if (v > k) { n = x; k = v; }
+    return k >= PSL_MIN && k >= all.length * PSL_SHARE && k >= any * PSL_FOCUS ? { n, c: k } : { n: null, c: 0 };
   }
   async fetch(req) {
     const u = new URL(req.url);
@@ -371,7 +391,7 @@ var ChatRoom = class {
       try { user = JSON.parse(req.headers.get("x-user") || "null"); } catch (e) { }
       server.serializeAttachment({ uid: user?.id ?? null, last: 0, lastText: "" });
       // no history: a viewer sees the chat from the moment they join
-      this.send(server, { t: "init", msgs: [], v: this.ctx.getWebSockets().length, me: user ? { name: user.name, color: user.color } : null });
+      this.send(server, { t: "init", msgs: [], v: this.ctx.getWebSockets().length, me: user ? { name: user.name, color: user.color } : null, psl: this.pslHot() });
       await this.countSoon();
       return new Response(null, { status: 101, webSocket: client });
     }
@@ -450,6 +470,13 @@ var ChatRoom = class {
       this.sql.exec("DELETE FROM reports WHERE at<?", Date.now() - 7 * 864e5);
       return;
     }
+    // which Poslovnik article this viewer reads (null: none); counted by pslHot
+    if (m.t === "psl") {
+      const n = m.n == null ? null : /^\d{1,3}$/.test(String(m.n)) ? String(m.n) : undefined;
+      if (n === undefined || n === (a.psl ?? null)) return;
+      ws.serializeAttachment({ ...a, psl: n, pat: Date.now() });
+      return this.countSoon();
+    }
     if (m.t === "ping") return this.send(ws, { t: "pong" });
   }
   async webSocketClose(ws, code) {
@@ -493,6 +520,8 @@ var MANIFEST = JSON.stringify({
     { src: "/favicon.svg?v=2", sizes: "any", type: "image/svg+xml" }
   ]
 });
+// Poslovnik burst (pslHot): how many, what share of the viewers, and how one-sided, within how long
+const PSL_MIN = 4, PSL_SHARE = 0.03, PSL_FOCUS = 0.6, PSL_WIN = 90e3;
 var worker_default = {
   async fetch(req, env, ctx) {
     const u = new URL(req.url), p = u.pathname;
@@ -518,6 +547,8 @@ var worker_default = {
         if (!row) return new Response("not found", { status: 404 });
         return new Response(new Uint8Array(row.bytes), { headers: { "content-type": row.type, "cache-control": "public, max-age=86400" } });
       }
+      // the Rules of Procedure, from the Assembly's page (scripts/poslovnik.py); the page loads it when it first needs an article
+      if (p === "/poslovnik.json") return new Response(POSLOVNIK_JSON, { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=3600" } });
       if (p === "/api/mps") return json(await mpsJson(env));
       if (p === "/api/seats") return seatsJson(req, env, ctx);
       if (p === "/api/version") return json({ v: PAGE_HASH });

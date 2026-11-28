@@ -37,20 +37,22 @@ if (!html.includes("/*MPS*/[]")) throw new Error("MP data placeholder /*MPS*/[] 
 
 const out = new URL("./src/generated/", import.meta.url);
 mkdirSync(out, { recursive: true });
+// write only what changed: `wrangler dev` watches src/, so rewriting the same files would rebuild forever
+const put = (f, x) => { try { if (readFileSync(f, "utf8") === x) return; } catch {} writeFileSync(f, x); };
 // the page knows its own version (98-update.js compares it with /api/version to pick up a new deploy)
 if (!html.includes('"/*@ver*/"')) throw new Error("version marker \"/*@ver*/\" is missing");
 const hash = createHash("sha1").update(html).digest("hex").slice(0, 10);
 html = html.replace('"/*@ver*/"', JSON.stringify(hash));
-writeFileSync(new URL("index.html", out), html);
-writeFileSync(new URL("version.js", out), `export default ${JSON.stringify(hash)};\n`);
+put(new URL("index.html", out), html);
+put(new URL("version.js", out), `export default ${JSON.stringify(hash)};\n`);
 // logo files (assets/icons, drawn by scripts/icons.py): favicon, home-screen icons, link preview image
 const ic = new URL("./assets/icons/", import.meta.url);
 const icons = Object.fromEntries(readdirSync(ic).filter((f) => /\.(png|svg)$/.test(f)).sort().map((f) => [f, readFileSync(new URL(f, ic)).toString("base64")]));
-writeFileSync(new URL("icons.js", out), `// built from assets/icons by build.mjs\nexport const ICON_FILES = ${JSON.stringify(icons)};\n`);
-writeFileSync(new URL("avatars.js", out), `// built from assets/avatars by build.mjs\nexport const AVATAR_IDS = ${JSON.stringify(AV_IDS)};\nexport const AVATAR_FILES = ${JSON.stringify(avFiles)};\n`);
+put(new URL("icons.js", out), `// built from assets/icons by build.mjs\nexport const ICON_FILES = ${JSON.stringify(icons)};\n`);
+put(new URL("avatars.js", out), `// built from assets/avatars by build.mjs\nexport const AVATAR_IDS = ${JSON.stringify(AV_IDS)};\nexport const AVATAR_FILES = ${JSON.stringify(avFiles)};\n`);
 // the admin seat editor shares the seat plan with the page (src/page/js/28-seatplan.js), so both show the same seats
 let sala = readFileSync(new URL("./src/admin/sala.html", import.meta.url), "utf8");
 if (!sala.includes("/*@seatplan*/")) throw new Error("seat plan marker /*@seatplan*/ is missing in src/admin/sala.html");
 sala = sala.replace("/*@seatplan*/", () => read("js/28-seatplan.js"));
-writeFileSync(new URL("sala.html", out), sala);
+put(new URL("sala.html", out), sala);
 console.log(`page built: ${html.length} chars, ${hash}`);

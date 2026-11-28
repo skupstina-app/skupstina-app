@@ -230,7 +230,7 @@ function arTick(force){if(AR.dataset.v!=="play"||!arDoc)return;const D=arDoc,n=a
  let j=-1;for(let k=0;k<arRows.length;k++){const x=arRows[k];if(x.at>t+1)break;if(arShow(x)&&x.k!=="t")j=k}
  if(j!==arCurI||force){arCurI=j;$$("#arTok button.on").forEach(b=>b.classList.remove("on"));const b=$(`#arTok [data-arj="${j}"]`);
   if(b){b.classList.add("on");if(Date.now()-arScrollAt>6000){const r=b.getBoundingClientRect(),top=$(".ar-stick").getBoundingClientRect().bottom;if(r.top<top||r.bottom>innerHeight-90)scrollBy({top:r.top-top-8,behavior:reduce?"auto":"smooth"})}}}
- arAskShow(t);
+ arAskShow(t);arPslTick(t);
  if(on&&Date.now()-arSaved>3000){arSaved=Date.now();store.set("arhiva-poz",JSON.stringify({d:arDay.date,t}))}}
 /* a moment we weren't sure of: signed-in visitors are asked, once, while it plays (from just before to 2 min after) */
 let arAskC=null,arAskStep=0;
