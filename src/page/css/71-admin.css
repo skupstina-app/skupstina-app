@@ -36,3 +36,6 @@
 .porlist li.m{display:block;color:var(--mute);font-size:15px}
 .novadd{display:grid;gap:8px}
 .novadd input,.novadd textarea{font:inherit;padding:10px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%;box-sizing:border-box}
+.novli li{grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start}
+.novli .ph{white-space:nowrap}
+.novli .pt{grid-column:auto}
