@@ -5,6 +5,8 @@
 .spk-list .tm b{font-size:15px}
 .spk-list .tm small{font-size:12px;color:var(--mute)}
 .spk-list .prog{position:absolute;left:3px;bottom:0;height:2px;opacity:.55}
+/* Uživo is the player and the chat only; the day's stats live in the "više" menu (79-panels) */
+#danas,#uzivo>.sample{display:none!important}
 .livestats{padding-top:clamp(40px,5vw,72px)}
 .lcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .lc{background:var(--card);border-radius:8px;box-shadow:var(--ring);padding:16px 18px;display:grid;gap:10px;align-content:start}
