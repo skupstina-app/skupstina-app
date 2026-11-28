@@ -21,3 +21,11 @@ $$('[role=tab]').forEach(b=>b.onclick=()=>{$$('[role=tab]').forEach(x=>{const on
 function novHTML(items){const bg=d=>d.toLocaleDateString("sv",{timeZone:"Europe/Belgrade"}),now=new Date(),t=bg(now),y=bg(new Date(+now-864e5)),MON=["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"],esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;"),g={};
  items.forEach(i=>(g[i.day]=g[i.day]||[]).push(i));
  return Object.keys(g).sort().reverse().map(d=>`<h4 class="nvd">${d===t?"Danas":d===y?"Juče":(+d.slice(8))+". "+MON[+d.slice(5,7)-1]}</h4><ul class="nvl">${g[d].map(i=>`<li><b>${esc(i.title)}</b>${i.body?": "+esc(i.body):""}</li>`).join("")}</ul>`).join("")||'<p class="m">Nema novosti.</p>'}
+
+/* Novosti badge: how many notes are newer than the last one this browser opened (localStorage nov-seen = highest id seen).
+   First visit just remembers the newest, so nobody starts with a badge. Shown as a number on the Novosti row and a dot on the Podešavanja tab. */
+function novMark(n){const b=$("#nvB");b.hidden=!n;b.textContent=n||"";$$('[data-tab=me]').forEach(x=>x.classList.toggle("nw",!!n))}
+function novSeen(items){const m=Math.max(0,...items.map(i=>i.id));try{localStorage.setItem("nov-seen",m)}catch(x){}novMark(0)}
+async function novCheck(){try{const it=(await(await fetch("/api/novosti")).json()).items,m=Math.max(0,...it.map(i=>i.id)),s=localStorage.getItem("nov-seen");
+ if(s===null){localStorage.setItem("nov-seen",m);return}novMark(it.filter(i=>i.id>+s).length)}catch(x){}}
+novCheck();document.addEventListener("visibilitychange",()=>{if(!document.hidden)novCheck()});

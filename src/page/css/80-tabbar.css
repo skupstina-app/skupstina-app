@@ -100,3 +100,5 @@ body.v1 .vbar[role=group] .who{display:flex!important}
 .vbar[role=group] .who .ph{display:grid;place-items:center;color:var(--ink)}
 .vbar[role=group] .who .ph .unk{width:70%;height:70%}
 .vbar[role=group].nosp .who{min-height:40px}
+.tabbar button[data-tab=me]{position:relative}
+.tabbar button.nw::after{content:"";position:absolute;top:8px;right:15px;width:6px;height:6px;background:var(--live)}
