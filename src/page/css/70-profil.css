@@ -93,3 +93,6 @@
 .colnext[hidden]{display:none}
 .coldlg .ax{top:6px;right:6px;width:36px;height:36px;border-radius:50%;background:var(--chip);color:var(--ink);font-size:22px}
 .coldlg .aerr{margin:6px 0 0!important;min-height:0;text-align:center}
+.nvd{margin:16px 0 0;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);font-weight:500}
+.nvl{margin:6px 0 0;padding-left:18px;display:grid;gap:8px;font-size:15px;line-height:1.4}
+.nvl b{font-weight:500}

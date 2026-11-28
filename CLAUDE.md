@@ -33,7 +33,7 @@ Map of this repo. Read this first, then open only the file you need.
 | Bottom tab bar (phones) | `html/tabbar.html` | `80-tabbar` | `50-tabs-rang` |
 | Footer | `html/footer.html` | | |
 | Logo, favicon, home-screen icons, link preview | `index.html` (meta, og:*), header/footer inline logo | `10-nav` (`.mark`) | `scripts/icons.py` → `assets/icons/` → `src/generated/icons.js`, served at `/favicon.svg`, `/favicon.ico`, `/icons/*`, `/og.png`; `/manifest.webmanifest` (`MANIFEST` in worker.js) |
-| Info button (top right): Beleške (Novo / Sledeće) and a suggestion box (`/api/contact`, kind `predlog`) | `html/header.html` (`#infoPop`) | `80-tabbar` | `25-info` |
+| Info button (top right): "Uskoro stiže" list and a suggestion box (`/api/contact`, kind `predlog`) | `html/header.html` (`#infoPop`) | `80-tabbar` | `25-info` |
 | Data, helpers, boot | | `00-base` | `00-data`, `05-core`, `25-info`, `40-timeline-views`, `74-install-card` (add to home screen), `99-boot` |
 
 The logo is the pixel building from "Dolazi uskoro" (23×21). Change it in `scripts/icons.py` (`LOGO`), run it (with the
@@ -224,3 +224,7 @@ Updates reach open pages and home-screen apps: the page HTML is sent with `cache
 it 5 min, keyed by the page hash). `build.mjs` writes that hash into the page (`"/*@ver*/"` in `js/98-update.js`);
 the page asks `/api/version`, reloads by itself when it comes back on screen after a minute away and a new version is
 out, and otherwise marks Podešavanja → Osveži aplikaciju with "novo" (that row always reloads fresh).
+
+## Novosti
+
+Podešavanja → row "Novosti" opens `#novDlg` (`html/profil.html`): what shipped, grouped by day, plain language for users. When told about a new update, add it under a new day heading at the top (`.nvd` + `.nvl`).

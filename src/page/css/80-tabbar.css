@@ -11,8 +11,6 @@
 .infopop{max-height:calc(100svh - 96px);overflow:auto}
 .infopop .ih{margin:14px 0 0;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
 .infopop .ih+ul{margin-top:6px}
-.infopop .idone li::marker{content:"✓  ";color:var(--live)}
-.infopop .idone{max-height:min(220px,30svh);overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
 .ipred{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:8px}
 .ipred label{font-size:14px;font-weight:500}
 .ipred textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:70px;font:inherit;font-size:15px;line-height:1.4;padding:8px 10px;border-radius:6px;border:0;background:var(--chip);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}

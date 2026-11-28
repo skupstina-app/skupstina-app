@@ -1,4 +1,4 @@
-/* info: Beleške (what is new, what is next) and a box for suggestions → /api/contact kind=predlog */
+/* info: "Uskoro stiže" and a box for suggestions → /api/contact kind=predlog */
 {const b=$("#infoBtn"),p=$("#infoPop");const set=o=>{p.hidden=!o;b.setAttribute("aria-expanded",o)};
 b.onclick=e=>{e.stopPropagation();set(p.hidden)};
 document.addEventListener("click",e=>{if(!p.hidden&&!p.contains(e.target))set(false)});

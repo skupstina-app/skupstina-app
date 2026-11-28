@@ -234,6 +234,7 @@ avGrid.addEventListener("click",async e=>{const b=e.target.closest(".avt");if(!b
  const j=await post("/api/auth/avatar",{avatar:a});
  if(j.ok&&j.user){me=j.user;ui()}else{me={...me,avatar:prev};avPaint();say(avErr,j.err==="login"?"login":"Nije sačuvano. Pokušaj ponovo.")}});
 
+const nd=$("#novDlg"),nClose=()=>nd.close?nd.close():nd.removeAttribute("open");$("#pnov").onclick=()=>nd.showModal?nd.showModal():nd.setAttribute("open","");$("#novX").onclick=nClose;nd.addEventListener("click",e=>{if(e.target===nd)nClose()});
 const rd=$("#rulesDlg");$$('a[href="#pravila"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();if(rd.showModal)rd.showModal();else rd.setAttribute("open","")}));
 $("#rulesClose").onclick=()=>rd.close?rd.close():rd.removeAttribute("open");
 fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(j=>{me=j.user;clientId=j.clientId;setBlocks(j.blocks||[]);admSet(j.admin)}).catch(()=>{}).finally(()=>{ui();connect()});
