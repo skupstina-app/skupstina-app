@@ -78,3 +78,8 @@ body[data-xv=stats] .side>:not(#p-stats),body[data-xv=prof] .side>:not(#p-prof){
 .phw.open .mbadge{display:none!important}
 .phw.open .ph{filter:none;opacity:1}
 .phm>.ph,.phm>.pph{display:block}
+
+#xStats .xlist:not(.all)>li:nth-child(n+6){display:none}
+.more{display:grid;place-items:center;width:44px;height:44px;margin:4px auto 0;border:0;border-radius:6px;background:none;color:var(--mute);cursor:pointer}
+.more .mi{width:18px;height:18px}
+.more[aria-expanded=true] .mi{transform:rotate(180deg)}

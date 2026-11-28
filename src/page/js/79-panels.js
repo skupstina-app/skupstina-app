@@ -32,6 +32,7 @@ let xv="",profMp=null,profFrom="";
 function xView(v,m){
  if(v==="prof"&&xv!=="prof")profFrom=xv==="stats"?"stats":"";
  xv=v;if(v==="prof")profMp=m||profMp;
+ if(v!=="stats"&&xMore){xMore=false;$("#xStats .xlist")&&$("#xStats .xlist").classList.remove("all");$("#xStats .xmore")&&$("#xStats .xmore").setAttribute("aria-expanded","false")}
  document.body.dataset.xv=v;
  $("#p-stats").hidden=v!=="stats";$("#p-prof").hidden=v!=="prof";
  $("#phw").classList.toggle("open",v==="prof");$("#phBtn").setAttribute("aria-expanded",v==="prof");
@@ -40,6 +41,7 @@ function xView(v,m){
  $("#podBtn").setAttribute("aria-label",v==="stats"?"Zatvori":"Više");
  renderPanels(true);xSub();
 }
+$("#xStats").addEventListener("click",e=>{const b=e.target.closest(".xmore");if(!b)return;xMore=!xMore;$("#xStats .xlist").classList.toggle("all",xMore);b.setAttribute("aria-expanded",xMore)});
 $("#podBtn").onclick=()=>xView(xv==="stats"?"":"stats");
 $("#phBtn").onclick=()=>{if(xv==="prof")xView("");else if(curSp)xView("prof",curSp)};
 
@@ -90,11 +92,14 @@ function tlDay(){
 const dayWhen=w=>w||"na poslednjoj sednici";
 /* the three numbers of a "Najviše govorili" row (also Arhiva): how many times, then time over share of all the time */
 function xStats(n,t,tot,fmt){const p=tot>0?t/tot*100:0;return `<span class="xs"><span class="xn nt">${n}×</span><span class="xt"><b class="nt">${fmt(t)}</b><small class="nt">${p>0&&p<1?"<1":Math.round(p)}%</small></span></span>`}
+/* icon-only "more" toggle (chevron, turned up when open); the lists it opens fall back to short when the menu closes */
+const moreBtn=(cls,on,label)=>`<button type="button" class="more ${cls}" data-all aria-expanded="${!!on}" aria-label="${label}" title="${label}"><svg class="mi" viewBox="0 0 13 13" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/></svg></button>`;
+let xMore=false;
 function renderStats(by){
  const list=[...by.entries()].filter(([,o])=>o.t>0).sort((a,b)=>b[1].t-a[1].t),tot=list.reduce((s,[,o])=>s+o.t,0);
  const rows=list.map(([m,o],k)=>`<li><button type="button" data-pm="${m.i}"><span class="rk">${k+1}</span><span class="sph" style="--gc:${SH[m.g]}${m.ph?`;background-image:url(/p/${m.id})`:""}"></span><span class="nm"><b>${esc(m.name)}</b><small>${esc(m.g===6?"Srbija pobeđuje":groups[m.g][1])}</small></span>${xStats(o.n,o.t,tot,mss)}</button></li>`).join("");
  const w=tlDay();
- $("#xStats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${dayWhen(w)}</h3>${list.length?`<ol class="xlist">${rows}</ol>`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
+ $("#xStats").innerHTML=`<div class="xin">${seatMap(by)}<h3>Najviše govorili ${dayWhen(w)}</h3>${list.length?`<ol class="xlist${xMore?" all":""}">${rows}</ol>${list.length>5?moreBtn("xmore",xMore,"Svi govornici"):""}`:`<p class="m">${w==="danas"?"Još niko nije govorio danas.":"Nema zabeleženih govora."}</p>`}</div>`;
  apply($("#xStats"));
 }
 $("#xStats").addEventListener("click",e=>{const b=e.target.closest("[data-pm]");if(b)xView("prof",mps[b.dataset.pm])});

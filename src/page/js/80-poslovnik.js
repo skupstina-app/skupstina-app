@@ -28,7 +28,7 @@ $$(".xtabs [data-x]").forEach(b=>b.onclick=()=>{xsub=b.dataset.x;store.set("x-su
 function xSub(){
  $$(".xtabs [data-x]").forEach(b=>b.setAttribute("aria-selected",b.dataset.x===xsub));
  $("#xStats").hidden=xsub!=="stats";$("#xPsl").hidden=xsub!=="psl";
- if(xv!=="stats")pslPin=null;else if(xsub==="psl")pslShow(false);
+ if(xv!=="stats")pslPin=pslAll=null;else if(xsub==="psl")pslShow(false);
  pslSay();pslHotShow();
 }
 /* pslPin: the article the live button opened, shown as a preview until the viewer types; pslAll: the full list was asked for */
@@ -41,7 +41,7 @@ async function pslShow(scroll){
  if(k){pslPin=null;a=PSL.get(k[0]);st=k[1];if(!a){pslCur=null;out.innerHTML=`<p class="m pse">Nema člana ${esc(k[0])}.</p>`;apply(out);pslSay();return}}
  else if(!q.trim()&&pslPin&&PSL.get(pslPin)){a=PSL.get(pslPin);pslPrev=true}
  pslCur=a?a.n:null;
- out.innerHTML=a?pslArt(a,st)+pslNav(a):q.trim()?"":pslAll?pslIndex():'<button type="button" class="psall" data-all>Svi članovi</button>';
+ out.innerHTML=a?pslArt(a,st)+pslNav(a):q.trim()?"":moreBtn("psall",pslAll,"Svi članovi")+(pslAll?pslIndex():"");
  apply(out);pslSay();
  const li=st&&out.querySelector(`[data-sn="${st}"]`);if(li&&scroll!==false)pslTo(li);
 }
@@ -54,7 +54,7 @@ $("#pslQ").addEventListener("input",()=>{pslAll=false;pslShow()});
 $("#pslQ").addEventListener("keydown",e=>{if(e.key==="Enter")e.target.blur()});
 $("#pslX").onclick=()=>{$("#pslQ").value="";pslPin=null;pslAll=false;pslShow();$("#pslQ").focus()};
 $("#pslOut").addEventListener("click",e=>{const g=e.target.closest("[data-go]"),s=e.target.closest("[data-st]");
- if(e.target.closest("[data-all]")){pslAll=true;pslShow();return}
+ if(e.target.closest("[data-all]")){pslAll=!pslAll;pslShow();return}
  if(g)pslGo(g.dataset.go);else if(s&&pslCur)pslGo(pslCur,+s.dataset.st)});
 
 /* live: tell the room which article this viewer reads (typed or picked, held 2 s; a preview doesn't count) */
